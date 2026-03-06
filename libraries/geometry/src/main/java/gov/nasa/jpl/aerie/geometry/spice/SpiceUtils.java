@@ -1,101 +1,84 @@
 package gov.nasa.jpl.aerie.geometry.spice;
 
+import gov.nasa.jpl.aerie.spice.SpiceLoader;
 import spice.basic.CSPICE;
+import spice.basic.SpiceErrorException;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class SpiceUtils {
 
+  private static boolean nativeLoaded = false;
+
   /**
-   * Initialize CSPICE for entire model.  This includes loading in
-   * any required kernels.
-   * <p>
-   * Kernels are bookkept in the meta kernel file determined by the
-   * SpiceConstants.NAIF_META_KERNEL_PATH environment
+   * Load the native SPICE library (JNISpice). Safe to call multiple times.
    */
-  public static void initialize() throws Exception {
+  public static void loadNativeLibrary() {
+    if (!nativeLoaded) {
+      SpiceLoader.loadSpice();
+      nativeLoaded = true;
+    }
+  }
+
+  /**
+   * Initialize CSPICE by loading all kernel files from a directory.
+   * <p>
+   * Loads the native SPICE library if not already loaded, clears any
+   * previously loaded kernels, then loads all kernel files (.bsp, .tls,
+   * .tpc, .bpc, .tf, .ck) from the given directory. This avoids issues
+   * with meta kernel PATH_VALUES being relative to the process working
+   * directory.
+   * <p>
+   * Falls back to loading the meta kernel file if no individual kernel
+   * files are found in the directory.
+   *
+   * @param kernelDir path to the directory containing SPICE kernel files
+   */
+  public static void initialize(Path kernelDir) throws SpiceErrorException {
+    loadNativeLibrary();
     CSPICE.kclear();
 
-    CSPICE.furnsh(SpiceConstants.NAIF_META_KERNEL_PATH);
-  }
+    if (kernelDir != null && Files.isDirectory(kernelDir)) {
+      try {
+        var kernelFiles = Files.list(kernelDir)
+            .filter(p -> {
+              String name = p.getFileName().toString().toLowerCase();
+              return name.endsWith(".bsp") || name.endsWith(".tls") ||
+                     name.endsWith(".tpc") || name.endsWith(".bpc") ||
+                     name.endsWith(".tf") || name.endsWith(".ck");
+            })
+            .sorted()
+            .toList();
 
-  public static String getToolkitVersion() throws Exception {
-    String version = "TOOLKIT";
-    version = CSPICE.tkvrsn(version);
+        if (!kernelFiles.isEmpty()) {
+          for (Path kernel : kernelFiles) {
+            CSPICE.furnsh(kernel.toString());
+          }
+          return;
+        }
+      } catch (IOException e) {
+        // Fall through to meta kernel
+      }
+    }
 
-    return version;
-  }
-
-
-  /**
-   * Input should be a Spice 3D point describing the location of the object on the
-   * target body (lat/lon/elevation).
-   * <p>
-   * This routine will determine if it is illuminated and return true/false
-   *
-   * @return
-   * @throws Exception
-   */
-  public static boolean isLatLonIlluminated(double [] latLonPoint) throws Exception {
-    // convert lat/lon/radii to Cartesian points
-//    double [] latLonPoint = new double []{90.0d, 0.0d, 1736.482d};
-
-    double [] spoint = CSPICE.latrec(latLonPoint[0], latLonPoint[1], latLonPoint[2]);
-    return isIlluminated(spoint);
-
-  }
-
-
-  public static boolean isIlluminated(double [] spoint) throws Exception {
-
-    double et = CSPICE.str2et(SpiceConstants.DEFAULT_ET);
-    double[] ssolpt = new double[3];
-    double[] trgepc = new double[3]; // Target surface point epoch.
-    double[] srfvec = new double[3];
-    double sslphs = 0.00d;
-    double sslsol = 0.00d;
-    double sslemi = 0.00d;
-
-    // this is the input for the method
-//    double[] spoint = new double[]{90.00d, 0.00d, 0.00d};
-    double[] angles = new double[3];
-    boolean[] visibl = new boolean[3];
-    boolean[] lit = new boolean[3];
-
-    CSPICE.illumf(SpiceConstants.NAIF_ILLUM_METHOD[0],
-      SpiceConstants.NAIF_MOON_NAME,
-      SpiceConstants.NAIF_SUN_NAME,
-      et,
-      "IAU_MOON",
-      SpiceConstants.NAIF_ABCORR_STRATEGY,
-      SpiceConstants.NAIF_SUN_NAME,
-      spoint,
-      trgepc,
-      srfvec,
-      angles,
-      visibl,
-      lit);
-
-    for (int i=0; i<3; i++)
-      System.out.println("angles " + i + ": " + angles[i]);
-
-    System.out.println("visibl: " + visibl[0]);
-    System.out.println("lit: " + lit[0]);
-
-    return lit[0];
+    // Fallback: try loading meta kernel from the directory
+    Path metaKernel = kernelDir != null
+        ? kernelDir.resolve("latest_meta_kernel.tm")
+        : Path.of(SpiceConstants.NAIF_META_KERNEL_PATH);
+    CSPICE.furnsh(metaKernel.toString());
   }
 
   /**
-   * Prints the output of spkezr for debugging purposes
-   *
-   * @param sv
-   * @param lt
+   * Initialize CSPICE using the default kernel directory from SPICE_DIRECTORY env var.
    */
-  public static void printStateVector(double[] sv, double[] lt) {
-    System.out.println("x: " + sv[0] + "\tVx: " + sv[3]);
-    System.out.println("y: " + sv[1] + "\tVy: " + sv[4]);
-    System.out.println("z: " + sv[2] + "\tVz: " + sv[5]);
+  public static void initialize() throws SpiceErrorException {
+    initialize(SpiceConstants.VERSIONED_KERNELS_ROOT_DIRECTORY);
+  }
 
-    System.out.println("Light Time: " + lt[0]);
-
+  public static String getToolkitVersion() throws SpiceErrorException {
+    return CSPICE.tkvrsn("TOOLKIT");
   }
 
 }
