@@ -1,4 +1,27 @@
 dependencies {
-  implementation project(':libraries:power')
-  implementation project(':libraries:data')
+  // Procedural libraries (for test simulation utilities)
+  annotationProcessor "gov.nasa.ammos.aerie.procedural:processor:${aerieVersion}"
+  implementation "gov.nasa.ammos.aerie.procedural:scheduling:${aerieVersion}"
+  implementation "gov.nasa.ammos.aerie.procedural:timeline:${aerieVersion}"
+  implementation "gov.nasa.ammos.aerie.procedural:constraints:${aerieVersion}"
+
+  implementation "gov.nasa.jpl.aerie:merlin-driver:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:parsing-utilities:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:type-utils:${aerieVersion}"
+
+  // Stateless simulation utilities
+  implementation "gov.nasa.ammos.aerie.procedural:utils:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:orchestration-utils:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:permissions:${aerieVersion}"
+
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+jar {
+  dependsOn configurations.runtimeClasspath
+  from {
+    configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  archiveFileName.set("testing-patterns-example.jar")
 }

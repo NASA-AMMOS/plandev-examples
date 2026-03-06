@@ -1,1 +1,11 @@
-// Standalone patterns - no library dependencies
+// Standalone patterns example - no library dependencies
+
+// Fat JAR for uploading to Aerie
+jar {
+  dependsOn configurations.runtimeClasspath
+  from {
+    configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  archiveFileName.set("activity-patterns-example.jar")
+}

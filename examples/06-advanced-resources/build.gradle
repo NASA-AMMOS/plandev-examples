@@ -1,1 +1,16 @@
-// Standalone example - demonstrates Streamline resource types
+// Standalone example - demonstrates all 5 Streamline resource types
+// No library dependencies needed
+
+dependencies {
+  implementation 'gov.nasa.jpl.aerie:merlin-driver:' + aerieVersion
+}
+
+// Fat JAR for uploading to Aerie
+jar {
+  dependsOn configurations.runtimeClasspath
+  from {
+    configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  archiveFileName.set("advanced-resources-example.jar")
+}
