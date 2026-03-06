@@ -47,13 +47,63 @@ volumes:
 
 Or set the `SPICE_DIRECTORY` environment variable to point to wherever you mount them.
 
+## Scheduling goals
+
+10 procedural scheduling goals (in `scheduling/`), built as individual ShadowJar artifacts:
+
+| Goal | What it does |
+|---|---|
+| `AddPeriapses` | SPICE: Computes periapsis events and creates Periapsis activities |
+| `AddApoapses` | SPICE: Computes apoapsis events and creates Apoapsis activities |
+| `AddOccultations` | SPICE: Computes occultation windows, creates EnterOccultation/ExitOccultation activities |
+| `AddSpacecraftEclipses` | SPICE: Computes eclipse windows, creates EnterEclipse/ExitEclipse activities |
+| `ScheduleRadarObservations` | Schedules VISAR observations across science orbits (50% DEM, 37.5% MedRes, 12.5% HiRes) |
+| `ScheduleDownlinks` | Schedules Downlink activities on designated downlink orbits, outside occultation windows |
+| `ScheduleFilterData` | Anchors FilterData activities 1 minute after each ChangeRadarDataMode |
+| `SchedulePriorityActivities` | Priority-based scheduling with 7 activity priorities and altitude thresholds |
+| `SchedulePriorityActivitiesAfterDownlink` | Battery-aware priority scheduling with two modes: RE-SIMULATION and VIRTUAL BATTERY |
+| `ScheduleRadarWithStopConditions` | Simulate-then-verify with rollback: pre/post-checks on battery, data volume, and downlink conflicts |
+
+## Constraint procedures
+
+7 procedural constraints (in `constraints/`):
+
+| Constraint | What it checks |
+|---|---|
+| `MinBatterySOC` | Battery SOC must stay above a configurable minimum |
+| `MaxUnfilteredData` | Unfiltered data volume must not exceed capacity |
+| `NoDeleteWhileWriting` | DeleteData and GenerateData/ChangeRadarDataMode must not overlap |
+| `DownlinkMinDuration` | Downlink activities must meet a minimum duration |
+| `NoDownlinkDuringOccultations` | No Downlink activities during occultation windows |
+| `ReprioritizeAfterDownlink` | ReprioritizeData must occur within a configurable time after each Downlink |
+| `MinWarmupDuration` | Radar must warm up for a minimum time before data collection begins |
+
+## Demo data
+
+Sample plans, views, and external events are in `demo/`:
+
+| Directory | Contents |
+|---|---|
+| `demo/plans/` | SimplePlan (12 activities), MarsSat Plan (full orbital), Constraint Violation Plan, Example_MarsSat_Plan |
+| `demo/views/` | Timeline views: 5 Bin, MarsSat Overview, MarsSat Power, Overview |
+| `demo/external-events/` | DSS-24 comm pass source and schema for external event scheduling |
+
 ## Build
 
 ```bash
+# Mission model JAR
 ./gradlew :examples:04-orbiter:build
+
+# Scheduling procedure JARs (requires compiling first)
+./gradlew :examples:04-orbiter:scheduling:compileJava
+./gradlew :examples:04-orbiter:scheduling:buildAllSchedulingProcedureJars
+
+# Constraint procedure JARs
+./gradlew :examples:04-orbiter:constraints:compileJava
+./gradlew :examples:04-orbiter:constraints:buildAllConstraintProcedureJars
 ```
 
-The fat JAR at `build/libs/orbiter-example.jar` can be uploaded to Aerie (after mounting SPICE kernels).
+The fat JAR at `build/libs/orbiter-example.jar` can be uploaded to Aerie (after mounting SPICE kernels). Scheduling and constraint procedure JARs are built individually in their respective `build/libs/` directories.
 
 ## Configuration
 

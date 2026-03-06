@@ -13,6 +13,8 @@ Demonstrates Aerie's procedural constraints and scheduling goals — the feature
 | `BatteryDepthOfDischarge` | Battery SOC must stay above a minimum threshold (default 20%) |
 | `DataVolumeLimit` | Onboard data volume must not exceed 90% of storage capacity |
 | `PowerBalance` | Flags periods where power consumption exceeds generation |
+| `NoSimultaneousCameraAndDownlink` | TakePicture and Downlink activities must not overlap (mutual exclusion pattern) |
+| `DownlinkMinDuration` | Downlink activities must meet a minimum duration (default 30 min) |
 
 **Scheduling goals** (in `goals/`):
 
