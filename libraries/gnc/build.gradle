@@ -4,4 +4,8 @@ plugins {
 
 dependencies {
   api project(':libraries:geometry')
+  // JPL Time library for Time/Duration classes used throughout GNC
+  api ':jplTime-2022-08'
+  // commons-math3 for Vector3D, Rotation, etc.
+  api 'org.apache.commons:commons-math3:3.6.1'
 }

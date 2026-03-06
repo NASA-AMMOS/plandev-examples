@@ -1,0 +1,28 @@
+package examples.orbiter;
+
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
+import examples.orbiter.data.DataModelSimConfig;
+import examples.orbiter.power.PowerModelSimConfig;
+
+import java.nio.file.Path;
+import java.util.Map;
+
+import static gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Template;
+
+public record Configuration(Integer spiceSpacecraftId,
+                            PowerModelSimConfig powerConfig,
+                            DataModelSimConfig dataConfig,
+                            Double offPointAngle) {
+
+  public static final Integer DEFAULT_SPICE_SCID = -74; // MRO
+
+  public static final PowerModelSimConfig POWER_CONFIG = PowerModelSimConfig.defaultConfiguration();
+
+  public static final DataModelSimConfig DATA_CONFIG = DataModelSimConfig.defaultConfiguration();
+
+  public static final Double DEFAULT_OFF_POINT_ANGLE = 70.0; // Worst case off point
+
+  public static @Template Configuration defaultConfiguration() {
+    return new Configuration(DEFAULT_SPICE_SCID, POWER_CONFIG, DATA_CONFIG, DEFAULT_OFF_POINT_ANGLE);
+  }
+}

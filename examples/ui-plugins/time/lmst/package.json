@@ -1,0 +1,21 @@
+{
+  "name": "aerie-ui-lmst-pugin-example",
+  "version": "0.0.1",
+  "description": "Aerie UI LMST Plugin Example",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "dependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "date-fns": "^3.6.0",
+    "d3-array": "^3.2.4",
+    "rollup": "^4.18.0",
+    "timecraftjs": "^2.0.0",
+    "tslib": "^2.6.3",
+    "typescript": "^5.4.5"
+  },
+  "devDependencies": {
+    "@types/d3-array": "^3.2.1"
+  }
+}

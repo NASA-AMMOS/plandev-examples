@@ -1,0 +1,118 @@
+{
+  "bodies": {
+    "SUN": {
+      "NaifID": 10,
+      "NaifFrame": "IAU_SUN",
+      "Albedo": 1.0,
+      "Trajectory": {
+        "calculateAltitude": false,
+        "calculateEarthSpacecraftBodyAngle": false,
+        "calculateSubSCInformation": false,
+        "calculateRaDec": false,
+        "calculateIlluminationAngles": false,
+        "calculateSubSolarInformation": false,
+        "calculateLST": false,
+        "calculateBetaAngle": false,
+        "calculateOrbitParameters": false,
+        "useDSK": false,
+        "calculationPeriods": [
+          {
+            "begin": "2024-01-02T00:00:00.000",
+            "end": "2024-05-06T00:00:00.000",
+            "minTimeStep": "01:00:00",
+            "maxTimeStep": "01:00:00",
+            "threshold": 0.1
+          }
+        ]
+      },
+      "Apoapsis": {
+        "calculationPeriods": []
+      },
+      "Periapsis": {
+        "calculationPeriods": []
+      },
+      "SolarEclipses": {
+        "calculationPeriods": []
+      },
+      "Occultations": {
+        "calculationPeriods": []
+      }
+    },
+    "EARTH": {
+      "NaifID": 399,
+      "NaifFrame": "IAU_EARTH",
+      "Albedo": 0.3,
+      "Trajectory": {
+        "calculateAltitude": false,
+        "calculateEarthSpacecraftBodyAngle": false,
+        "calculateSubSCInformation": false,
+        "calculateRaDec": false,
+        "calculateIlluminationAngles": false,
+        "calculateSubSolarInformation": false,
+        "calculateLST": false,
+        "calculateBetaAngle": false,
+        "calculateOrbitParameters": false,
+        "useDSK": false,
+        "calculationPeriods": [
+          {
+            "begin": "2024-01-02T00:00:00.000",
+            "end": "2024-05-06T00:00:00.000",
+            "minTimeStep": "01:00:00",
+            "maxTimeStep": "01:00:00",
+            "threshold": 0.1
+          }
+        ]
+      },
+      "Apoapsis": {
+        "calculationPeriods": []
+      },
+      "Periapsis": {
+        "calculationPeriods": []
+      },
+      "SolarEclipses": {
+        "calculationPeriods": []
+      },
+      "Occultations": {
+        "calculationPeriods": []
+      }
+    },
+    "MARS": {
+      "NaifID": 499,
+      "NaifFrame": "IAU_MARS",
+      "Albedo": 0.17,
+      "Trajectory": {
+        "calculateAltitude": true,
+        "calculateEarthSpacecraftBodyAngle": true,
+        "calculateSubSCInformation": true,
+        "calculateRaDec": true,
+        "calculateIlluminationAngles": true,
+        "calculateSubSolarInformation": true,
+        "calculateLST": true,
+        "calculateBetaAngle": true,
+        "calculateOrbitParameters": true,
+        "useDSK": false,
+        "calculationPeriods": [
+          {
+            "begin": "2024-01-02T00:00:00.000",
+            "end": "2024-05-06T00:00:00.000",
+            "minTimeStep": "00:00:30",
+            "maxTimeStep": "00:00:30",
+            "threshold": 0.1
+          }
+        ]
+      },
+      "Apoapsis": {
+        "calculationPeriods": []
+      },
+      "Periapsis": {
+        "calculationPeriods": []
+      },
+      "SolarEclipses": {
+        "calculationPeriods": []
+      },
+      "Occultations": {
+        "calculationPeriods": []
+      }
+    }
+  }
+}

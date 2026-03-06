@@ -7,9 +7,10 @@ Build reusable spacecraft subsystem models (power, data, geometry, telecom) and 
 ## Quick Start
 
 ```bash
-# Prerequisites: Java 21, GITHUB_USER and GITHUB_TOKEN env vars
+# Prerequisites: Java 21, Git LFS, GITHUB_USER and GITHUB_TOKEN env vars
 # (GITHUB_TOKEN needs read:packages scope for GitHub Packages)
 
+git lfs install          # one-time setup for SPICE kernel files
 git clone https://github.com/NASA-AMMOS/plandev-examples.git
 cd plandev-examples
 ./gradlew build
@@ -107,6 +108,7 @@ See [RECIPES.md](RECIPES.md) for common patterns and copy-paste examples.
 ## Requirements
 
 - **Java 21** (via Gradle toolchain — will auto-download if needed)
+- **Git LFS** for SPICE kernel files used by the orbiter and geometry library (~238 MB). Install with `git lfs install` before cloning. If you already cloned without LFS, run `git lfs pull` to fetch the kernel files.
 - **GitHub credentials** for Aerie Maven packages:
   ```bash
   export GITHUB_USER=your-username

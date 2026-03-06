@@ -1,0 +1,33 @@
+{
+  "name": "aerie-ascii-art-action",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "rimraf dist && tsc && rollup -c rollup.config.js",
+    "format": "prettier --plugin-search-dir=. --write .",
+    "lint": "prettier --plugin-search-dir=. --check . && eslint .",
+    "test": "node --import tsx --test 'tests/**/*.test.ts'"
+  },
+  "author": "Dan Delany <delany@jpl.nasa.gov>",
+  "license": "MIT",
+  "description": "Example Aerie Action for generating ASCII art with figlet",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-typescript": "12.1.2",
+    "@types/figlet": "^1.7.0",
+    "prettier": "3.4.2",
+    "rimraf": "6.0.1",
+    "rollup": "4.34.3",
+    "ts-node": "^10.9.2",
+    "tslib": "2.8.1",
+    "tsx": "^4.19.3",
+    "typescript": "5.7.3"
+  },
+  "dependencies": {
+    "@nasa-jpl/aerie-actions": "0.1.7",
+    "@types/node": "^22.13.10",
+    "figlet": "^1.8.0"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "aerie-action-examples",
+  "version": "0.1.0",
+  "description": "Reference examples for developing Aerie Actions",
+  "main": "index.js",
+  "workspaces": [
+    "examples/*"
+  ],
+  "private": true,
+  "scripts": {
+    "test": "npm run test --workspaces"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NASA-AMMOS/aerie-action-template.git"
+  },
+  "keywords": ["aerie"],
+  "contributors": [
+    "Dan Delany <delany@jpl.nasa.gov>",
+    "Cody Hansen <cody.m.hansen@jpl.nasa.gov>"
+  ],
+  "license": "MIT",
+  "bugs": "https://github.com/NASA-AMMOS/aerie/issues",
+  "homepage": "https://github.com/NASA-AMMOS/aerie-action-template#readme",
+  "engines": {
+    "node": ">=18"
+  }
+}

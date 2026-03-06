@@ -1,3 +1,18 @@
 plugins {
   id 'java-library'
 }
+
+dependencies {
+  // JNISpice provides spice.basic.CSPICE and related classes
+  api ':JNISpice-N0067'
+
+  // JPL Time library (gov.nasa.jpl.time.Time, Duration, etc.)
+  api ':jplTime-2022-08'
+
+  // Apache Commons (used by geometry calculations)
+  api 'org.apache.commons:commons-math3:3.6.1'
+  implementation 'org.apache.commons:commons-lang3:3.14.0'
+
+  // Gson for JSON config parsing
+  implementation 'com.google.code.gson:gson:2.10.1'
+}
