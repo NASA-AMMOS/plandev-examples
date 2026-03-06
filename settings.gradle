@@ -1,0 +1,21 @@
+rootProject.name = 'plandev-examples'
+
+// Tutorial
+include '00-tutorial'
+
+// Reusable libraries
+include 'libraries:power'
+include 'libraries:data'
+include 'libraries:geometry'
+include 'libraries:gnc'
+include 'libraries:telecom'
+
+// Progressive examples
+include 'examples:01-power-only'
+include 'examples:02-data-only'
+include 'examples:03-power-and-data'
+include 'examples:04-orbiter'
+include 'examples:05-constraints-and-scheduling'
+include 'examples:06-activity-patterns'
+include 'examples:07-testing-patterns'
+include 'examples:08-external-events'

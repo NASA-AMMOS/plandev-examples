@@ -1,0 +1,42 @@
+allprojects {
+  repositories {
+    flatDir { dirs "$rootDir/third-party" }
+    mavenCentral()
+    maven {
+      name = "GitHubPackages"
+      url = "https://maven.pkg.github.com/nasa-ammos/aerie"
+      credentials {
+        username = System.getenv('GITHUB_USER') ?: 'anonymous'
+        password = System.getenv('GITHUB_TOKEN') ?: ''
+      }
+    }
+  }
+}
+
+// Only apply java plugin to leaf subprojects (not the 'libraries' and 'examples' parent dirs)
+subprojects {
+  if (it.name == 'libraries' || it.name == 'examples') return
+
+  apply plugin: 'java'
+
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(21)
+    }
+  }
+
+  dependencies {
+    annotationProcessor 'gov.nasa.jpl.aerie:merlin-framework-processor:2.7.0'
+    implementation 'gov.nasa.jpl.aerie:contrib:2.7.0'
+    implementation 'gov.nasa.jpl.aerie:merlin-framework:2.7.0'
+    implementation 'gov.nasa.jpl.aerie:merlin-sdk:2.7.0'
+    compileOnly 'gov.nasa.jpl.aerie:merlin-driver:2.7.0'
+
+    testImplementation 'gov.nasa.jpl.aerie:merlin-framework-junit:2.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+  }
+
+  test {
+    useJUnitPlatform()
+  }
+}

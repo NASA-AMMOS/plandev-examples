@@ -1,0 +1,6 @@
+dependencies {
+  implementation project(':libraries:power')
+  implementation project(':libraries:data')
+  implementation project(':libraries:geometry')
+  implementation project(':libraries:gnc')
+}
