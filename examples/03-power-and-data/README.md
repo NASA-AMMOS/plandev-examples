@@ -20,6 +20,7 @@ Demonstrates how to compose multiple subsystem libraries into a single mission m
 |----------|-------------------|-------------|
 | `TakePicture` | Power + Data | Turns on camera (draws power) while generating science data into a storage bin |
 | `Downlink` | Power | Turns on telecom subsystem for a specified duration |
+| `Calibrate` | Power | Turns on camera for a calibration sequence (default 30 min) |
 | `GenerateData` | Data | Generates data into an onboard bin at a specified rate |
 | `PlaybackData` | Data | Plays back data from onboard storage to ground |
 | `DeleteData` | Data | Removes data from an onboard bin |
@@ -35,3 +36,5 @@ The fat JAR at `build/libs/power-and-data-example.jar` can be uploaded directly 
 ## Key takeaway
 
 The `Mission` class composes library models by instantiating them and wiring their resources together. Activities can then interact with multiple subsystems — `TakePicture` draws power via the PEL while simultaneously writing data to the storage model. This is the pattern used by more complex examples like the orbiter.
+
+This model also serves as the base mission model for examples [05-constraints-and-scheduling](../05-constraints-and-scheduling/) and [09-external-events](../09-external-events/), which add procedural constraints and scheduling goals on top of this model without duplicating its code.

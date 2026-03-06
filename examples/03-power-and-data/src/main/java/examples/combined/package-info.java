@@ -5,6 +5,7 @@
 
 @MissionModel.WithActivityType(TakePicture.class)
 @MissionModel.WithActivityType(Downlink.class)
+@MissionModel.WithActivityType(Calibrate.class)
 
 // Data library activities (available since Mission implements DataMissionModel)
 @MissionModel.WithActivityType(GenerateData.class)
@@ -13,6 +14,7 @@
 
 package examples.combined;
 
+import examples.combined.activities.Calibrate;
 import examples.combined.activities.Downlink;
 import examples.combined.activities.TakePicture;
 import gov.nasa.jpl.aerie.contrib.serialization.rulesets.BasicValueMappers;

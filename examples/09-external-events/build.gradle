@@ -1,35 +1,16 @@
 dependencies {
-  implementation project(':libraries:power')
-  implementation project(':libraries:data')
-  implementation project(':libraries:telecom')
-
   // Procedural scheduling
   annotationProcessor "gov.nasa.ammos.aerie.procedural:processor:${aerieVersion}"
   implementation "gov.nasa.ammos.aerie.procedural:scheduling:${aerieVersion}"
   implementation "gov.nasa.ammos.aerie.procedural:timeline:${aerieVersion}"
   implementation "gov.nasa.ammos.aerie.procedural:constraints:${aerieVersion}"
 
-  // Required by procedural scheduling
+  // Required for Duration, SerializedValue in scheduling goals
+  implementation "gov.nasa.jpl.aerie:merlin-framework:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:contrib:${aerieVersion}"
   implementation "gov.nasa.jpl.aerie:type-utils:${aerieVersion}"
 }
 
-// Include library sources so the Aerie annotation processor can generate value mappers
-// for @AutoValueMapper.Record types defined in the libraries
-sourceSets {
-  main {
-    java {
-      srcDir project(':libraries:power').file('src/main/java')
-      srcDir project(':libraries:data').file('src/main/java')
-    }
-  }
-}
-
-// Fat JAR for uploading to Aerie
 jar {
-  dependsOn configurations.runtimeClasspath
-  from {
-    configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
-  }
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-  archiveFileName.set("external-events-example.jar")
+  archiveFileName.set("external-events-procedures.jar")
 }

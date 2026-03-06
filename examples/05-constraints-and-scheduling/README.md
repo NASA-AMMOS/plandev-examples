@@ -4,7 +4,7 @@ Demonstrates Aerie's procedural constraints and scheduling goals — the feature
 
 ## What's in this example
 
-**Mission model**: A simple spacecraft with power (solar array, battery, PEL) and data (storage buckets) subsystems, plus TakePicture, Downlink, and Calibrate activities.
+**Mission model**: Uses the [03-power-and-data](../03-power-and-data/) model (power, data, TakePicture, Downlink, Calibrate activities). This example contains only the constraint and scheduling procedures — no duplicated model code.
 
 **Constraint procedures** (in `constraints/`):
 
@@ -25,14 +25,18 @@ Demonstrates Aerie's procedural constraints and scheduling goals — the feature
 
 ## How to use
 
-1. Upload the JAR to Aerie
-2. Create a plan and add some TakePicture activities
-3. Run the scheduling goals to auto-place Calibrate and Downlink activities
+1. Upload the `03-power-and-data` model JAR to Aerie and create a plan
+2. Add some TakePicture activities to the plan
+3. Upload this example's procedure JAR and run the scheduling goals
 4. Run the constraints to check for battery, data, and power violations
 5. Simulate and observe the constraint violations on the timeline
 
 ## Build
 
 ```bash
+# Build the mission model (from example 03)
+./gradlew :examples:03-power-and-data:build
+
+# Build the procedure JAR
 ./gradlew :examples:05-constraints-and-scheduling:build
 ```
