@@ -27,9 +27,10 @@ Start with the tutorial and work your way up:
 | 3 | `examples/03-power-and-data/` | Combined subsystems | `libraries/power` + `libraries/data` |
 | 4 | `examples/04-orbiter/` | Full Mars orbiter | All libraries |
 | 5 | `examples/05-constraints-and-scheduling/` | Constraints + scheduling goals | `libraries/power` + `libraries/data` |
-| 6 | `examples/06-activity-patterns/` | Common activity idioms | None (standalone) |
-| 7 | `examples/07-testing-patterns/` | Model testing strategies | `libraries/power` + `libraries/data` |
-| 8 | `examples/08-external-events/` | Scheduling with external events | `libraries/power` + `libraries/data` + `libraries/telecom` |
+| 6 | `examples/06-advanced-resources/` | Streamline resource types | None (standalone) |
+| 7 | `examples/07-activity-patterns/` | Common activity idioms | None (standalone) |
+| 8 | `examples/08-testing-patterns/` | Model testing strategies | `libraries/power` + `libraries/data` |
+| 9 | `examples/09-external-events/` | Scheduling with external events | `libraries/power` + `libraries/data` + `libraries/telecom` |
 
 ## Repository Structure
 
@@ -48,9 +49,10 @@ plandev-examples/
 │   ├── 03-power-and-data/
 │   ├── 04-orbiter/
 │   ├── 05-constraints-and-scheduling/
-│   ├── 06-activity-patterns/
-│   ├── 07-testing-patterns/
-│   └── 08-external-events/
+│   ├── 06-advanced-resources/
+│   ├── 07-activity-patterns/
+│   ├── 08-testing-patterns/
+│   └── 09-external-events/
 ├── archive/lander/                 # Legacy reference (unmaintained)
 └── tools/                          # PEL generator, SPICE helpers
 ```

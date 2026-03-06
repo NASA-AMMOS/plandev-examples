@@ -35,7 +35,7 @@ plandev-examples/
 
 - **Gradle multi-project build** with Java 21
 - Root `settings.gradle` includes all subprojects
-- Root `build.gradle` defines shared Aerie dependencies (merlin-framework, merlin-sdk, contrib v2.7.0)
+- Root `build.gradle` defines shared Aerie dependencies (merlin-framework, merlin-sdk, contrib v4.1.1)
 - Libraries publish as Maven artifacts; examples depend on libraries via `implementation project(':libraries:power')`
 - Each example produces a standalone JAR uploadable to Aerie
 

@@ -1,0 +1,127 @@
+{
+    "name": "Demo System PEL",
+    "version": "1.0",
+    "power_loads": [
+        {
+            "name": "GNC",
+            "load_type": "states",
+            "power_states": [
+                {
+                    "state": "Nominal",
+                    "CBE_power_usage": {
+                        "value": 50.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    },
+                    "MEV_power_usage": {
+                        "value": 65.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    }
+                },
+                {
+                    "state": "Turning",
+                    "CBE_power_usage": {
+                        "value": 100.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    },
+                    "MEV_power_usage": {
+                        "value": 115.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Telecom",
+            "load_type": "states",
+            "power_states": [
+                {
+                    "state": "Off",
+                    "CBE_power_usage": {
+                        "value": 0.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    },
+                    "MEV_power_usage": {
+                        "value": 0.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    }
+                },
+                {
+                    "state": "On",
+                    "CBE_power_usage": {
+                        "value": 175.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    },
+                    "MEV_power_usage": {
+                        "value": 190.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Avionics",
+            "load_type": "states",
+            "power_states": [
+                {
+                    "state": "On",
+                    "CBE_power_usage": {
+                        "value": 100.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    },
+                    "MEV_power_usage": {
+                        "value": 115.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Camera",
+            "load_type": "states",
+            "power_states": [
+                {
+                    "state": "Off",
+                    "CBE_power_usage": {
+                        "value": 0.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    },
+                    "MEV_power_usage": {
+                        "value": 0.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    }
+                },
+                {
+                    "state": "On",
+                    "CBE_power_usage": {
+                        "value": 150.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    },
+                    "MEV_power_usage": {
+                        "value": 165.0,
+                        "units": "W",
+                        "quantity_type": "electrical power"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Locomotion",
+            "load_type": "dynamic",
+            "units": "W",
+            "MEV_factor": 1.25
+        }
+    ]
+}

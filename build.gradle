@@ -35,7 +35,8 @@ subprojects {
     compileOnly "gov.nasa.jpl.aerie:merlin-driver:${aerieVersion}"
 
     testImplementation "gov.nasa.jpl.aerie:merlin-framework-junit:${aerieVersion}"
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
   }
 
   test {

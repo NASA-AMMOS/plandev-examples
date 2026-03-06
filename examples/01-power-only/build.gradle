@@ -1,3 +1,37 @@
 dependencies {
   implementation project(':libraries:power')
+
+  implementation 'gov.nasa.jpl.aerie:merlin-driver:' + aerieVersion
+  implementation 'gov.nasa.jpl.aerie:parsing-utilities:' + aerieVersion
+  implementation 'gov.nasa.jpl.aerie:type-utils:' + aerieVersion
+
+  implementation 'com.google.guava:guava:29.0-jre'
+  implementation 'com.google.code.gson:gson:2.8.7'
+  implementation 'com.google.mug:mug:5.3'
+  implementation 'org.apache.commons:commons-csv:1.9.0'
+  implementation 'org.apache.commons:commons-math3:+'
+
+  testImplementation 'com.google.truth:truth:1.0.1'
+  testImplementation 'com.google.truth.extensions:truth-java8-extension:1.0.1'
+  testImplementation 'com.google.guava:guava-testlib:29.0-jre'
+}
+
+// Include library sources so the Aerie annotation processor can generate value mappers
+// for @AutoValueMapper.Record types defined in the library
+sourceSets {
+  main {
+    java {
+      srcDir project(':libraries:power').file('src/main/java')
+    }
+  }
+}
+
+// Fat JAR for uploading to Aerie
+jar {
+  dependsOn configurations.runtimeClasspath
+  from {
+    configurations.runtimeClasspath.filter{ it.exists() }.collect{ it.isDirectory() ? it : zipTree(it) }
+  }
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+  archiveFileName.set("power-example.jar")
 }

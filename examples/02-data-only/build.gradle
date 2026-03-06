@@ -1,3 +1,11 @@
 dependencies {
   implementation project(':libraries:data')
 }
+
+jar {
+  dependsOn configurations.runtimeClasspath
+  from {
+    configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
