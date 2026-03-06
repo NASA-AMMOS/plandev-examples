@@ -1,1 +1,28 @@
 // Standalone tutorial - no library dependencies
+
+dependencies {
+  // Procedural scheduling/constraints libraries (used by tests)
+  annotationProcessor "gov.nasa.ammos.aerie.procedural:processor:${aerieVersion}"
+  implementation "gov.nasa.ammos.aerie.procedural:scheduling:${aerieVersion}"
+  implementation "gov.nasa.ammos.aerie.procedural:timeline:${aerieVersion}"
+  implementation "gov.nasa.ammos.aerie.procedural:constraints:${aerieVersion}"
+
+  // Additional deps beyond the root defaults
+  implementation "gov.nasa.jpl.aerie:merlin-driver:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:parsing-utilities:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:type-utils:${aerieVersion}"
+
+  // Stateless simulation utilities (used for testing)
+  implementation "gov.nasa.ammos.aerie.procedural:utils:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:orchestration-utils:${aerieVersion}"
+  implementation "gov.nasa.jpl.aerie:permissions:${aerieVersion}"
+
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+jar {
+  from {
+    configurations.runtimeClasspath.filter { it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

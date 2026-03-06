@@ -113,7 +113,7 @@ See [RECIPES.md](RECIPES.md) for common patterns and copy-paste examples.
 
 ## Aerie Version
 
-All projects target **Aerie v2.7.0** (`merlin-framework`, `merlin-sdk`, `contrib`).
+All projects target **Aerie v4.1.1** (`merlin-framework`, `merlin-sdk`, `contrib`).
 
 ## Contributing
 

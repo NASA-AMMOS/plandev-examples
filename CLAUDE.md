@@ -21,7 +21,10 @@ plandev-examples/
 │   ├── 03-power-and-data/
 │   ├── 04-orbiter/                 # from aerie-orbiter-model (refactored to use libraries)
 │   ├── 05-constraints-and-scheduling/
-│   ├── ...
+│   ├── 06-advanced-resources/      # Streamline resource types beyond Discrete
+│   ├── 07-activity-patterns/
+│   ├── 08-testing-patterns/
+│   ├── 09-external-events/
 │   ├── actions/                    # from aerie-action-examples
 │   └── ui-plugins/                 # from aerie-ui-plugin-examples
 ├── archive/lander/                 # Legacy reference (from aerie-lander)

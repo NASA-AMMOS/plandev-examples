@@ -1,13 +1,16 @@
 # Gradle
 .gradle/
 build/
-!gradle/wrapper/gradle-wrapper.jar
 
 # Java
 *.class
 *.jar
 *.war
 *.ear
+
+# Exceptions - these JARs must be committed
+!gradle/wrapper/gradle-wrapper.jar
+!third-party/*.jar
 
 # IDE
 .idea/

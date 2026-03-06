@@ -1,3 +1,5 @@
+ext.aerieVersion = '4.1.1'
+
 allprojects {
   repositories {
     flatDir { dirs "$rootDir/third-party" }
@@ -26,13 +28,13 @@ subprojects {
   }
 
   dependencies {
-    annotationProcessor 'gov.nasa.jpl.aerie:merlin-framework-processor:2.7.0'
-    implementation 'gov.nasa.jpl.aerie:contrib:2.7.0'
-    implementation 'gov.nasa.jpl.aerie:merlin-framework:2.7.0'
-    implementation 'gov.nasa.jpl.aerie:merlin-sdk:2.7.0'
-    compileOnly 'gov.nasa.jpl.aerie:merlin-driver:2.7.0'
+    annotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${aerieVersion}"
+    implementation "gov.nasa.jpl.aerie:contrib:${aerieVersion}"
+    implementation "gov.nasa.jpl.aerie:merlin-framework:${aerieVersion}"
+    implementation "gov.nasa.jpl.aerie:merlin-sdk:${aerieVersion}"
+    compileOnly "gov.nasa.jpl.aerie:merlin-driver:${aerieVersion}"
 
-    testImplementation 'gov.nasa.jpl.aerie:merlin-framework-junit:2.7.0'
+    testImplementation "gov.nasa.jpl.aerie:merlin-framework-junit:${aerieVersion}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
   }
 
