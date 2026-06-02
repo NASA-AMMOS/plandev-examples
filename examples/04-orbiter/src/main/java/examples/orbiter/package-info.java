@@ -1,3 +1,10 @@
+/**
+ * Mars-orbiter-style mission model — integrates power, data, geometry, telecom, and radar subsystems.
+ *
+ * Initially derived from NASA-AMMOS/aerie-orbiter-model. Subsequently refactored to import
+ * {@code libraries/{power,data,geometry,telecom}} rather than carry its own copies of that code.
+ * See ATTRIBUTION.md at the repo root for the full directory-to-source mapping.
+ */
 @MissionModel(model = Mission.class)
 @WithMappers(BasicValueMappers.class)
 @WithMappers(CommonValueMappers.class)

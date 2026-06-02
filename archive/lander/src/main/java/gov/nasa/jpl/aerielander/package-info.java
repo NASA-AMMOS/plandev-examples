@@ -1,3 +1,9 @@
+/**
+ * Legacy Aerie Lander mission model — kept as an unmaintained reference only.
+ *
+ * Initially derived from NASA-AMMOS/aerie-lander (InSight-derived; last actively maintained in 2022).
+ * See ATTRIBUTION.md at the repo root for the full directory-to-source mapping.
+ */
 @MissionModel(model = Mission.class)
 
 @WithConfiguration(Configuration.class)

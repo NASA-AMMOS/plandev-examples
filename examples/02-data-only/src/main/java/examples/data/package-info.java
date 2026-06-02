@@ -1,3 +1,9 @@
+/**
+ * Data-only example mission model — exercises {@code libraries/data}.
+ *
+ * Initially derived from NASA-AMMOS/aerie-simple-model-data (the {@code demo/} subdir).
+ * See ATTRIBUTION.md at the repo root for the full directory-to-source mapping.
+ */
 @MissionModel(model = Mission.class)
 @MissionModel.WithMappers(CommonValueMappers.class)
 @MissionModel.WithMappers(BasicValueMappers.class)

@@ -1,3 +1,9 @@
+/**
+ * Power-only example mission model — exercises {@code libraries/power}.
+ *
+ * Initially derived from NASA-AMMOS/aerie-simple-model-power (the {@code demosystem} package).
+ * See ATTRIBUTION.md at the repo root for the full directory-to-source mapping.
+ */
 @MissionModel(model = Mission.class)
 @WithMappers(BasicValueMappers.class)
 @WithMappers(CustomValueMappers.class)

@@ -1,3 +1,9 @@
+/**
+ * Mission model for the tutorial walk-through.
+ *
+ * Initially derived from NASA-AMMOS/aerie-modeling-tutorial. See ATTRIBUTION.md at
+ * the repo root for the full directory-to-source mapping.
+ */
 @MissionModel(model = Mission.class)
 @WithMappers(BasicValueMappers.class)
 @WithConfiguration(Configuration.class)
