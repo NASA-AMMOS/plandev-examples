@@ -4,11 +4,11 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import gov.nasa.jpl.time.Time;
-import examples.orbiter.JPLTimeConvertUtility;
+import gov.nasa.jpl.aerie.geometry.globals.JPLTimeConvertUtility;
 import examples.orbiter.Mission;
 import examples.orbiter.geometry.activities.atomic.Apoapsis;
-import examples.orbiter.geometry.directspicecalls.SpiceDirectEventGenerator;
-import examples.orbiter.geometry.interfaces.GeometryInformationNotAvailableException;
+import gov.nasa.jpl.aerie.geometry.directspicecalls.SpiceDirectEventGenerator;
+import gov.nasa.jpl.aerie.geometry.interfaces.GeometryInformationNotAvailableException;
 
 import java.util.ArrayList;
 import java.util.List;

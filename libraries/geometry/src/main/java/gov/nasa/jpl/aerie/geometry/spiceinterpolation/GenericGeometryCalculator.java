@@ -11,7 +11,9 @@ import gov.nasa.jpl.aerie.geometry.interfaces.TimeDependentStateCalculator;
 import gov.nasa.jpl.aerie.geometry.resources.GenericGeometryResources;
 import gov.nasa.jpl.aerie.geometry.returnedobjects.*;
 import gov.nasa.jpl.time.Time;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import spice.basic.CSPICE;
 import spice.basic.SpiceErrorException;
 
 import java.util.Map;
@@ -59,6 +61,18 @@ public class GenericGeometryCalculator implements GeometryCalculator {
     set(geomRes.SpacecraftBodyRange.get(body.getName()), bodyPositionAndVelocityWRTSpacecraft[0].getNorm());
     set(geomRes.SpacecraftBodySpeed.get(body.getName()), bodyPositionAndVelocityWRTSpacecraft[1].getNorm());
     set(geomRes.BodyHalfAngleSize.get(body.getName()), Math.asin(body.getAverageEquitorialRadius()/bodyPositionAndVelocityWRTSpacecraft[0].getNorm())*(180.0/Math.PI));
+
+    // Spacecraft attitude: rotation from J2000 to spacecraft body frame
+    if(body.doCalculateAttitude() && body.getSpacecraftFrame() != null) {
+      try {
+        double[][] pxformMatrix = CSPICE.pxform("J2000", body.getSpacecraftFrame(),
+          JPLTimeConvertUtility.nowJplTime(absClock).toET());
+        Rotation attitude = new Rotation(pxformMatrix, 1e-10);
+        set(geomRes.spacecraftAttitude, attitude);
+      } catch (SpiceErrorException e) {
+        // Frame not available — leave attitude at previous value
+      }
+    }
 
     // this section is also multi-mission; the Sun can't have an angle from itself
     if(!body.getName().equals("SUN")){

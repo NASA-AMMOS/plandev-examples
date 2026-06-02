@@ -4,9 +4,9 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import examples.orbiter.Mission;
-import examples.orbiter.geometry.resources.EclipseTypes;
-import examples.orbiter.geometry.resources.GenericGeometryResources;
-import examples.orbiter.geometry.spiceinterpolation.Body;
+import gov.nasa.jpl.aerie.geometry.resources.EclipseTypes;
+import gov.nasa.jpl.aerie.geometry.resources.GenericGeometryResources;
+import gov.nasa.jpl.aerie.geometry.spiceinterpolation.Body;
 
 import static gov.nasa.jpl.aerie.contrib.streamline.core.Resources.currentValue;
 import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects.set;

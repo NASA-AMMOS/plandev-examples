@@ -13,11 +13,11 @@ import gov.nasa.ammos.aerie.procedural.timeline.plan.Plan;
 import gov.nasa.ammos.aerie.procedural.timeline.plan.SimulationResults;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import gov.nasa.jpl.aerie.merlin.protocol.types.SerializedValue;
-import examples.orbiter.JPLTimeConvertUtility;
-import examples.orbiter.geometry.directspicecalls.SpiceDirectEventGenerator;
-import examples.orbiter.geometry.interfaces.GeometryInformationNotAvailableException;
-import examples.orbiter.geometry.spiceinterpolation.Bodies;
-import examples.orbiter.spice.Spice;
+import gov.nasa.jpl.aerie.geometry.globals.JPLTimeConvertUtility;
+import gov.nasa.jpl.aerie.geometry.directspicecalls.SpiceDirectEventGenerator;
+import gov.nasa.jpl.aerie.geometry.interfaces.GeometryInformationNotAvailableException;
+import gov.nasa.jpl.aerie.geometry.spiceinterpolation.Bodies;
+import examples.orbiter.Mission;import examples.orbiter.spice.Spice;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import spice.basic.SpiceErrorException;
@@ -69,7 +69,7 @@ public record AddPeriapses(
       }
 
       // Initialize Geometry Bodies
-      Bodies bodiesObj = new Bodies();
+      Bodies bodiesObj = new Bodies(Mission.class);
       SpiceDirectEventGenerator generator = new SpiceDirectEventGenerator(bodiesObj.getBodiesMap());
       Instant planStart = plan.toAbsolute(plan.totalBounds().start);
       Instant planEnd = plan.toAbsolute(plan.totalBounds().end);

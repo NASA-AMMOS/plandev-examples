@@ -88,6 +88,9 @@ public class GenericGeometryResources {
   public Map<String, MutableResource<Discrete<Boolean>>> Periapsis;
   public Map<String, MutableResource<Discrete<Boolean>>> Apoapsis;
 
+  /** Spacecraft attitude quaternion (J2000 → spacecraft body frame) for bodies with calculateAttitude=true */
+  public MutableResource<Discrete<Rotation>> spacecraftAttitude;
+
   public static DoubleValueMapper dvm = new DoubleValueMapper();
   public static BooleanValueMapper bvm = new BooleanValueMapper();
   public static IntegerValueMapper ivm = new IntegerValueMapper();
@@ -155,6 +158,10 @@ public class GenericGeometryResources {
 
     LitOrDarkSide = resource(discrete(0));
     registrar.discrete("LitOrDarkSide", LitOrDarkSide, ivm);
+
+    // Spacecraft attitude quaternion (identity = no rotation from J2000)
+    spacecraftAttitude = resource(discrete(Rotation.IDENTITY));
+    registerRotation(registrar, "spacecraftAttitude", spacecraftAttitude);
 
     // loop through bodies to build and register arrayed resources
     for (String body : bodies) {

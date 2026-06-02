@@ -8,12 +8,14 @@ import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources;
+import gov.nasa.jpl.aerie.geometry.globals.AbsoluteClock;
+import gov.nasa.jpl.aerie.geometry.globals.Window;
 import gov.nasa.jpl.time.Duration;
 import examples.orbiter.data.Data;
 import examples.orbiter.data.DataMissionModel;
-import examples.orbiter.geometry.resources.GenericGeometryResources;
-import examples.orbiter.geometry.spiceinterpolation.GenericGeometryCalculator;
-import examples.orbiter.geometry.spiceinterpolation.SpiceResourcePopulater;
+import gov.nasa.jpl.aerie.geometry.resources.GenericGeometryResources;
+import gov.nasa.jpl.aerie.geometry.spiceinterpolation.GenericGeometryCalculator;
+import gov.nasa.jpl.aerie.geometry.spiceinterpolation.SpiceResourcePopulater;
 import examples.orbiter.power.BatteryModel;
 import examples.orbiter.power.GenericSolarArray;
 import examples.orbiter.power.pel.PELModel;
@@ -114,7 +116,7 @@ public final class Mission implements DataMissionModel {
     //
     this.geometryCalculator = new GenericGeometryCalculator(this.absoluteClock, config.spiceSpacecraftId(), "LT+S", this.errorRegistrar);
     // Assume no gaps in SPICE data for now
-    this.spiceResPop = new SpiceResourcePopulater(this.geometryCalculator, this.absoluteClock, new Window[]{}, Duration.ZERO_DURATION );
+    this.spiceResPop = new SpiceResourcePopulater(this.geometryCalculator, this.absoluteClock, new Window[]{}, Duration.ZERO_DURATION, Mission.class);
     this.geometryResources = this.geometryCalculator.getResources();
     this.spiceResPop.calculateTimeDependentInformation();
 

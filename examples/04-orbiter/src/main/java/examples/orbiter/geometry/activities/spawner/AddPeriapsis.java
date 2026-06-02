@@ -3,11 +3,11 @@ package examples.orbiter.geometry.activities.spawner;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
-import examples.orbiter.JPLTimeConvertUtility;
+import gov.nasa.jpl.aerie.geometry.globals.JPLTimeConvertUtility;
 import examples.orbiter.Mission;
 import examples.orbiter.geometry.activities.atomic.Periapsis;
-import examples.orbiter.geometry.directspicecalls.SpiceDirectEventGenerator;
-import examples.orbiter.geometry.interfaces.GeometryInformationNotAvailableException;
+import gov.nasa.jpl.aerie.geometry.directspicecalls.SpiceDirectEventGenerator;
+import gov.nasa.jpl.aerie.geometry.interfaces.GeometryInformationNotAvailableException;
 import gov.nasa.jpl.time.Time;
 
 import java.util.ArrayList;

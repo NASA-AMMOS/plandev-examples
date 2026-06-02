@@ -13,15 +13,15 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import gov.nasa.jpl.aerie.merlin.protocol.types.SerializedValue;
 import gov.nasa.jpl.time.Time;
-import examples.orbiter.JPLTimeConvertUtility;
-import examples.orbiter.Window;
+import gov.nasa.jpl.aerie.geometry.globals.JPLTimeConvertUtility;
+import gov.nasa.jpl.aerie.geometry.globals.Window;
 import examples.orbiter.geometry.activities.atomic.EnterOccultation;
 import examples.orbiter.geometry.activities.atomic.ExitOccultation;
-import examples.orbiter.geometry.directspicecalls.SpiceDirectEventGenerator;
-import examples.orbiter.geometry.interfaces.GeometryInformationNotAvailableException;
-import examples.orbiter.geometry.resources.EclipseTypes;
-import examples.orbiter.geometry.spiceinterpolation.Bodies;
-import examples.orbiter.spice.Spice;
+import gov.nasa.jpl.aerie.geometry.directspicecalls.SpiceDirectEventGenerator;
+import gov.nasa.jpl.aerie.geometry.interfaces.GeometryInformationNotAvailableException;
+import gov.nasa.jpl.aerie.geometry.resources.EclipseTypes;
+import gov.nasa.jpl.aerie.geometry.spiceinterpolation.Bodies;
+import examples.orbiter.Mission;import examples.orbiter.spice.Spice;
 import spice.basic.SpiceErrorException;
 
 import java.nio.file.Path;
@@ -65,7 +65,7 @@ public record AddOccultations(
       }
 
       // Initialize Geometry Bodies and Generator
-      Bodies bodiesObj = new Bodies();
+      Bodies bodiesObj = new Bodies(Mission.class);
       SpiceDirectEventGenerator generator = new SpiceDirectEventGenerator(bodiesObj.getBodiesMap());
 
       // Get useful plan bounds information

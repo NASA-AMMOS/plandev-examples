@@ -90,6 +90,8 @@
         "calculateLST": true,
         "calculateBetaAngle": true,
         "calculateOrbitParameters": true,
+        "calculateAttitude": false,
+        "spacecraftFrame": null,
         "useDSK": false,
         "calculationPeriods": [
           {

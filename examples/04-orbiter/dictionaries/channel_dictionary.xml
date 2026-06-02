@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<telemetry_dictionary>
+  <header mission_name="ORBITER" version="1.0.0.0" schema_version="1.0">
+    <spacecraft_ids>
+      <spacecraft_id value="42"/>
+    </spacecraft_ids>
+  </header>
+
+  <enum_definitions>
+    <enum_table name="OnOff">
+      <values>
+        <enum symbol="OFF" numeric="0"/>
+        <enum symbol="ON"  numeric="1"/>
+      </values>
+    </enum_table>
+
+    <enum_table name="SolarArrayDeploymentState">
+      <values>
+        <enum symbol="STOWED"    numeric="0"/>
+        <enum symbol="DEPLOYING" numeric="1"/>
+        <enum symbol="DEPLOYED"  numeric="2"/>
+      </values>
+    </enum_table>
+
+    <enum_table name="RadarDataCollectionMode">
+      <values>
+        <enum symbol="OFF"     numeric="0"/>
+        <enum symbol="LOW_RES" numeric="1"/>
+        <enum symbol="MED_RES" numeric="2"/>
+        <enum symbol="HI_RES"  numeric="3"/>
+      </values>
+    </enum_table>
+
+    <enum_table name="EclipseState">
+      <values>
+        <enum symbol="OUT_OF_ECLIPSE" numeric="0"/>
+        <enum symbol="IN_ECLIPSE"     numeric="1"/>
+      </values>
+    </enum_table>
+
+    <enum_table name="OccultationState">
+      <values>
+        <enum symbol="VISIBLE"  numeric="0"/>
+        <enum symbol="OCCULTED" numeric="1"/>
+      </values>
+    </enum_table>
+
+    <enum_table name="boolean">
+      <values>
+        <enum symbol="FALSE" numeric="0"/>
+        <enum symbol="TRUE"  numeric="1"/>
+      </values>
+    </enum_table>
+  </enum_definitions>
+
+  <telemetry_definitions>
+
+    <!-- =========================================================== -->
+    <!-- Power: PEL component states                                  -->
+    <!-- =========================================================== -->
+    <telemetry abbreviation="PWR-0001" channel_derivation="None" name="PWR_EPS_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1001</measurement_id>
+      <description>Electrical Power Subsystem state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0002" channel_derivation="None" name="PWR_CDH_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1002</measurement_id>
+      <description>Command and Data Handling state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0003" channel_derivation="None" name="PWR_SSR_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1003</measurement_id>
+      <description>Solid State Recorder state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0004" channel_derivation="None" name="PWR_HEATERS_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1004</measurement_id>
+      <description>Bus heaters state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0005" channel_derivation="None" name="PWR_ADCS_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1005</measurement_id>
+      <description>Attitude Determination and Control state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0006" channel_derivation="None" name="PWR_HARNESS_LOSS" type="enum" source="flight" byte_length="1">
+      <measurement_id>1006</measurement_id>
+      <description>Harness loss model state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0007" channel_derivation="None" name="PWR_PROP_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1007</measurement_id>
+      <description>Propulsion subsystem state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0008" channel_derivation="None" name="PWR_IDST_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1008</measurement_id>
+      <description>Integrated Deep Space Transponder state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0009" channel_derivation="None" name="PWR_X_TWTA_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1009</measurement_id>
+      <description>X-band TWTA state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0010" channel_derivation="None" name="PWR_KA_TWTA_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1010</measurement_id>
+      <description>Ka-band TWTA state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0011" channel_derivation="None" name="PWR_RADAR_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1011</measurement_id>
+      <description>Radar power state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0012" channel_derivation="None" name="PWR_IMAGER_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>1012</measurement_id>
+      <description>Imager power state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0013" channel_derivation="None" name="PWR_RADAR_HEATER" type="enum" source="flight" byte_length="1">
+      <measurement_id>1013</measurement_id>
+      <description>Radar heater state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0014" channel_derivation="None" name="PWR_IMAGER_HEATER" type="enum" source="flight" byte_length="1">
+      <measurement_id>1014</measurement_id>
+      <description>Imager heater state</description>
+      <enum_format enum_name="OnOff"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+
+    <telemetry abbreviation="PWR-0020" channel_derivation="None" name="PWR_CBE_LOAD" type="float" source="flight" byte_length="4">
+      <measurement_id>1020</measurement_id>
+      <description>Aggregated CBE bus power load (Current Best Estimate)</description>
+      <raw_units>W</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0021" channel_derivation="None" name="PWR_MEV_LOAD" type="float" source="flight" byte_length="4">
+      <measurement_id>1021</measurement_id>
+      <description>Aggregated MEV bus power load (Maximum Expected Value)</description>
+      <raw_units>W</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="PWR-0022" channel_derivation="None" name="PWR_PRODUCTION" type="float" source="flight" byte_length="4">
+      <measurement_id>1022</measurement_id>
+      <description>Instantaneous power produced by the solar array</description>
+      <raw_units>W</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+
+    <!-- =========================================================== -->
+    <!-- Battery (CBE)                                                -->
+    <!-- =========================================================== -->
+    <telemetry abbreviation="BAT-0001" channel_derivation="None" name="BAT_CBE_SOC" type="float" source="flight" byte_length="4">
+      <measurement_id>2001</measurement_id>
+      <description>CBE battery state of charge</description>
+      <raw_units>%</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0002" channel_derivation="None" name="BAT_CBE_CURRENT" type="float" source="flight" byte_length="4">
+      <measurement_id>2002</measurement_id>
+      <description>CBE battery current (positive = charging)</description>
+      <raw_units>A</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0003" channel_derivation="None" name="BAT_CBE_CURRENT_RAW" type="float" source="flight" byte_length="4">
+      <measurement_id>2003</measurement_id>
+      <description>Unclamped CBE battery current (pre-charge-controller)</description>
+      <raw_units>A</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0004" channel_derivation="None" name="BAT_CBE_CHARGE" type="float" source="flight" byte_length="4">
+      <measurement_id>2004</measurement_id>
+      <description>CBE battery accumulated charge</description>
+      <raw_units>Ah</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0005" channel_derivation="None" name="BAT_CBE_FULL" type="enum" source="flight" byte_length="1">
+      <measurement_id>2005</measurement_id>
+      <description>CBE battery is fully charged</description>
+      <enum_format enum_name="boolean"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0006" channel_derivation="None" name="BAT_CBE_EMPTY" type="enum" source="flight" byte_length="1">
+      <measurement_id>2006</measurement_id>
+      <description>CBE battery is depleted</description>
+      <enum_format enum_name="boolean"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+
+    <!-- Battery (MEV) -->
+    <telemetry abbreviation="BAT-0011" channel_derivation="None" name="BAT_MEV_SOC" type="float" source="flight" byte_length="4">
+      <measurement_id>2011</measurement_id>
+      <description>MEV battery state of charge</description>
+      <raw_units>%</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0012" channel_derivation="None" name="BAT_MEV_CURRENT" type="float" source="flight" byte_length="4">
+      <measurement_id>2012</measurement_id>
+      <description>MEV battery current</description>
+      <raw_units>A</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0013" channel_derivation="None" name="BAT_MEV_CURRENT_RAW" type="float" source="flight" byte_length="4">
+      <measurement_id>2013</measurement_id>
+      <description>Unclamped MEV battery current</description>
+      <raw_units>A</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0014" channel_derivation="None" name="BAT_MEV_CHARGE" type="float" source="flight" byte_length="4">
+      <measurement_id>2014</measurement_id>
+      <description>MEV battery accumulated charge</description>
+      <raw_units>Ah</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0015" channel_derivation="None" name="BAT_MEV_FULL" type="enum" source="flight" byte_length="1">
+      <measurement_id>2015</measurement_id>
+      <description>MEV battery is fully charged</description>
+      <enum_format enum_name="boolean"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="BAT-0016" channel_derivation="None" name="BAT_MEV_EMPTY" type="enum" source="flight" byte_length="1">
+      <measurement_id>2016</measurement_id>
+      <description>MEV battery is depleted</description>
+      <enum_format enum_name="boolean"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+
+    <!-- =========================================================== -->
+    <!-- Solar Array                                                  -->
+    <!-- =========================================================== -->
+    <telemetry abbreviation="SA-0001" channel_derivation="None" name="SA_DEPLOYMENT_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>3001</measurement_id>
+      <description>Solar array deployment state machine</description>
+      <enum_format enum_name="SolarArrayDeploymentState"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>power</module>
+        <ops_category>POWER</ops_category>
+      </categories>
+    </telemetry>
+
+    <!-- =========================================================== -->
+    <!-- Geometry (SPICE-derived)                                     -->
+    <!-- =========================================================== -->
+    <telemetry abbreviation="GEO-0001" channel_derivation="None" name="GEO_SUN_RANGE_AU" type="float" source="flight" byte_length="8">
+      <measurement_id>4001</measurement_id>
+      <description>Distance from spacecraft to Sun</description>
+      <raw_units>AU</raw_units>
+      <categories>
+        <module>geometry</module>
+        <ops_category>GEOMETRY</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="GEO-0002" channel_derivation="None" name="GEO_EARTH_RANGE_KM" type="float" source="flight" byte_length="8">
+      <measurement_id>4002</measurement_id>
+      <description>Distance from spacecraft to Earth</description>
+      <raw_units>km</raw_units>
+      <categories>
+        <module>geometry</module>
+        <ops_category>GEOMETRY</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="GEO-0003" channel_derivation="None" name="GEO_TARGET_RANGE_KM" type="float" source="flight" byte_length="8">
+      <measurement_id>4003</measurement_id>
+      <description>Distance from spacecraft to primary target body</description>
+      <raw_units>km</raw_units>
+      <categories>
+        <module>geometry</module>
+        <ops_category>GEOMETRY</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="GEO-0004" channel_derivation="None" name="GEO_FRAC_SUN_VISIBLE" type="float" source="flight" byte_length="4">
+      <measurement_id>4004</measurement_id>
+      <description>Fraction of solar disk not in eclipse (1.0 = full sun, 0.0 = full eclipse)</description>
+      <raw_units>ratio</raw_units>
+      <categories>
+        <module>geometry</module>
+        <ops_category>GEOMETRY</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="GEO-0005" channel_derivation="None" name="GEO_ECLIPSE_STATE" type="enum" source="flight" byte_length="1">
+      <measurement_id>4005</measurement_id>
+      <description>Eclipse status (umbra/penumbra latched as IN_ECLIPSE)</description>
+      <enum_format enum_name="EclipseState"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>geometry</module>
+        <ops_category>GEOMETRY</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="GEO-0006" channel_derivation="None" name="GEO_OCCULTATION" type="enum" source="flight" byte_length="1">
+      <measurement_id>4006</measurement_id>
+      <description>Earth-Spacecraft occultation status</description>
+      <enum_format enum_name="OccultationState"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>geometry</module>
+        <ops_category>GEOMETRY</ops_category>
+      </categories>
+    </telemetry>
+
+    <!-- =========================================================== -->
+    <!-- Data Management — aggregate                                  -->
+    <!-- =========================================================== -->
+    <telemetry abbreviation="DAT-0001" channel_derivation="None" name="DAT_RATE_TOTAL" type="float" source="flight" byte_length="4">
+      <measurement_id>5001</measurement_id>
+      <description>Total instantaneous data generation rate (sum across bins)</description>
+      <raw_units>bps</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0002" channel_derivation="None" name="DAT_VOLUME_MAX" type="float" source="flight" byte_length="8">
+      <measurement_id>5002</measurement_id>
+      <description>Configured SSR capacity</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0003" channel_derivation="None" name="DAT_UNFILTERED_VOL" type="float" source="flight" byte_length="8">
+      <measurement_id>5003</measurement_id>
+      <description>Total volume in the unfiltered onboard bucket</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0004" channel_derivation="None" name="DAT_FILTERED_VOL" type="float" source="flight" byte_length="8">
+      <measurement_id>5004</measurement_id>
+      <description>Total volume in the filtered onboard bucket</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0005" channel_derivation="None" name="DAT_GROUND_VOL" type="float" source="flight" byte_length="8">
+      <measurement_id>5005</measurement_id>
+      <description>Cumulative downlinked data on ground</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0006" channel_derivation="None" name="DAT_DOWNLINK_REQ_VOL" type="float" source="flight" byte_length="8">
+      <measurement_id>5006</measurement_id>
+      <description>Volume queued/requested to downlink</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0007" channel_derivation="None" name="DAT_DOWNLINK_REQ_DUR" type="float" source="flight" byte_length="4">
+      <measurement_id>5007</measurement_id>
+      <description>Estimated time to drain the downlink queue at current rate</description>
+      <raw_units>s</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+
+    <!-- Per-bin volumes (illustrative: bins 0-3) -->
+    <telemetry abbreviation="DAT-0010" channel_derivation="None" name="DAT_BIN0_VOL" type="float" source="flight" byte_length="8">
+      <measurement_id>5010</measurement_id>
+      <description>Bin 0 volume</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0011" channel_derivation="None" name="DAT_BIN0_RECV" type="float" source="flight" byte_length="8">
+      <measurement_id>5011</measurement_id>
+      <description>Bin 0 received-on-ground</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0012" channel_derivation="None" name="DAT_BIN1_VOL" type="float" source="flight" byte_length="8">
+      <measurement_id>5012</measurement_id>
+      <description>Bin 1 volume</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0013" channel_derivation="None" name="DAT_BIN1_RECV" type="float" source="flight" byte_length="8">
+      <measurement_id>5013</measurement_id>
+      <description>Bin 1 received-on-ground</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0014" channel_derivation="None" name="DAT_BIN2_VOL" type="float" source="flight" byte_length="8">
+      <measurement_id>5014</measurement_id>
+      <description>Bin 2 volume</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0015" channel_derivation="None" name="DAT_BIN2_RECV" type="float" source="flight" byte_length="8">
+      <measurement_id>5015</measurement_id>
+      <description>Bin 2 received-on-ground</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0016" channel_derivation="None" name="DAT_BIN3_VOL" type="float" source="flight" byte_length="8">
+      <measurement_id>5016</measurement_id>
+      <description>Bin 3 volume</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="DAT-0017" channel_derivation="None" name="DAT_BIN3_RECV" type="float" source="flight" byte_length="8">
+      <measurement_id>5017</measurement_id>
+      <description>Bin 3 received-on-ground</description>
+      <raw_units>bits</raw_units>
+      <categories>
+        <module>data</module>
+        <ops_category>DATA</ops_category>
+      </categories>
+    </telemetry>
+
+    <!-- =========================================================== -->
+    <!-- Telecom                                                      -->
+    <!-- =========================================================== -->
+    <telemetry abbreviation="TLM-0001" channel_derivation="None" name="TLM_DOWNLINK_RATE" type="float" source="flight" byte_length="4">
+      <measurement_id>6001</measurement_id>
+      <description>Currently negotiated downlink rate (0 if no contact)</description>
+      <raw_units>bps</raw_units>
+      <categories>
+        <module>telecom</module>
+        <ops_category>TELECOM</ops_category>
+      </categories>
+    </telemetry>
+
+    <!-- =========================================================== -->
+    <!-- Radar / Payload                                              -->
+    <!-- =========================================================== -->
+    <telemetry abbreviation="RAD-0001" channel_derivation="None" name="RAD_MODE" type="enum" source="flight" byte_length="1">
+      <measurement_id>7001</measurement_id>
+      <description>Current radar data collection mode</description>
+      <enum_format enum_name="RadarDataCollectionMode"/>
+      <raw_units>None</raw_units>
+      <categories>
+        <module>radar</module>
+        <ops_category>RADAR</ops_category>
+      </categories>
+    </telemetry>
+    <telemetry abbreviation="RAD-0002" channel_derivation="None" name="RAD_DATA_RATE" type="float" source="flight" byte_length="4">
+      <measurement_id>7002</measurement_id>
+      <description>Data rate produced by the radar in its current mode</description>
+      <raw_units>Mbps</raw_units>
+      <categories>
+        <module>radar</module>
+        <ops_category>RADAR</ops_category>
+      </categories>
+    </telemetry>
+
+  </telemetry_definitions>
+</telemetry_dictionary>

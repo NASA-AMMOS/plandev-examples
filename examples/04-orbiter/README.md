@@ -87,6 +87,7 @@ Sample plans, views, and external events are in `demo/`:
 | `demo/plans/` | SimplePlan (12 activities), MarsSat Plan (full orbital), Constraint Violation Plan, Example_MarsSat_Plan |
 | `demo/views/` | Timeline views: 5 Bin, MarsSat Overview, MarsSat Power, Overview |
 | `demo/external-events/` | DSS-24 comm pass source and schema for external event scheduling |
+| `demo/external-datasets/` | `sample_dataset.json` (3 profiles × 60k segments) for SimplePlan; regenerate with `generate_sample_dataset.py` |
 
 ## Build
 

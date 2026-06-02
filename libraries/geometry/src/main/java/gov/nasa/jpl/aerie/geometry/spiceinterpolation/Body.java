@@ -26,15 +26,26 @@ public class Body {
   private boolean calculateBetaAngle;
   private boolean calculateOrbitParameters;
   private boolean useDSK;
+  private boolean calculateAttitude;
+  private String spacecraftFrame; // SPICE frame name for attitude computation (e.g., "MRO_SPACECRAFT")
 
   public Body(String name, int NAIFID, String NAIFBodyFrame, Double albedo){
-    this(name, NAIFID, NAIFBodyFrame, albedo, false, false, false, false, false, false, false, false, false, false);
+    this(name, NAIFID, NAIFBodyFrame, albedo, false, false, false, false, false, false, false, false, false, false, false, null);
   }
 
   public Body(String name, int NAIFID, String NAIFBodyFrame, Double albedo, boolean calculateAltitude,
               boolean calculateEarthSpacecraftBodyAngle, boolean calculateSubSCInformation, boolean calculateRaDec,
               boolean calculateIlluminationAngles, boolean calculateSubSolarInformation, boolean calculateLST, boolean calculateBetaAngle,
               boolean calculateOrbitParameters, boolean useDSK){
+    this(name, NAIFID, NAIFBodyFrame, albedo, calculateAltitude, calculateEarthSpacecraftBodyAngle,
+         calculateSubSCInformation, calculateRaDec, calculateIlluminationAngles, calculateSubSolarInformation,
+         calculateLST, calculateBetaAngle, calculateOrbitParameters, useDSK, false, null);
+  }
+
+  public Body(String name, int NAIFID, String NAIFBodyFrame, Double albedo, boolean calculateAltitude,
+              boolean calculateEarthSpacecraftBodyAngle, boolean calculateSubSCInformation, boolean calculateRaDec,
+              boolean calculateIlluminationAngles, boolean calculateSubSolarInformation, boolean calculateLST, boolean calculateBetaAngle,
+              boolean calculateOrbitParameters, boolean useDSK, boolean calculateAttitude, String spacecraftFrame){
     this.name = name;
     this.NAIFID = NAIFID;
     this.NAIFBodyFrame = NAIFBodyFrame;
@@ -49,6 +60,8 @@ public class Body {
     this.calculateBetaAngle = calculateBetaAngle;
     this.calculateOrbitParameters = calculateOrbitParameters;
     this.useDSK = useDSK;
+    this.calculateAttitude = calculateAttitude;
+    this.spacecraftFrame = spacecraftFrame;
 
     // use SPICE to get body information that comes from kernels
     try {
@@ -142,6 +155,14 @@ public class Body {
 
   public boolean useDSK(){
     return useDSK;
+  }
+
+  public boolean doCalculateAttitude() {
+    return calculateAttitude;
+  }
+
+  public String getSpacecraftFrame() {
+    return spacecraftFrame;
   }
 
   /*

@@ -59,6 +59,8 @@ public class Bodies {
       JsonObject body = entry.getValue().getAsJsonObject();
       if(jsonObjHasKey(body, "Trajectory")) {
         JsonObject trajectory = body.get("Trajectory").getAsJsonObject();
+        String spacecraftFrame = trajectory.has("spacecraftFrame") && !trajectory.get("spacecraftFrame").isJsonNull()
+          ? trajectory.get("spacecraftFrame").getAsString() : null;
         toReturn.put(entry.getKey(), new Body(entry.getKey(),
           body.get("NaifID").getAsInt(),
           body.get("NaifFrame").getAsString(),
@@ -72,7 +74,9 @@ public class Bodies {
           getIfNonNull(trajectory, "calculateLST"),
           getIfNonNull(trajectory, "calculateBetaAngle"),
           getIfNonNull(trajectory, "calculateOrbitParameters"),
-          getIfNonNull(trajectory, "useDSK")));
+          getIfNonNull(trajectory, "useDSK"),
+          getIfNonNull(trajectory, "calculateAttitude"),
+          spacecraftFrame));
       }
       else{
         toReturn.put(entry.getKey(), new Body(entry.getKey(),

@@ -7,7 +7,7 @@ import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import examples.orbiter.Mission;
 import examples.orbiter.data.activities.DeleteData;
 import examples.orbiter.data.activities.PlaybackData;
-import examples.orbiter.geometry.resources.EclipseTypes;
+import gov.nasa.jpl.aerie.geometry.resources.EclipseTypes;
 import examples.orbiter.power.pel.*;
 
 import static gov.nasa.jpl.aerie.contrib.streamline.core.Resources.currentValue;

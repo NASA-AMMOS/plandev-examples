@@ -2,8 +2,6 @@ dependencies {
   implementation project(':libraries:power')
   implementation project(':libraries:data')
   implementation project(':libraries:geometry')
-  implementation project(':libraries:gnc')
-  implementation project(':libraries:telecom')
 
   // jplTime library used by geometry code
   implementation name: 'jplTime-2022-08'
