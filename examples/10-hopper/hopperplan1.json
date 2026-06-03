@@ -1,0 +1,88 @@
+{
+  "activities": [
+    {
+      "anchor_id": null,
+      "anchored_to_start": true,
+      "arguments": {
+        "bin": 0,
+        "dataRateBps": 5000000,
+        "durationSeconds": 300
+      },
+      "id": 1865,
+      "metadata": {},
+      "name": "PerformHop",
+      "start_offset": "4752:00:00",
+      "tags": [],
+      "type": "PerformHop"
+    },
+    {
+      "anchor_id": null,
+      "anchored_to_start": true,
+      "arguments": {
+        "bin": 0,
+        "dataRateBps": 5000000,
+        "durationSeconds": 300
+      },
+      "id": 1866,
+      "metadata": {},
+      "name": "PerformHop",
+      "start_offset": "4824:00:00",
+      "tags": [],
+      "type": "PerformHop"
+    },
+    {
+      "anchor_id": null,
+      "anchored_to_start": true,
+      "arguments": {
+        "bin": 0,
+        "dataRateBps": 5000000,
+        "durationSeconds": 300
+      },
+      "id": 1867,
+      "metadata": {},
+      "name": "PerformHop",
+      "start_offset": "4896:00:00",
+      "tags": [],
+      "type": "PerformHop"
+    },
+    {
+      "anchor_id": null,
+      "anchored_to_start": true,
+      "arguments": {
+        "bin": 0,
+        "dataRateBps": 5000000,
+        "durationSeconds": 300
+      },
+      "id": 1868,
+      "metadata": {},
+      "name": "PerformHop",
+      "start_offset": "4944:00:00",
+      "tags": [],
+      "type": "PerformHop"
+    }
+  ],
+  "duration": "6360:00:00",
+  "id": 9,
+  "model_id": 5,
+  "name": "hopper1",
+  "simulation_arguments": {
+    "powerConfig": {
+      "batteryConfig": {
+        "busVoltage": 28,
+        "initialSOC": 100,
+        "batteryCapacity": 10.7
+      },
+      "powerSourceConfig": {
+        "otherLosses": 1,
+        "arrayMechArea": 0.33,
+        "packingFactor": 0.9,
+        "cellEfficiency": 0.28,
+        "deploymentState": "DEPLOYED",
+        "conversionEfficiency": 0.9
+      }
+    }
+  },
+  "start_time": "2028-04-09T00:00:00+00:00",
+  "tags": [],
+  "version": "2"
+}
