@@ -60,7 +60,7 @@ public class SimplePEL {
   }
   
   public enum HopState {
-    OFF(0.0), ON(100.0);
+    OFF(80.0), ON(1000.0);
     private final double load;
     HopState(double load) { this.load = load; }
     public double getLoad() { return load; }
