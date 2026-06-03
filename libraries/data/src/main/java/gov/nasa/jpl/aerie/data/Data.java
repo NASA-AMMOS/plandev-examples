@@ -3,18 +3,14 @@ package gov.nasa.jpl.aerie.data;
 import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
 import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.LinearBoundaryConsistencySolver;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources;
 
 import java.util.*;
 
 import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.set;
 import static gov.nasa.jpl.aerie.contrib.streamline.core.Reactions.wheneverDynamicsChange;
 import static gov.nasa.jpl.aerie.contrib.streamline.core.Resources.*;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources.*;
 import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.*;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.min;
 import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.spawn;
 
 
@@ -26,8 +22,6 @@ import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.spawn;
  * registers resources for the bins.
  */
 public class Data {
-  public static LinearBoundaryConsistencySolver rateSolver = new LinearBoundaryConsistencySolver("DataModel Rate Solver");
-
   /**
    * The onboard storage device of the spacecraft, a parent of the bins, {@link #onboardBuckets}.
    */
@@ -107,37 +101,50 @@ public class Data {
       this.dataRate = polynomialResource(1.0);
     }
 
-    // Create resources to help determine when to stop PlaybackData activities: volumeRequestedToDownlink, durationRequestedForDownlink
-    var done = and(lessThanOrEquals(volumeRequestedToDownlink, 0),
-      lessThanOrEquals(durationRequestedToDownlink, 0));
-    Resource<Polynomial> downlinkRateLeft = choose(done, constant(0), this.dataRate);
-    ArrayList<Resource<Polynomial>> actualDownlinkRates = new ArrayList<>();
+    // Allocate the available downlink rate to bins in priority order, in a single
+    // pass on each input change.
+    Runnable computeDownlinkRates = () -> {
+      boolean done = currentValue(volumeRequestedToDownlink) <= 0 &&
+                     currentValue(durationRequestedToDownlink) <= 0;
+      double rateLeft = done ? 0.0 : currentValue(this.dataRate);
+
+      for (int i = 0; i < onboard.children.size(); ++i) {
+        Bucket scBin = onboard.children.get(i);
+        Bucket gBin = ground.children.get(i);
+
+        double availableVolume = currentValue(scBin.received) - currentValue(gBin.received);
+        boolean binIsEmpty = currentValue(scBin.volume) <= 0 || availableVolume <= 0 || done;
+
+        double binRate;
+        if (binIsEmpty) {
+          binRate = Math.max(0, Math.min(currentValue(scBin.actualRate), rateLeft));
+        } else {
+          binRate = rateLeft;
+        }
+
+        set((MutableResource<Polynomial>) gBin.desiredReceiveRate, Polynomial.polynomial(binRate));
+        rateLeft -= binRate;
+      }
+    };
+
+    wheneverDynamicsChange(this.dataRate, r -> computeDownlinkRates.run());
+    wheneverDynamicsChange(volumeRequestedToDownlink, r -> computeDownlinkRates.run());
+    wheneverDynamicsChange(durationRequestedToDownlink, r -> computeDownlinkRates.run());
     for (int i = 0; i < onboard.children.size(); ++i) {
       Bucket scBin = onboard.children.get(i);
       Bucket gBin = ground.children.get(i);
-      var availableVolumeToDownlink = subtract(scBin.received, gBin.received);
-      var isEmpty = or(lessThanOrEquals(scBin.volume, 0),
-        or(lessThanOrEquals(availableVolumeToDownlink, 0),
-          and(lessThanOrEquals(volumeRequestedToDownlink, 0),
-            lessThanOrEquals(durationRequestedToDownlink, 0))));
-      var actualDownlinkRate =
-        choose(isEmpty, max(constant(0), min(scBin.actualRate, downlinkRateLeft)),
-          downlinkRateLeft);
-      actualDownlinkRates.add(actualDownlinkRate);
-      downlinkRateLeft = PolynomialResources.subtract(downlinkRateLeft, actualDownlinkRate);
-      forward(eraseExpiry(actualDownlinkRate), (MutableResource<Polynomial>)gBin.desiredReceiveRate);
+      wheneverDynamicsChange(scBin.volume, r -> computeDownlinkRates.run());
+      wheneverDynamicsChange(scBin.received, r -> computeDownlinkRates.run());
+      wheneverDynamicsChange(scBin.actualRate, r -> computeDownlinkRates.run());
+      wheneverDynamicsChange(gBin.received, r -> computeDownlinkRates.run());
     }
+
     wheneverDynamicsChange(ground.actualRate, r -> {
       if (currentValue(volumeRequestedToDownlink) > 0)
         set(volumeRequestedToDownlink, Polynomial.polynomial(currentValue(volumeRequestedToDownlink), -data(r).extract()));
     });
-    spawn(() -> {
-      for (int i = 0; i < onboard.children.size(); ++i) {
-        Bucket scBin = onboard.children.get(i);
-        Bucket gBin = ground.children.get(i);
-        set((MutableResource<Polynomial>) gBin.desiredReceiveRate, actualDownlinkRates.get(i).getDynamics().getOrThrow().data());
-      }
-    });
+
+    spawn(computeDownlinkRates);
   }
 
   /**

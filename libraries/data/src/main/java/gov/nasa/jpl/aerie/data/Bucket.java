@@ -1,9 +1,10 @@
 package gov.nasa.jpl.aerie.data;
 
+import gov.nasa.jpl.aerie.contrib.serialization.mappers.BooleanValueMapper;
 import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
 import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.LinearBoundaryConsistencySolver;
+import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 
@@ -15,12 +16,8 @@ import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
 import static gov.nasa.jpl.aerie.contrib.streamline.core.Reactions.wheneverDynamicsChange;
 import static gov.nasa.jpl.aerie.contrib.streamline.core.monads.ResourceMonad.map;
 import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources.choose;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.LinearBoundaryConsistencySolver.Comparison.GreaterThanOrEquals;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.LinearBoundaryConsistencySolver.Comparison.LessThanOrEquals;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.LinearBoundaryConsistencySolver.LinearExpression.lx;
 import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial.polynomial;
 import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.*;
-import static gov.nasa.jpl.aerie.data.Data.rateSolver;
 
 /**
  * A container or category representing volume and constant & linear changes in the volume of something (e.g., data).
@@ -99,6 +96,11 @@ public class Bucket {
    */
   public Resource<Polynomial> removeRate;
 
+  /**
+   * Discrete signal that is {@code true} when {@link #volume} is at or below zero.
+   */
+  public Resource<Discrete<Boolean>> isEmpty;
+
   private static Resource<Polynomial> max_bound = constant(Double.MAX_VALUE);
 
   /**
@@ -126,23 +128,18 @@ public class Bucket {
     this.removed = polynomialResource(0.0);
     this.volume = polynomialResource(0.0);
     this.volume_ub = upperBound;
+    this.isEmpty = lessThanOrEquals(volume, 0);
 
     this.correctedVolume = null;
 
     this.children = children;
 
-    // The code below uses a built-in arc-consistency solver (LinearBoundaryConsistencySolver) and forward()
-    // in order to handle cyclic dependencies among parent and child Buckets.
-    // This is based on DataModel.java in the contrib module of Aerie.
-    LinearBoundaryConsistencySolver.LinearExpression sumExpr = null;
+    // Children's volume bounds cascade in priority order: child[i] gets
+    // child[i-1].volume_ub - child[i-1].volume, so higher-priority bins consume
+    // parent capacity first. Per-child rate is clamped via choose() on isEmpty/isFull.
     for (int i = 0; i < this.children.size(); ++i) {  // TODO -- what if a child has children?
       Bucket child = this.children.get(i);
 
-      // actualRates of the children are the output of the solver
-      var rate = rateSolver.variable("rate " + child.name, LinearBoundaryConsistencySolver.Domain::upperBound);
-      child.actualRate = rate.resource();
-
-      // define volume upper bounds
       if (!volume_ub.equals(max_bound)) {
         if (i == 0) {
           child.volume_ub = child.volume_ub.equals(max_bound) ? volume_ub : min(child.volume_ub, volume_ub);
@@ -152,50 +149,32 @@ public class Bucket {
         }
       }
 
-      // define volume as the integration of the actualRate, but bound by clamps
       child.clampedVolume = clamp(child.volume, constant(0), child.volume_ub);
-      child.correctedVolume = map(child.clampedVolume, child.actualRate, (v, r) -> r.integral(v.extract()));
-      // forward() handles cyclic dependencies by updating the volume repeatedly until it converges (right?)
-      forward(eraseExpiry(child.correctedVolume), (MutableResource<Polynomial>) child.volume);
 
-      // build up an expression for the solver that sums the children's rates
-      if (sumExpr == null) sumExpr = lx(rate);
-      else sumExpr = sumExpr.add(lx(rate));
-
-      // define the desired rate
       child.desiredRate = subtract(child.desiredReceiveRate, child.desiredRemoveRate);
-      // Can't get more than the desired rate unless the desired rate is negative and the bucket is empty
-      // solver constraint for the upper bound on the rate based on whether volume is zero:
-      //     actualRate <= isEmpty ? max(desiredRate, 0) : desiredRate
-      var isEmpty = lessThanOrEquals(child.volume, 0);
-      var rate_ub = choose(isEmpty, max(child.desiredRate, constant(0)), child.desiredRate);
-      rateSolver.declare(lx(rate), LessThanOrEquals, lx(rate_ub));
 
-      // Don't delete if there's nothing to delete, otherwise deleting is unlimited
-      // solver constraint for the lower bound on the rate based on whether volume is zero:
-      //     actualRate >= isEmpty ? 0 : -Double.MAX_VALUE
-      var rate_lb = choose(isEmpty, constant(0), constant(-Double.MAX_VALUE));
-      rateSolver.declare(lx(rate), GreaterThanOrEquals, lx(rate_lb));
+      // Clamp rate so an empty bin can only receive and a full bin can only remove.
+      var childIsEmpty = lessThanOrEquals(child.volume, 0);
+      var childIsFull = greaterThanOrEquals(child.volume, child.volume_ub);
+      child.actualRate = choose(childIsEmpty,
+          max(child.desiredRate, constant(0)),
+          choose(childIsFull,
+              min(child.desiredRate, constant(0)),
+              child.desiredRate));
+
+      child.correctedVolume = map(child.clampedVolume, child.actualRate, (v, r) -> r.integral(v.extract()));
+      forward(eraseExpiry(child.correctedVolume), (MutableResource<Polynomial>) child.volume);
 
       child.finishInit();
     }
 
-    // resources and solver constraints for parent Buckets
     if (!this.children.isEmpty()) {
-      // When full, we never write more than the upper bound will tolerate, in total
-      var totalVolume = sum(children.stream().map(b -> b.volume));
-      var isFull = greaterThanOrEquals(totalVolume, volume_ub);
-      var totalRate_ub = choose(isFull, differentiate(volume_ub), constant(Double.MAX_VALUE));
-      // solver constraint:  totalOfChildActualRates <= isFull ? differentiate(volume_ub) : Double.MAX_VALUE
-      rateSolver.declare(sumExpr, LessThanOrEquals, lx(totalRate_ub));
-
-      // resources as the sum of the children's
-      this.volume = totalVolume;
+      this.volume = sum(children.stream().map(b -> b.volume));
+      this.isEmpty = lessThanOrEquals(this.volume, 0);
       actualRate = sum(children.stream().map(b -> b.actualRate));
       desiredReceiveRate = sum(children.stream().map(b -> b.desiredReceiveRate));
       desiredRemoveRate = sum(children.stream().map(b -> b.desiredRemoveRate));
     }
-    // finish initialization of top-level parent after children
     if (!isChild) {
       finishInit();
     }
@@ -238,6 +217,7 @@ public class Bucket {
     registrar.real(name + ".receivedVolume", assumeLinear(received));
     registrar.real(name + ".removedVolume", assumeLinear(removed));
     registrar.real(name + ".volume", assumeLinear(volume));
+    registrar.discrete(name + ".isEmpty", isEmpty, new BooleanValueMapper());
     if (clampedVolume != null) registrar.real(name + ".clampedVolume", assumeLinear(clampedVolume));
     if (correctedVolume != null) registrar.real(name + ".correctedVolume", assumeLinear(correctedVolume));
     if (!volume_ub.equals(max_bound)) {
