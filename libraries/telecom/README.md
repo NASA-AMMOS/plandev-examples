@@ -40,6 +40,17 @@ Two tests upstream are functional (Friis bit-rate calculation, mapper serializat
 
 It's a starting point. The link-equation core, the DSN station table, and the frequency-band scaffolding are reasonable seeds for a real telecom library. The plan is to flesh it out (see [§5.2 / §6 P1 in the consolidation plan](../../ATTRIBUTION.md)) and then migrate the orbiter example off its stub onto this library once the gaps are closed.
 
+## Follow-up: real geometry integration
+
+The library defines its own [`GeometryModel`](src/main/java/gov/nasa/jpl/aerie/telecom/GeometryModel.java) interface (`isVisible`, `getDistanceBetween`, `getViewPeriods`), but ships **no implementation** — the upstream `aerie-simple-model-telecom` had a mocked `GeometryModelImpl` in a separate `geometry/` subproject that we deliberately skipped because [libraries/geometry/](../geometry/) already provides real SPICE-backed geometry from a different upstream.
+
+The gap that remains: **nothing currently bridges `libraries/geometry`'s SPICE outputs into telecom's `GeometryModel` interface.** Until that adapter exists, `TelecomModel.daemon()` will NPE on any non-null but actual deployment. Two follow-up tasks worth tracking:
+
+1. **Build a `SpiceBackedGeometryModel`** that implements telecom's `GeometryModel<String>` by delegating to `libraries/geometry`'s `GenericGeometryCalculator` / `SpiceDirectTimeDependentStateCalculator`. This is the "real" integration that closes the README's "geometry is mocked" caveat.
+2. **Make `TelecomModel` defensive against null geometry** — a tiny null guard in `daemon()` would let the library be instantiated for resource-registration-only use cases without crashing.
+
+The test ([src/test/java/.../TelecomModelTest.java](src/test/java/gov/nasa/jpl/aerie/telecom/TelecomModelTest.java)) uses a tiny inline `FixedDistanceGeometry` stub so the daemon's geometry lookups don't NPE — sufficient to pin the Friis arithmetic, insufficient to validate any visibility / view-period logic.
+
 ## Source
 
 Initially derived from [NASA-AMMOS/aerie-simple-model-telecom](https://github.com/NASA-AMMOS/aerie-simple-model-telecom) (originally a private POC; last actively maintained March 2024). See [ATTRIBUTION.md](../../ATTRIBUTION.md) at the repo root for the full directory-to-source mapping.

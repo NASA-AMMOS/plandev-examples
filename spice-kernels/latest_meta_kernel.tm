@@ -11,7 +11,7 @@
 
            \begindata
 
-           PATH_VALUES       = ( 'spice/kernels' )
+           PATH_VALUES       = ( 'spice-kernels' )
 
            PATH_SYMBOLS      = ( 'KERNELS' )
 

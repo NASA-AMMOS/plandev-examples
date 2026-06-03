@@ -3,7 +3,7 @@ package gov.nasa.jpl.aerie.geometry.spice;
 import java.nio.file.Path;
 
 public class SpiceConstants {
-  public static final Path VERSIONED_KERNELS_ROOT_DIRECTORY = Path.of(System.getenv().getOrDefault("SPICE_DIRECTORY", "spice/kernels"));
+  public static final Path VERSIONED_KERNELS_ROOT_DIRECTORY = Path.of(System.getenv().getOrDefault("SPICE_DIRECTORY", "spice-kernels"));
   public static final String NAIF_TLS_KERNEL_PATH = VERSIONED_KERNELS_ROOT_DIRECTORY.toString() + "/naif0012.tls";
   public static final String NAIF_BSP_KERNEL_PATH = VERSIONED_KERNELS_ROOT_DIRECTORY.toString() + "/de440s.bsp";
   public static final String NAIF_TPC_KERNEL_PATH = VERSIONED_KERNELS_ROOT_DIRECTORY.toString() + "/pck00011.tpc";

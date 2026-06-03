@@ -27,9 +27,9 @@ Migrated from [aerie-orbiter-model](https://github.com/NASA-AMMOS/aerie-orbiter-
 
 ## SPICE kernels
 
-This model requires SPICE kernels for orbital geometry calculations. The kernels are included in `spice/kernels/` (tracked via Git LFS, ~238 MB total).
+This model requires SPICE kernels for orbital geometry calculations. The kernels live at the top-level shared directory [`spice-kernels/`](../../spice-kernels/) (tracked via Git LFS, ~238 MB total) — shared with `libraries/geometry`'s tests.
 
-The kernel directory is configurable via the `SPICE_DIRECTORY` environment variable (defaults to `spice/kernels`).
+The kernel directory is configurable via the `SPICE_DIRECTORY` environment variable (defaults to `spice-kernels`, resolved relative to the JVM's working directory).
 
 ### Running locally
 
@@ -42,10 +42,12 @@ When uploading the JAR to Aerie, the SPICE kernels must be volume-mounted into t
 ```yaml
 # In your docker-compose.yml, add to the aerie_merlin service:
 volumes:
-  - ./examples/04-orbiter/spice/kernels:/spice/kernels
+  - ./spice-kernels:/spice/kernels
+environment:
+  SPICE_DIRECTORY: /spice/kernels
 ```
 
-Or set the `SPICE_DIRECTORY` environment variable to point to wherever you mount them.
+Or point `SPICE_DIRECTORY` at wherever you mount the kernels.
 
 ## Scheduling goals
 

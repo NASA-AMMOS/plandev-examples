@@ -16,3 +16,9 @@ dependencies {
   // Gson for JSON config parsing
   implementation 'com.google.code.gson:gson:2.10.1'
 }
+
+test {
+  // Tests need the shared SPICE kernel set at the repo root. Tests run with cwd=libraries/geometry,
+  // so the relative-path fallback in SpiceConstants doesn't resolve.
+  environment("SPICE_DIRECTORY", "${rootDir}/spice-kernels")
+}
