@@ -1,3 +1,6 @@
+plugins {
+  id("co.uzzu.dotenv.gradle") version "4.0.0"
+}
 ext.aerieVersion = '4.1.1'
 
 allprojects {
@@ -8,8 +11,8 @@ allprojects {
       name = "GitHubPackages"
       url = "https://maven.pkg.github.com/nasa-ammos/aerie"
       credentials {
-        username = System.getenv('GITHUB_USER') ?: 'anonymous'
-        password = System.getenv('GITHUB_TOKEN') ?: ''
+        username = env.GITHUB_USER.value
+        password = env.GITHUB_TOKEN.value
       }
     }
   }
