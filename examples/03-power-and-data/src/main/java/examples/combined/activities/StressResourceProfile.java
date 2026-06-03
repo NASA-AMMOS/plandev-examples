@@ -8,8 +8,6 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
-
 /**
  * Test activity that produces a high number of resource segments by toggling
  * the camera state and pumping data into bin 0 in a tight loop. Use this to
@@ -43,8 +41,9 @@ public class StressResourceProfile {
     for (int i = 0; i < numberOfPoints; i++) {
       final var nextState = (i % 2 == 0) ? CameraState.ON : CameraState.OFF;
       DiscreteEffects.set(model.pel.cameraState, nextState);
+      // receive(rate, step) blocks for `step`, advancing time on its own; no
+      // separate delay needed (a trailing delay would double each iteration).
       binToChange.receive(dataRateBps, step);
-      delay(step);
     }
 
     DiscreteEffects.set(model.pel.cameraState, CameraState.OFF);

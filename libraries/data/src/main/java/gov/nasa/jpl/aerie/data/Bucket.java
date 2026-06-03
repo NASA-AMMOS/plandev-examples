@@ -230,9 +230,16 @@ public class Bucket {
 
 
   /**
-   * Add an incoming rate of volume over a duration to the existing {@link #desiredReceiveRate}.
-   * @param rate desired rate of volume to receive
-   * @param duration the duration over which the volume is coming in
+   * Receive volume at the given rate for the given duration: raises the desired receive rate by
+   * {@code rate}, waits {@code duration}, then lowers it back down.
+   *
+   * <p><strong>This call blocks, advancing simulation time by {@code duration}.</strong> It both
+   * produces the data and consumes the time, so callers should not add their own {@code delay} for
+   * the same window (doing so doubles the activity's length). To raise the rate without waiting,
+   * use {@link #addReceiveRate(double)} instead.
+   *
+   * @param rate desired rate of volume to receive (volume units per second)
+   * @param duration the duration over which the volume is received; simulation time advances by this amount
    */
   public void receive(double rate, Duration duration) {
     if (duration.isEqualTo(Duration.ZERO)) return; // TODO -- warning?
@@ -248,9 +255,14 @@ public class Bucket {
   }
 
   /**
-   * Add a rate to remove/delete volume over a duration to the existing {@link #desiredRemoveRate}.
-   * @param rate
-   * @param duration
+   * Remove/delete volume at the given rate for the given duration: raises the desired remove rate by
+   * {@code rate}, waits {@code duration}, then lowers it back down.
+   *
+   * <p><strong>This call blocks, advancing simulation time by {@code duration}.</strong> To raise the
+   * remove rate without waiting, use {@link #addRemoveRate(double)} instead.
+   *
+   * @param rate desired rate of volume to remove (volume units per second)
+   * @param duration the duration over which the volume is removed; simulation time advances by this amount
    */
   public void remove(double rate, Duration duration) {
     if (duration.isEqualTo(Duration.ZERO)) return; // TODO -- warning?
@@ -267,7 +279,13 @@ public class Bucket {
 
   /**
    * Add an incoming rate of volume to the existing {@link #desiredReceiveRate}.
-   * @param rate
+   *
+   * <p>Non-blocking: sets the rate and returns immediately. The rate persists until something
+   * changes it again, so the caller is responsible for later lowering it (e.g. via
+   * {@link #addReceiveRate(double)} with a negative rate). Contrast with the blocking
+   * {@link #receive(double, Duration)}, which turns the rate off for you after a duration.
+   *
+   * @param rate the rate of volume to add to the desired receive rate (volume units per second)
    */
   public void addReceiveRate(double rate) {
     if (rate == 0) return;
@@ -280,7 +298,12 @@ public class Bucket {
   }
   /**
    * Add a rate to remove/delete volume to the existing {@link #desiredRemoveRate}.
-   * @param rate
+   *
+   * <p>Non-blocking: sets the rate and returns immediately. The rate persists until something
+   * changes it again. Contrast with the blocking {@link #remove(double, Duration)}, which turns the
+   * rate off for you after a duration.
+   *
+   * @param rate the rate of volume to add to the desired remove rate (volume units per second)
    */
   public void addRemoveRate(double rate) {
     if (rate == 0) return;
@@ -293,8 +316,16 @@ public class Bucket {
   }
 
   /**
-   * Attempt to receive a specified amount immediately (over 1 second).
-   * @param amount
+   * Receive a fixed {@code amount} of volume, delivered over a 1-second window.
+   *
+   * <p><strong>This is not instantaneous: it blocks for 1 second of simulation time.</strong> The
+   * amount is first clamped to the current headroom ({@code volume_ub - volume}), then passed as the
+   * <em>rate</em> to {@link #receive(double, Duration)} with a 1-second duration. Because delivered
+   * volume is {@code rate * duration}, the stored volume equals {@code amount} only because the
+   * window is exactly one second -- during that second the receive rate spikes to {@code amount} per
+   * second, which is visible to rate-derived resources (e.g. downlink allocation).
+   *
+   * @param amount the volume to receive, clamped to available headroom
    */
   public void receive(double amount) {
     if (amount == 0) return;
@@ -308,8 +339,15 @@ public class Bucket {
   }
 
   /**
-   * Attempt to remove a specified amount immediately (over 1 second).
-   * @param amount
+   * Remove a fixed {@code amount} of volume, taken over a 1-second window.
+   *
+   * <p><strong>This is not instantaneous: it blocks for 1 second of simulation time.</strong> The
+   * amount is first clamped to the currently available volume, then passed as the <em>rate</em> to
+   * {@link #remove(double, Duration)} with a 1-second duration. The removed volume equals
+   * {@code amount} only because the window is exactly one second; during that second the remove rate
+   * spikes to {@code amount} per second. See {@link #receive(double)} for the same caveats.
+   *
+   * @param amount the volume to remove, clamped to the available volume
    */
   public void remove(double amount) {
     if (amount == 0) return;

@@ -8,8 +8,6 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
-
 /**
  * Perform a hop which activates hop mode and draws power for the duration of the hop.
  */
@@ -30,13 +28,13 @@ public class PerformHop {
     // Turn on hop mode (power impact)
     DiscreteEffects.set(model.pel.hopState, HopState.ON);
 
-    // Generate data into onboard storage
+    // Generate data into onboard storage. receive(rate, dur) is a blocking
+    // call: it turns the receive rate on, waits for the full duration while
+    // data accumulates, then turns the rate back off. So this both produces the
+    // data and provides the hop delay -- no extra delay needed.
     var binToChange = model.data.getOnboardBin(bin);
     var dur = Duration.of(durationSeconds, Duration.SECONDS);
     binToChange.receive(dataRateBps, dur);
-
-    // Wait for hop duration
-    delay(dur);
 
     // Turn off hop mode
     DiscreteEffects.set(model.pel.hopState, HopState.OFF);

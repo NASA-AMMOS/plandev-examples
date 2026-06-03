@@ -10,8 +10,6 @@ import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 
 import java.util.Optional;
 
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
-
 /**
  * An activity that takes a picture, affecting both power and data subsystems.
  *
@@ -35,13 +33,13 @@ public class TakePicture {
     // Turn on camera (power impact)
     DiscreteEffects.set(model.pel.cameraState, CameraState.ON);
 
-    // Generate science data into onboard storage
+    // Generate science data into onboard storage. receive(rate, dur) is a
+    // blocking call: it turns the receive rate on, waits for the full duration
+    // while data accumulates, then turns the rate back off. So this both
+    // produces the data and provides the imaging delay -- no extra delay needed.
     var binToChange = model.data.getOnboardBin(bin);
     var dur = Duration.of(durationSeconds, Duration.SECONDS);
     binToChange.receive(dataRateBps, dur);
-
-    // Wait for imaging duration
-    delay(dur);
 
     // Turn off camera
     DiscreteEffects.set(model.pel.cameraState, CameraState.OFF);
