@@ -28,6 +28,14 @@ public class DeleteData {
   @Export.Parameter
   public int bin = 0;
 
+  public DeleteData() {}
+
+  public DeleteData(double volume, boolean limitToSentData, int bin) {
+    this.volume = volume;
+    this.limitToSentData = limitToSentData;
+    this.bin = bin;
+  }
+
   @ActivityType.EffectModel
   public void run(DataMissionModel model) {
     Data data = model.getData();

@@ -26,6 +26,12 @@ public class PlaybackData {
   @Export.Parameter
   public Optional<Duration> duration = Optional.empty();
 
+  public PlaybackData() {}
+
+  public PlaybackData(Duration duration) {
+    this.duration = Optional.of(duration);
+  }
+
   @ActivityType.EffectModel
   public void run(DataMissionModel model) {
     var ground = model.getData().ground;

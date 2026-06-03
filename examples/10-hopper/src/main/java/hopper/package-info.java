@@ -5,11 +5,17 @@
 
 @WithActivityType(PerformHop.class)
 @WithActivityType(TakePicture.class)
+@WithActivityType(Downlink.class)
+@WithActivityType(PlaybackData.class)
+@WithActivityType(DeleteData.class)
 
 package hopper;
 
 import hopper.activities.PerformHop;
 import hopper.activities.TakePicture;
+import hopper.activities.Downlink;
+import gov.nasa.jpl.aerie.data.activities.PlaybackData;
+import gov.nasa.jpl.aerie.data.activities.DeleteData;
 import gov.nasa.jpl.aerie.contrib.serialization.rulesets.BasicValueMappers;
 import gov.nasa.jpl.aerie.data.mappers.CommonValueMappers;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel;
