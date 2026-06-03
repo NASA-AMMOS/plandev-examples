@@ -67,7 +67,7 @@ public class SimplePEL {
   }
 
   public enum TelecomState {
-    OFF(0.0), ON(100.0);
+    OFF(0.0), ON(25.0);
     private final double load;
     TelecomState(double load) { this.load = load; }
     public double getLoad() { return load; }
