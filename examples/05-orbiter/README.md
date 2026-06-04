@@ -95,15 +95,15 @@ Sample plans, views, and external events are in `demo/`:
 
 ```bash
 # Mission model JAR
-./gradlew :examples:04-orbiter:build
+./gradlew :examples:05-orbiter:build
 
 # Scheduling procedure JARs (requires compiling first)
-./gradlew :examples:04-orbiter:scheduling:compileJava
-./gradlew :examples:04-orbiter:scheduling:buildAllSchedulingProcedureJars
+./gradlew :examples:05-orbiter:scheduling:compileJava
+./gradlew :examples:05-orbiter:scheduling:buildAllSchedulingProcedureJars
 
 # Constraint procedure JARs
-./gradlew :examples:04-orbiter:constraints:compileJava
-./gradlew :examples:04-orbiter:constraints:buildAllConstraintProcedureJars
+./gradlew :examples:05-orbiter:constraints:compileJava
+./gradlew :examples:05-orbiter:constraints:buildAllConstraintProcedureJars
 ```
 
 The fat JAR at `build/libs/orbiter-example.jar` can be uploaded to Aerie (after mounting SPICE kernels). Scheduling and constraint procedure JARs are built individually in their respective `build/libs/` directories.

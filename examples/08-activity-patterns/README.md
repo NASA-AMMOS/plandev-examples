@@ -23,5 +23,5 @@ A cookbook of common activity patterns in Aerie. Each activity demonstrates a sp
 ## Build
 
 ```bash
-./gradlew :examples:07-activity-patterns:build
+./gradlew :examples:08-activity-patterns:build
 ```

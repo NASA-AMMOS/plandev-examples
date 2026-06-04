@@ -39,7 +39,7 @@ To point the model at the right spacecraft, set its NAIF ID — for the orbiter 
 
 Kernels are not bundled inside this library. The library reads them from `SPICE_DIRECTORY` (env var) or falls back to a relative `spice-kernels` path — see [SpiceConstants.java](src/main/java/gov/nasa/jpl/aerie/geometry/spice/SpiceConstants.java).
 
-In this repo, the canonical kernel location is the top-level shared [spice-kernels/](../../spice-kernels/) directory (an 8-kernel set covering MRO, Mars, Earth, and Sun, ~238 MB total). When deploying to Aerie, mount that directory into the merlin/scheduler workers and set `SPICE_DIRECTORY` accordingly — see [examples/04-orbiter/README.md](../../examples/04-orbiter/README.md).
+In this repo, the canonical kernel location is the top-level shared [spice-kernels/](../../spice-kernels/) directory (an 8-kernel set covering MRO, Mars, Earth, and Sun, ~238 MB total). When deploying to Aerie, mount that directory into the merlin/scheduler workers and set `SPICE_DIRECTORY` accordingly — see [examples/05-orbiter/README.md](../../examples/05-orbiter/README.md).
 
 ## Usage
 
@@ -62,7 +62,7 @@ GenericGeometryCalculator geometryCalculator = new GenericGeometryCalculator(
 geometryResources.registerStates(registrar);
 ```
 
-See [examples/04-orbiter/src/main/java/examples/orbiter/Mission.java](../../examples/04-orbiter/src/main/java/examples/orbiter/Mission.java) for a complete wiring.
+See [examples/05-orbiter/src/main/java/examples/orbiter/Mission.java](../../examples/05-orbiter/src/main/java/examples/orbiter/Mission.java) for a complete wiring.
 
 ## Test coverage
 
@@ -77,7 +77,7 @@ See [examples/04-orbiter/src/main/java/examples/orbiter/Mission.java](../../exam
 2. `GenericGeometryCalculatorTest` — Aerie resource values match direct SPICE calls within ±0.01°.
 3. `GeometrySpawnersTest` — spawner activities (`AddSpacecraftEclipses`, `AddOccultations`, `AddPeriapsis`, `AddApoapsis`) produce the right event counts over a sim window.
 
-To port these, build a minimal test mission model inside `libraries/geometry/src/test/java/.../testmodel/`: a `TestMission`, `TestConfiguration`, `package-info.java` with `@MissionModel` + the ~10 activity registrations, plus `default_geometry_config.json` copied from [examples/04-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json](../../examples/04-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json) into `src/test/resources/`. Enable `testAnnotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${aerieVersion}"` in `build.gradle`. ~150–200 lines of scaffold; same shape as the upstream tests.
+To port these, build a minimal test mission model inside `libraries/geometry/src/test/java/.../testmodel/`: a `TestMission`, `TestConfiguration`, `package-info.java` with `@MissionModel` + the ~10 activity registrations, plus `default_geometry_config.json` copied from [examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json](../../examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json) into `src/test/resources/`. Enable `testAnnotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${aerieVersion}"` in `build.gradle`. ~150–200 lines of scaffold; same shape as the upstream tests.
 
 ## Building
 

@@ -17,12 +17,12 @@ All upstream repos referenced are at https://github.com/NASA-AMMOS.
 | [`examples/01-power-only/`](examples/01-power-only/) | [`aerie-simple-model-power`](https://github.com/NASA-AMMOS/aerie-simple-model-power) (`demosystem` package) | Demo activities (`TurnOnCamera`, `Drive`, etc.) that exercise [`libraries/power/`](libraries/power/). |
 | [`examples/02-data-only/`](examples/02-data-only/) | [`aerie-simple-model-data`](https://github.com/NASA-AMMOS/aerie-simple-model-data) (`demo/` subdir) | Demo wrapper around [`libraries/data/`](libraries/data/). |
 | [`examples/03-power-and-data/`](examples/03-power-and-data/) | *(new in this repo)* | Composition example showing how to integrate two library subsystems. No upstream source. |
-| [`examples/04-orbiter/`](examples/04-orbiter/) | [`aerie-orbiter-model`](https://github.com/NASA-AMMOS/aerie-orbiter-model) | Mars-orbiter-style mission model. Refactored to import [`libraries/{power,data,geometry,telecom}`](libraries/) rather than duplicate the subsystem code. |
-| [`examples/05-constraints-and-scheduling/`](examples/05-constraints-and-scheduling/) | *(new in this repo)* | — |
-| [`examples/06-advanced-resources/`](examples/06-advanced-resources/) | *(new in this repo)* | Streamline resource-type cheatsheet. |
-| [`examples/07-activity-patterns/`](examples/07-activity-patterns/) | *(new in this repo)* | Common activity idioms (state machines, loops, conditional logic, …). |
-| [`examples/08-testing-patterns/`](examples/08-testing-patterns/) | *(new in this repo)* | Model testing recipes. |
-| [`examples/09-external-events/`](examples/09-external-events/) | *(new in this repo)* | External events + scheduling integration. |
+| [`examples/05-orbiter/`](examples/05-orbiter/) | [`aerie-orbiter-model`](https://github.com/NASA-AMMOS/aerie-orbiter-model) | Mars-orbiter-style mission model. Refactored to import [`libraries/{power,data,geometry,telecom}`](libraries/) rather than duplicate the subsystem code. |
+| [`examples/06-constraints-and-scheduling/`](examples/06-constraints-and-scheduling/) | *(new in this repo)* | — |
+| [`examples/07-advanced-resources/`](examples/07-advanced-resources/) | *(new in this repo)* | Streamline resource-type cheatsheet. |
+| [`examples/08-activity-patterns/`](examples/08-activity-patterns/) | *(new in this repo)* | Common activity idioms (state machines, loops, conditional logic, …). |
+| [`examples/09-testing-patterns/`](examples/09-testing-patterns/) | *(new in this repo)* | Model testing recipes. |
+| [`examples/10-external-events/`](examples/10-external-events/) | *(new in this repo)* | External events + scheduling integration. |
 | [`examples/actions/`](examples/actions/) | [`aerie-action-examples`](https://github.com/NASA-AMMOS/aerie-action-examples) | Node.js Aerie actions (`ascii-art`, `basic`, `fresh`). |
 | [`examples/ui-plugins/`](examples/ui-plugins/) | [`aerie-ui-plugin-examples`](https://github.com/NASA-AMMOS/aerie-ui-plugin-examples) | Aerie UI plugin examples (TypeScript). |
 | [`archive/lander/`](archive/lander/) | [`aerie-lander`](https://github.com/NASA-AMMOS/aerie-lander) | Unmaintained legacy InSight-derived reference. Kept for posterity only. |

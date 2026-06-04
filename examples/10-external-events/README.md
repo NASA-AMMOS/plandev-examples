@@ -46,5 +46,5 @@ plan.commit();
 ./gradlew :examples:03-power-and-data:build
 
 # Build the procedure JAR
-./gradlew :examples:09-external-events:build
+./gradlew :examples:10-external-events:build
 ```

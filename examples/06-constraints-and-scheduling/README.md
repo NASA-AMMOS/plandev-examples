@@ -38,5 +38,5 @@ Demonstrates Aerie's procedural constraints and scheduling goals — the feature
 ./gradlew :examples:03-power-and-data:build
 
 # Build the procedure JAR
-./gradlew :examples:05-constraints-and-scheduling:build
+./gradlew :examples:06-constraints-and-scheduling:build
 ```

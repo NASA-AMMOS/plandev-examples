@@ -30,5 +30,5 @@ Demonstrates all 5 Streamline resource types beyond the basic Discrete resources
 ## Build
 
 ```bash
-./gradlew :examples:06-advanced-resources:build
+./gradlew :examples:07-advanced-resources:build
 ```

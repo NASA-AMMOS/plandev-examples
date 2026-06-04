@@ -4,7 +4,7 @@ Reusable telecom (downlink) subsystem code for Aerie mission models — Friis li
 
 ## Status: experimental, not currently consumed
 
-This library is **scaffold, not a finished subsystem**. None of the examples in this repo currently depend on it. The orbiter example ([examples/04-orbiter/](../../examples/04-orbiter/)) has its own minimal in-tree `TelecomModel` stub (one resource: `downlinkBitRate`) rather than using this library — see the comment in [examples/04-orbiter/src/main/java/examples/orbiter/telecom/TelecomModel.java](../../examples/04-orbiter/src/main/java/examples/orbiter/telecom/TelecomModel.java).
+This library is **scaffold, not a finished subsystem**. None of the examples in this repo currently depend on it. The orbiter example ([examples/05-orbiter/](../../examples/05-orbiter/)) has its own minimal in-tree `TelecomModel` stub (one resource: `downlinkBitRate`) rather than using this library — see the comment in [examples/05-orbiter/src/main/java/examples/orbiter/telecom/TelecomModel.java](../../examples/05-orbiter/src/main/java/examples/orbiter/telecom/TelecomModel.java).
 
 What works:
 

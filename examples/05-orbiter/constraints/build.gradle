@@ -13,7 +13,7 @@ java {
 
 dependencies {
   // Pull in mission model classes (for activity/resource type references)
-  implementation project(':examples:04-orbiter')
+  implementation project(':examples:05-orbiter')
 
   // Procedural constraint libraries
   annotationProcessor "gov.nasa.ammos.aerie.procedural:processor:${aerieVersion}"

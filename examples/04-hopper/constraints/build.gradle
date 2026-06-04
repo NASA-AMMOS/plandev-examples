@@ -13,7 +13,7 @@ java {
 
 dependencies {
   // pull in any helper / utils from the mission model
-  implementation project(':examples:10-hopper')
+  implementation project(':examples:04-hopper')
 
   // procedural scheduling libraries
   annotationProcessor "gov.nasa.ammos.aerie.procedural:processor:" + project.aerieVersion

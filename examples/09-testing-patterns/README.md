@@ -26,11 +26,11 @@ Tests use Aerie's stateless simulation utilities to run a simulation in-process 
 ## Running tests
 
 ```bash
-./gradlew :examples:08-testing-patterns:test
+./gradlew :examples:09-testing-patterns:test
 ```
 
 ## Build
 
 ```bash
-./gradlew :examples:08-testing-patterns:build
+./gradlew :examples:09-testing-patterns:build
 ```

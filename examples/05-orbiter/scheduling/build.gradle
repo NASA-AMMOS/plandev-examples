@@ -13,7 +13,7 @@ java {
 
 dependencies {
   // Pull in mission model classes (for RadarDataCollectionMode, geometry types, etc.)
-  implementation project(':examples:04-orbiter')
+  implementation project(':examples:05-orbiter')
 
   // Procedural scheduling libraries
   annotationProcessor "gov.nasa.ammos.aerie.procedural:processor:${aerieVersion}"
@@ -39,7 +39,7 @@ dependencies {
 sourceSets {
   main {
     java {
-      srcDir project(':examples:04-orbiter').file('src/main/java')
+      srcDir project(':examples:05-orbiter').file('src/main/java')
     }
   }
 }

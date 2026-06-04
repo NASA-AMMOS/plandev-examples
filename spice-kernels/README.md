@@ -1,6 +1,6 @@
 # SPICE Kernels
 
-Shared SPICE kernel set used by both [libraries/geometry](../libraries/geometry/) (for tests) and [examples/04-orbiter](../examples/04-orbiter/) (for simulation).
+Shared SPICE kernel set used by both [libraries/geometry](../libraries/geometry/) (for tests) and [examples/05-orbiter](../examples/05-orbiter/) (for simulation).
 
 All kernel files are tracked via Git LFS (`*.bsp`, `*.tls`, `*.tpc`, `*.tf`, `*.ck`, `*.bpc`). Cloning the repo without LFS will leave you with pointer files — install Git LFS and `git lfs pull` to get the actual binaries.
 
@@ -22,7 +22,7 @@ All kernel files are tracked via Git LFS (`*.bsp`, `*.tls`, `*.tpc`, `*.tf`, `*.
 
 ## Usage
 
-Code that needs these kernels reads `SPICE_DIRECTORY` (env var) or falls back to `spice-kernels` relative to the JVM working directory. Both [libraries/geometry/.../SpiceConstants.java](../libraries/geometry/src/main/java/gov/nasa/jpl/aerie/geometry/spice/SpiceConstants.java) and [examples/04-orbiter/.../Mission.java](../examples/04-orbiter/src/main/java/examples/orbiter/Mission.java) follow this convention.
+Code that needs these kernels reads `SPICE_DIRECTORY` (env var) or falls back to `spice-kernels` relative to the JVM working directory. Both [libraries/geometry/.../SpiceConstants.java](../libraries/geometry/src/main/java/gov/nasa/jpl/aerie/geometry/spice/SpiceConstants.java) and [examples/05-orbiter/.../Mission.java](../examples/05-orbiter/src/main/java/examples/orbiter/Mission.java) follow this convention.
 
 ## Copy-pasting libraries/geometry/ out of this repo
 
