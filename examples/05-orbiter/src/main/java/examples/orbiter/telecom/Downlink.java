@@ -47,16 +47,16 @@ public class Downlink {
     spawn(model, new PlaybackData(duration));
 
     // Set spacecraft hardware associated with downlink
-    // Check current state for VISAR
+    // Capture current radar/imager state to restore after downlink
     set(model.pel.x_twtaState, X_TWTA_State.ON);
     set(model.pel.ka_twtaState, Ka_TWTA_State.ON);
     set(model.pel.ssrState, SSR_State.DOWNLINK);
     set(model.pel.idstState, IDST_State.DOWNLINK);
     set(model.pel.propState, Prop_State.DOWNLINK);
-    Radar_State prevVisarState = currentValue(model.pel.radarState);
+    Radar_State prevRadarState = currentValue(model.pel.radarState);
     set(model.pel.radarState, Radar_State.DOWNLINK);
     set(model.pel.radar_heatersState, Radar_Heaters_State.OFF);
-    Imager_State prevVemState = currentValue(model.pel.imagerState);
+    Imager_State prevImagerState = currentValue(model.pel.imagerState);
     set(model.pel.imager_heatersState, Imager_Heaters_State.DOWNLINK);
     set(model.pel.heatersState, Heaters_State.DOWNLINK);
     set(model.pel.harnesslossState, HarnessLoss_State.DOWNLINK);
@@ -75,7 +75,7 @@ public class Downlink {
     set(model.pel.idstState, IDST_State.ON);
     set(model.pel.propState, Prop_State.OFF);
 
-    if(prevVisarState.equals(Radar_State.OFF)) {
+    if(prevRadarState.equals(Radar_State.OFF)) {
       set(model.pel.radarState, Radar_State.OFF);
       set(model.pel.radar_heatersState, Radar_Heaters_State.SCIENCE_SURVIVAL);
       set(model.pel.heatersState, Heaters_State.SURVIVAL);
@@ -87,7 +87,7 @@ public class Downlink {
       set(model.pel.harnesslossState, HarnessLoss_State.RADAR_ON);
     }
 
-    if(prevVemState.equals(Imager_State.OFF)) {
+    if(prevImagerState.equals(Imager_State.OFF)) {
       set(model.pel.imagerState, Imager_State.OFF);
       set(model.pel.imager_heatersState, Imager_Heaters_State.SCIENCE_SURVIVAL);
     } else {

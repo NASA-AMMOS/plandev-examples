@@ -57,10 +57,10 @@ public record ScheduleRadarObservations() implements Goal {
         windows.add(Pair.of(start, end));
       }
 
-      // For the first 11 orbits, schedule VISAR observations with the following per-orbit conops
-      // 50% DEM, 37.5% MedRes and 12.5% HiRes
-      // Turn VISAR On 3 hours before first observation (warmup time assumption)
-      long VISAR_ORBIT_SEGMENTS = 8;
+      // For the first 11 orbits, schedule radar observations with the following per-orbit conops
+      // 50% low-res, 37.5% med-res and 12.5% hi-res
+      // Turn the radar on 3 hours before first observation (warmup time assumption)
+      long RADAR_ORBIT_SEGMENTS = 8;
 
       Map<String, SerializedValue> actArgs = Map.of();
 
@@ -70,7 +70,7 @@ public record ScheduleRadarObservations() implements Goal {
         if (SciOrDl < NUM_SCI_ORBITS) {
           Instant orbStartTime = windows.get(i).getLeft();
 
-          // Turn on VISAR and warmup before first observation
+          // Turn on the radar and warmup before first observation
           if (firstObs) {
             firstObs = false;
             Instant warmupTime = instantMinusDuration(orbStartTime, RADAR_WARMUP_DUR);
@@ -88,9 +88,9 @@ public record ScheduleRadarObservations() implements Goal {
           // No need to do anything if this is the last orbit
           if (i+1 != windows.size()) {
             Instant nexOrbStartTime = windows.get(i+1).getLeft();
-            Duration orbSegDur = durationBetweenInstants(orbStartTime, nexOrbStartTime).dividedBy(VISAR_ORBIT_SEGMENTS);
+            Duration orbSegDur = durationBetweenInstants(orbStartTime, nexOrbStartTime).dividedBy(RADAR_ORBIT_SEGMENTS);
             Instant nextRadarActTime = orbStartTime;
-            // The first four segments should have DEM on
+            // The first four segments use low-res
             actArgs = Map.of(
               "mode", new EnumValueMapper<>(RadarDataCollectionMode.class).serializeValue(RadarDataCollectionMode.LOW_RES));
             var newDirective = new NewDirective(
@@ -123,7 +123,7 @@ public record ScheduleRadarObservations() implements Goal {
             plan.create(newDirective);
             nextRadarActTime = instantPlusDuration(nextRadarActTime, orbSegDur.times(1));
 
-            // Turn VISAR off if this is the last science orbit
+            // Turn the radar off if this is the last science orbit
             if (SciOrDl + 1 == NUM_SCI_ORBITS) {
               actArgs = Map.of(
                 "mode", new EnumValueMapper<>(RadarDataCollectionMode.class).serializeValue(RadarDataCollectionMode.OFF));

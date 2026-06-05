@@ -96,7 +96,7 @@ public final class Mission implements DataMissionModel {
   // Telecom Member Variables
   public final TelecomModel telecomModel;
 
-  // VISAR Member Variables
+  // Radar Member Variables
   public final RadarModel radarModel;
 
   public Mission(final gov.nasa.jpl.aerie.merlin.framework.Registrar registrar, final Instant planStart, final Configuration config) {

@@ -19,7 +19,7 @@ public record Configuration(Integer spiceSpacecraftId,
 
   public static final Integer DEFAULT_SPICE_SCID = -74; // MRO
 
-  // Orbiter (VERITAS/MRO-class) power configuration: a ~16 m^2 array and 94.5 Ah battery.
+  // Representative Mars-orbiter power configuration: a ~16 m^2 array and 94.5 Ah battery.
   // Uses the library power types but keeps orbiter-specific values rather than the library's
   // generic defaults (5 m^2 / 100 Ah). Order: deploymentState, mechArea, packingFactor,
   // cellEfficiency, conversionEfficiency, otherLosses; battery: capacity(Ah), busVoltage(V), SOC(%).
