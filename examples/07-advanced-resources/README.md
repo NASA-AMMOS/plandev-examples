@@ -1,4 +1,4 @@
-# 06 - Advanced Resources
+# 07 - Advanced Resources
 
 Demonstrates all 5 Streamline resource types beyond the basic Discrete resources covered in the tutorial.
 

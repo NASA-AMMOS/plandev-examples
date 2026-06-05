@@ -1,6 +1,8 @@
-# 04 - Orbiter (MRO)
+# 05 - Orbiter (MRO)
 
 A full-featured Mars orbiter mission model based on the Mars Reconnaissance Orbiter (MRO). This is the most complex example in the repository, integrating five subsystems with SPICE-based orbital geometry.
+
+It **composes the shared building blocks** — `libraries/power`, `libraries/data`, and `libraries/geometry` — and layers mission-specific complexity on top: an equipment-level PEL, the VISAR radar, and SPICE-driven orbital-event activities. Where [04-hopper](../04-hopper/) shows the clean composition *pattern* at small scale, the orbiter shows what a realistic model looks like at full scale.
 
 Migrated from [aerie-orbiter-model](https://github.com/NASA-AMMOS/aerie-orbiter-model).
 
@@ -11,7 +13,7 @@ Migrated from [aerie-orbiter-model](https://github.com/NASA-AMMOS/aerie-orbiter-
 | **Geometry** | SPICE-based orbital mechanics — spacecraft position, eclipse detection, occultation events, orbit parameters |
 | **Power** | 14-component PEL (ADCS, CDH, EPS, heaters, imager, radar, SSR, telecom TWTAs, etc.), solar array with geometry-driven power generation, dual CBE/MEV battery tracking |
 | **Data** | Multi-bin onboard storage with priority-based playback, configurable bin count (default 20) |
-| **Telecom** | Friis link equation model with configurable transmitter/receiver/frequency parameters |
+| **Telecom** | A simple downlink-rate stub: a `Downlink` activity sets the playback data rate from a parameter. The full Friis link-budget model lives in `libraries/telecom` (experimental — not yet wired in here). |
 | **Radar** | VISAR radar instrument with observation modes and data collection |
 
 ## Activities

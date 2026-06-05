@@ -1,4 +1,4 @@
-# 05 - Constraints and Scheduling
+# 06 - Constraints and Scheduling
 
 Demonstrates Aerie's procedural constraints and scheduling goals — the features that separate Aerie from a simple simulator.
 

@@ -1,4 +1,4 @@
-# 09 - External Events
+# 10 - External Events
 
 Demonstrates how to schedule activities in response to external events — a key real-world workflow where missions schedule operations around DSN ground contacts, orbital events, or other externally-defined windows.
 

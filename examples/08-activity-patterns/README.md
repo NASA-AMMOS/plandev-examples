@@ -1,4 +1,4 @@
-# 07 - Activity Patterns
+# 08 - Activity Patterns
 
 A cookbook of common activity patterns in Aerie. Each activity demonstrates a specific idiom that modelers frequently need.
 

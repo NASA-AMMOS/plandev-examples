@@ -1,4 +1,4 @@
-# 08 - Testing Patterns
+# 09 - Testing Patterns
 
 Demonstrates how to write automated tests for Aerie mission models using stateless simulation.
 
