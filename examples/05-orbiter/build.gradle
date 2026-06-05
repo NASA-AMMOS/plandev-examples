@@ -21,6 +21,7 @@ dependencies {
 sourceSets {
   main {
     java {
+      srcDir project(':libraries:power').file('src/main/java')
       srcDir project(':libraries:data').file('src/main/java')
     }
   }

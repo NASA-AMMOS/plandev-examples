@@ -35,11 +35,15 @@ dependencies {
   implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 
-// Include mission model source so annotation processor can see types
+// Include mission model source so annotation processor can see types. The library sources are
+// also needed so the processor can generate mappers for the library @AutoValueMapper.Record
+// types (e.g. PowerModelSimConfig) referenced by the mission model's Configuration.
 sourceSets {
   main {
     java {
       srcDir project(':examples:05-orbiter').file('src/main/java')
+      srcDir project(':libraries:power').file('src/main/java')
+      srcDir project(':libraries:data').file('src/main/java')
     }
   }
 }

@@ -16,8 +16,8 @@ import gov.nasa.jpl.aerie.data.DataMissionModel;
 import gov.nasa.jpl.aerie.geometry.resources.GenericGeometryResources;
 import gov.nasa.jpl.aerie.geometry.spiceinterpolation.GenericGeometryCalculator;
 import gov.nasa.jpl.aerie.geometry.spiceinterpolation.SpiceResourcePopulater;
-import examples.orbiter.power.BatteryModel;
-import examples.orbiter.power.GenericSolarArray;
+import gov.nasa.jpl.aerie.power.BatteryModel;
+import gov.nasa.jpl.aerie.power.GenericSolarArray;
 import examples.orbiter.power.pel.PELModel;
 import examples.orbiter.spice.Spice;
 import examples.orbiter.telecom.TelecomModel;
@@ -136,10 +136,10 @@ public final class Mission implements DataMissionModel {
     // Initialize Power Model
     //
     this.pel = new PELModel();
-    this.array = new GenericSolarArray(config.powerConfig().solarArrayConfig(),
+    this.array = new GenericSolarArray(config.powerConfig().powerSourceConfig(),
       SpacecraftSunRange_AU, offSunAngle, this.geometryResources.FractionOfSunNotInEclipse);
-    this.cbebattery = new BatteryModel("cbe", config.powerConfig().batteryConfig(), pel.cbeTotalLoad, array.powerProduction);
-    this.mevbattery = new BatteryModel("mev", config.powerConfig().batteryConfig(), pel.mevTotalLoad, array.powerProduction);
+    this.cbebattery = new BatteryModel("cbe", config.powerConfig().batteryConfig(), pel.cbeTotalLoad, array.getPowerProduction());
+    this.mevbattery = new BatteryModel("mev", config.powerConfig().batteryConfig(), pel.mevTotalLoad, array.getPowerProduction());
 
     pel.registerStates(this.errorRegistrar);
     array.registerStates(this.errorRegistrar);
