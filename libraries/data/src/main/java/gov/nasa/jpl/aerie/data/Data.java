@@ -1,9 +1,13 @@
 package gov.nasa.jpl.aerie.data;
 
+import gov.nasa.jpl.aerie.contrib.serialization.mappers.IntegerValueMapper;
 import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
 import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
+import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.monads.DiscreteResourceMonad;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
+import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources;
 
 import java.util.*;
 
@@ -157,6 +161,88 @@ public class Data {
     registrar.real("volumeRequestedToDownlink", assumeLinear(volumeRequestedToDownlink));
     registrar.real("durationRequestedToDownlink", assumeLinear(durationRequestedToDownlink));
     registrar.real("playbackDataRate", assumeLinear(dataRate));
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Optional downlink-priority telemetry.
+  //
+  // These register *derived* resources that expose the prioritized-downlink behaviour for the UI;
+  // they do not change simulation behaviour. registerStates() does NOT call them by default — a
+  // mission model opts in via registerDownlinkTelemetry(...) (or the individual methods below).
+  // They double as a compact worked example of derived resources (reduce over a list of resources).
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+   * Register all optional downlink-priority telemetry: {@code onboard.highestDownlinkPriority},
+   * {@code ground.currentDownlinkPriority}, and grouped onboard bin volumes
+   * ({@code onboard.binGroup_SS_EE.volume}, summed in blocks of {@code groupSize}).
+   *
+   * @param groupSize adjacent bins to sum per grouped-volume resource (e.g. 5). Useful when there
+   *                  are many bins and one timeline line per bin would be cluttered.
+   */
+  public void registerDownlinkTelemetry(Registrar registrar, int groupSize) {
+    registerHighestDownlinkPriority(registrar);
+    registerCurrentDownlinkPriority(registrar);
+    registerGroupedBinVolumes(registrar, groupSize);
+  }
+
+  /**
+   * Register {@code onboard.highestDownlinkPriority}: the index of the highest-priority
+   * (lowest-index) non-empty onboard bin — the bin that will downlink next, or -1 if all empty.
+   */
+  public void registerHighestDownlinkPriority(Registrar registrar) {
+    List<Resource<Discrete<Map.Entry<Boolean, Integer>>>> indexed = new ArrayList<>();
+    // Build from lowest priority (highest index) to highest (index 0) so that, folding left, a
+    // lower-index (higher-priority) non-empty bin overrides a higher-index one.
+    for (int i = onboard.children.size() - 1; i >= 0; --i) {
+      final int idx = i;
+      indexed.add(DiscreteResourceMonad.map(onboard.children.get(i).isEmpty, empty -> Map.entry(empty, idx)));
+    }
+    Resource<Discrete<Map.Entry<Boolean, Integer>>> highest = DiscreteResourceMonad.reduce(
+        indexed, Map.entry(false, -1),
+        (first, second) -> !second.getKey() ? second : first);
+    registrar.discrete(onboard.name + ".highestDownlinkPriority",
+        DiscreteResourceMonad.map(highest, Map.Entry::getValue), new IntegerValueMapper());
+  }
+
+  /**
+   * Register {@code ground.currentDownlinkPriority}: the index of the bin currently being
+   * downlinked (its ground bin has a positive receive rate), or -1 if none.
+   */
+  public void registerCurrentDownlinkPriority(Registrar registrar) {
+    List<Resource<Discrete<Map.Entry<Boolean, Integer>>>> indexed = new ArrayList<>();
+    for (int i = ground.children.size() - 1; i >= 0; --i) {
+      final int idx = i;
+      Resource<Discrete<Boolean>> isDownlinking = PolynomialResources.greaterThan(ground.children.get(i).actualRate, 0);
+      indexed.add(DiscreteResourceMonad.map(isDownlinking, dl -> Map.entry(dl, idx)));
+    }
+    Resource<Discrete<Map.Entry<Boolean, Integer>>> current = DiscreteResourceMonad.reduce(
+        indexed, Map.entry(false, -1),
+        (first, second) -> second.getKey() ? second : first);
+    registrar.discrete(ground.name + ".currentDownlinkPriority",
+        DiscreteResourceMonad.map(current, Map.Entry::getValue), new IntegerValueMapper());
+  }
+
+  /**
+   * Register grouped onboard bin-volume resources for a compact UI view: bins are summed in blocks
+   * of {@code groupSize} and registered as {@code onboard.binGroup_SS_EE.volume}.
+   */
+  public void registerGroupedBinVolumes(Registrar registrar, int groupSize) {
+    int numBins = onboardBuckets.size();
+    int numGroups = (numBins + groupSize - 1) / groupSize; // ceiling division
+    for (int g = 0; g < numGroups; g++) {
+      int startBin = g * groupSize;
+      int endBin = Math.min(startBin + groupSize, numBins);
+      List<Resource<Polynomial>> groupVolumes = new ArrayList<>();
+      for (int i = startBin; i < endBin; i++) {
+        groupVolumes.add(onboardBuckets.get(i).volume);
+      }
+      Resource<Polynomial> groupTotal = groupVolumes.stream()
+          .reduce(PolynomialResources::add)
+          .orElse(polynomialResource(0.0));
+      String groupName = String.format("%s.binGroup_%02d_%02d.volume", onboard.name, startBin, endBin - 1);
+      registrar.real(groupName, assumeLinear(groupTotal));
+    }
   }
 
 }
