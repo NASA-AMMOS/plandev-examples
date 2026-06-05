@@ -2,7 +2,9 @@
  * Mars-orbiter-style mission model — integrates power, data, geometry, telecom, and radar subsystems.
  *
  * Initially derived from NASA-AMMOS/aerie-orbiter-model. Subsequently refactored to import
- * {@code libraries/{power,data,geometry,telecom}} rather than carry its own copies of that code.
+ * {@code libraries/{power,data,geometry}} rather than carry its own copies of that code. The
+ * radar model, equipment-level PEL, and SPICE-driven event activities are orbiter-specific
+ * additions on top. (Telecom is still a local stub — {@code libraries/telecom} is experimental.)
  * See ATTRIBUTION.md at the repo root for the full directory-to-source mapping.
  */
 @MissionModel(model = Mission.class)
@@ -25,10 +27,9 @@
 @WithActivityType(AddSpacecraftEclipses.class)
 // Power
 @WithActivityType(SolarArrayDeployment.class)
-// Data
+// Data (from libraries/data)
 @MissionModel.WithActivityType(ChangeDataGenerationRate.class)
 @MissionModel.WithActivityType(DeleteData.class)
-@MissionModel.WithActivityType(FilterData.class)
 @MissionModel.WithActivityType(GenerateData.class)
 @MissionModel.WithActivityType(PlaybackData.class)
 @MissionModel.WithActivityType(ReprioritizeData.class)
@@ -48,8 +49,8 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithConfiguration;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithMappers;
-import examples.orbiter.data.activities.*;
-import examples.orbiter.data.mappers.CommonValueMappers;
+import gov.nasa.jpl.aerie.data.activities.*;
+import gov.nasa.jpl.aerie.data.mappers.CommonValueMappers;
 import examples.orbiter.geometry.activities.atomic.*;
 import examples.orbiter.geometry.activities.spawner.AddApoapsis;
 import examples.orbiter.geometry.activities.spawner.AddOccultations;

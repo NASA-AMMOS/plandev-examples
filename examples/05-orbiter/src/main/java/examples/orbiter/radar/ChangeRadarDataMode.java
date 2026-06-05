@@ -4,7 +4,7 @@ import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import examples.orbiter.Mission;
-import examples.orbiter.data.activities.ChangeDataGenerationRate;
+import gov.nasa.jpl.aerie.data.activities.ChangeDataGenerationRate;
 
 import static examples.orbiter.generated.ActivityActions.call;
 
@@ -22,10 +22,13 @@ public class ChangeRadarDataMode {
 
   @ActivityType.EffectModel
   public void run(Mission model) {
-    // Spawn an activity to playback -- put it in a random bin
+    // Start generating data into a random onboard bin at the mode's rate.
     double newRate = mode.getDataRate();
-    int bin = model.getRandom().nextInt(model.data.unfilteredOnboardBuckets.size());
-    call(model, new ChangeDataGenerationRate(bin, newRate*1e6));
+    int bin = model.getRandom().nextInt(model.data.onboardBuckets.size());
+    var change = new ChangeDataGenerationRate();
+    change.bin = bin;
+    change.rate = newRate * 1e6;
+    call(model, change);
 
     DiscreteEffects.set(model.radarModel.RadarDataMode, mode);
   }

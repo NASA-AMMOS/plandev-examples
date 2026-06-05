@@ -82,29 +82,6 @@
           {
             "autoAdjustHeight": false,
             "expanded": true,
-            "height": 40,
-            "horizontalGuides": [],
-            "id": 2,
-            "layers": [
-              {
-                "activityColor": "#2288ff",
-                "chartType": "activity",
-                "filter": {
-                  "activity": {
-                    "types": ["FilterData"]
-                  }
-                },
-                "id": 2,
-                "name": "",
-                "yAxisId": null
-              }
-            ],
-            "name": "Filter Data",
-            "yAxes": []
-          },
-          {
-            "autoAdjustHeight": false,
-            "expanded": true,
             "height": 80,
             "horizontalGuides": [],
             "id": 3,
@@ -136,8 +113,7 @@
     "visualization3d": {
       "activityColorMap": {
         "ChangeRadarDataMode": "#ff8800",
-        "Downlink": "#00cc66",
-        "FilterData": "#2288ff"
+        "Downlink": "#00cc66"
       },
       "bodies": [
         {

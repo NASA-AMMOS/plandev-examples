@@ -16,12 +16,12 @@ Migrated from [aerie-orbiter-model](https://github.com/NASA-AMMOS/aerie-orbiter-
 
 ## Activities
 
-22 activity types across all subsystems:
+21 activity types across all subsystems:
 
 - **Geometry spawners**: `AddApoapsis`, `AddPeriapsis`, `AddOccultations`, `AddSpacecraftEclipses` — spawn event markers from SPICE data
 - **Geometry events**: `Apoapsis`, `Periapsis`, `EnterOccultation`, `ExitOccultation`, `SpacecraftEnterEclipse`, `SpacecraftExitEclipse`
 - **Power**: `SolarArrayDeployment`
-- **Data**: `GenerateData`, `PlaybackData`, `DeleteData`, `FilterData`, `ChangeDataGenerationRate`, `ReprioritizeData`
+- **Data** (from `libraries/data`): `GenerateData`, `PlaybackData`, `DeleteData`, `ChangeDataGenerationRate`, `ReprioritizeData`
 - **Telecom**: `Downlink`
 - **Radar**: `Radar_On`, `Radar_Off`, `ChangeRadarDataMode`, `TakeRadarObservation`
 
@@ -51,7 +51,7 @@ Or point `SPICE_DIRECTORY` at wherever you mount the kernels.
 
 ## Scheduling goals
 
-10 procedural scheduling goals (in `scheduling/`), built as individual ShadowJar artifacts:
+9 procedural scheduling goals (in `scheduling/`), built as individual ShadowJar artifacts:
 
 | Goal | What it does |
 |---|---|
@@ -61,19 +61,17 @@ Or point `SPICE_DIRECTORY` at wherever you mount the kernels.
 | `AddSpacecraftEclipses` | SPICE: Computes eclipse windows, creates EnterEclipse/ExitEclipse activities |
 | `ScheduleRadarObservations` | Schedules VISAR observations across science orbits (50% DEM, 37.5% MedRes, 12.5% HiRes) |
 | `ScheduleDownlinks` | Schedules Downlink activities on designated downlink orbits, outside occultation windows |
-| `ScheduleFilterData` | Anchors FilterData activities 1 minute after each ChangeRadarDataMode |
 | `SchedulePriorityActivities` | Priority-based scheduling with 7 activity priorities and altitude thresholds |
 | `SchedulePriorityActivitiesAfterDownlink` | Battery-aware priority scheduling with two modes: RE-SIMULATION and VIRTUAL BATTERY |
 | `ScheduleRadarWithStopConditions` | Simulate-then-verify with rollback: pre/post-checks on battery, data volume, and downlink conflicts |
 
 ## Constraint procedures
 
-7 procedural constraints (in `constraints/`):
+6 procedural constraints (in `constraints/`):
 
 | Constraint | What it checks |
 |---|---|
 | `MinBatterySOC` | Battery SOC must stay above a configurable minimum |
-| `MaxUnfilteredData` | Unfiltered data volume must not exceed capacity |
 | `NoDeleteWhileWriting` | DeleteData and GenerateData/ChangeRadarDataMode must not overlap |
 | `DownlinkMinDuration` | Downlink activities must meet a minimum duration |
 | `NoDownlinkDuringOccultations` | No Downlink activities during occultation windows |

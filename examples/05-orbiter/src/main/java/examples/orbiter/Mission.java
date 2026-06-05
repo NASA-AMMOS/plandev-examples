@@ -11,8 +11,8 @@ import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources
 import gov.nasa.jpl.aerie.geometry.globals.AbsoluteClock;
 import gov.nasa.jpl.aerie.geometry.globals.Window;
 import gov.nasa.jpl.time.Duration;
-import examples.orbiter.data.Data;
-import examples.orbiter.data.DataMissionModel;
+import gov.nasa.jpl.aerie.data.Data;
+import gov.nasa.jpl.aerie.data.DataMissionModel;
 import gov.nasa.jpl.aerie.geometry.resources.GenericGeometryResources;
 import gov.nasa.jpl.aerie.geometry.spiceinterpolation.GenericGeometryCalculator;
 import gov.nasa.jpl.aerie.geometry.spiceinterpolation.SpiceResourcePopulater;
@@ -49,8 +49,8 @@ import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomi
 public final class Mission implements DataMissionModel {
 
   /**
-   * Seeded random number generator to determine how much of the unfiltered data goes into each filtered bin.
-   * Is static so that different instances on the same plan behave differently, but in a deterministic way.
+   * Seeded random number generator used by the radar activities to pick which onboard data bin
+   * to write into. Static so behaviour is deterministic across instances on the same plan.
    */
   public static final Random seededRandom = new Random(100);
 
@@ -158,6 +158,9 @@ public final class Mission implements DataMissionModel {
 
     this.data = new Data(Optional.of(asPolynomial(dataRate)), config.dataConfig().binCount(), asPolynomial(maxVolune));
     data.registerStates(errorRegistrar);
+    // Optional downlink-priority telemetry (highest/current downlink priority + grouped bin
+    // volumes in blocks of 5 — useful with the default 20 bins). Behaviour-neutral UI insight.
+    data.registerDownlinkTelemetry(errorRegistrar, 5);
 
     //
     // Initialize Telecom Model
@@ -176,7 +179,7 @@ public final class Mission implements DataMissionModel {
     return data;
   }
 
-  @Override
+  /** Not part of the library DataMissionModel interface — used by the radar activities. */
   public Random getRandom() {return seededRandom;}
 
 }

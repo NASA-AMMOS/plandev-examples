@@ -5,8 +5,8 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Validation;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import examples.orbiter.Mission;
-import examples.orbiter.data.activities.DeleteData;
-import examples.orbiter.data.activities.PlaybackData;
+import gov.nasa.jpl.aerie.data.activities.DeleteData;
+import gov.nasa.jpl.aerie.data.activities.PlaybackData;
 import gov.nasa.jpl.aerie.geometry.resources.EclipseTypes;
 import examples.orbiter.power.pel.*;
 
@@ -64,7 +64,7 @@ public class Downlink {
     delay(duration);
 
     // Spawn an activity to delete data
-    for(int i = 0; i < model.data.filteredOnboard.children.size(); ++i){
+    for(int i = 0; i < model.data.onboard.children.size(); ++i){
       spawn(model, new DeleteData(Double.MAX_VALUE, true, i));
     }
 

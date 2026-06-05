@@ -8,7 +8,7 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.WithDefaults;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import examples.orbiter.Mission;
-import examples.orbiter.data.Data;
+import gov.nasa.jpl.aerie.data.Data;
 import examples.orbiter.power.pel.Radar_State;
 
 import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.set;
@@ -81,9 +81,9 @@ public class TakeRadarObservation {
     // Spawn an activity to playback
     // spawn(model, new ChangeDataGenerationRate(0, newRate*1e6)); // Conversion
     // from Mbps -> bps
-    // @todo Temporary injection of Data Model Code - remove
+    // Write radar data into the chosen onboard bin for the observation duration.
     Data data = model.getData();
-    var binToChange = data.getFilteredBin(bin);
+    var binToChange = data.getOnboardBin(bin);
 
     if (newRate > 0) {
       set((MutableResource<Polynomial>) binToChange.desiredReceiveRate, polynomial(newRate * 1e6));
@@ -92,7 +92,6 @@ public class TakeRadarObservation {
       set((MutableResource<Polynomial>) binToChange.desiredReceiveRate, polynomial(0));
       set((MutableResource<Polynomial>) binToChange.desiredRemoveRate, polynomial(-newRate * 1e6));
     }
-    // @todo End of Temporary code
 
     DiscreteEffects.set(model.radarModel.RadarDataMode, mode);
 
