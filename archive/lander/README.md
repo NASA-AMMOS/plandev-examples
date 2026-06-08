@@ -4,7 +4,7 @@
 
 Migrated from [aerie-lander](https://github.com/NASA-AMMOS/aerie-lander).
 
-A mission model of a lander-type mission (inspired by InSight) developed for the Aerie planning and simulation environment. This is a very complex Aerie mission model with 104 activity types across 10 subsystems.
+A mission model of a lander-type mission (inspired by InSight) developed for the Aerie planning and simulation environment. This is a very complex Aerie mission model with 104 activity types across 11 subsystems.
 
 ## Subsystems
 

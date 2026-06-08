@@ -52,7 +52,7 @@ Two independent cross-checks confirm correctness:
 ## Regenerate
 
 Requires `spiceypy` + `numpy` and the shared kernels in
-[`spice-kernels/`](../../../../spice-kernels/) (`de440s.bsp`, `pck00011.tpc`,
+[`spice-kernels/`](../../../spice-kernels/) (`de440s.bsp`, `pck00011.tpc`,
 `naif0012.tls` — already in the repo; `git lfs pull` if you only have pointers).
 
 ```bash
