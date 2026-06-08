@@ -4,7 +4,7 @@ AMMOS AMPCS-style command and telemetry dictionaries for the orbiter example mis
 
 ## Files
 
-- [command_dictionary.xml](command_dictionary.xml) — 21 FSW commands across power, radar, telecom, data management, and bus subsystems.
+- [command_dictionary.xml](command_dictionary.xml) — 20 FSW commands across power, radar, telecom, data management, and bus subsystems.
 - [channel_dictionary.xml](channel_dictionary.xml) — 50+ channels covering PEL component states, dual-battery (CBE/MEV) telemetry, solar array, geometry, data buckets, telecom, and radar. (AMPCS convention: filename is `channel_dictionary.xml` but the root XML element is `<telemetry_dictionary>`.)
 
 ## Mapping to the model
@@ -19,7 +19,6 @@ Commands and channels are derived from the orbiter mission model in [../src/main
 | `DATA_GEN_SET_RATE` | `ChangeDataGenerationRate` activity |
 | `DATA_PLAYBACK` | `PlaybackData` activity |
 | `DATA_DELETE` | `DeleteData` activity |
-| `DATA_FILTER` | `FilterData` activity |
 | `PWR_DEPLOY_SOLAR_ARRAY` | `SolarArrayDeployment` activity |
 | `PWR_*_STATE` channels | `PELModel` component enums |
 | `BAT_{CBE,MEV}_*` channels | `BatteryModel` resources |
@@ -42,7 +41,7 @@ Both files round-trip cleanly through the canonical Aerie parser, [`@nasa-jpl/ae
 ```js
 import { parse, parseChannelDictionary } from '@nasa-jpl/aerie-ampcs';
 const cmd = parse(fs.readFileSync('command_dictionary.xml','utf8'));
-// → 21 fswCommands, 4 enums
+// → 20 fswCommands, 4 enums
 const tlm = parseChannelDictionary(fs.readFileSync('channel_dictionary.xml','utf8'));
-// → 54 telemetries
+// → 53 telemetries
 ```

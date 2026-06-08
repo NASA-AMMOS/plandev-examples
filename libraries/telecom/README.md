@@ -9,7 +9,7 @@ This library is **scaffold, not a finished subsystem**. None of the examples in 
 What works:
 
 - Friis link-equation arithmetic over configurable transmitter / receiver / frequency parameters
-- 6 DSN ground stations (DSS-14, 24, 25, 26, 34, 43, 54, etc.) and 7 frequency bands
+- 6 DSN ground stations (Canberra, Madrid, and Goldstone, each at 70 m and 34 m) and 7 frequency bands
 - Per-link bit-rate resources
 - `DownlinkActivity` sets the resulting bit rate for a duration
 
@@ -38,7 +38,7 @@ Two tests upstream are functional (Friis bit-rate calculation, mapper serializat
 
 ## Why keep it then?
 
-It's a starting point. The link-equation core, the DSN station table, and the frequency-band scaffolding are reasonable seeds for a real telecom library. The plan is to flesh it out (see [§5.2 / §6 P1 in the consolidation plan](../../ATTRIBUTION.md)) and then migrate the orbiter example off its stub onto this library once the gaps are closed.
+It's a starting point. The link-equation core, the DSN station table, and the frequency-band scaffolding are reasonable seeds for a real telecom library. The plan is to flesh it out and then migrate the orbiter example off its stub onto this library once the gaps are closed.
 
 ## Follow-up: real geometry integration
 

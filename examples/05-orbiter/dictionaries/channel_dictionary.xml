@@ -440,18 +440,9 @@
         <ops_category>DATA</ops_category>
       </categories>
     </telemetry>
-    <telemetry abbreviation="DAT-0003" channel_derivation="None" name="DAT_UNFILTERED_VOL" type="float" source="flight" byte_length="8">
+    <telemetry abbreviation="DAT-0003" channel_derivation="None" name="DAT_ONBOARD_VOL" type="float" source="flight" byte_length="8">
       <measurement_id>5003</measurement_id>
-      <description>Total volume in the unfiltered onboard bucket</description>
-      <raw_units>bits</raw_units>
-      <categories>
-        <module>data</module>
-        <ops_category>DATA</ops_category>
-      </categories>
-    </telemetry>
-    <telemetry abbreviation="DAT-0004" channel_derivation="None" name="DAT_FILTERED_VOL" type="float" source="flight" byte_length="8">
-      <measurement_id>5004</measurement_id>
-      <description>Total volume in the filtered onboard bucket</description>
+      <description>Total volume in the onboard bucket</description>
       <raw_units>bits</raw_units>
       <categories>
         <module>data</module>

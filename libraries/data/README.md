@@ -11,7 +11,7 @@ Reusable data management subsystem model for Aerie mission models. Migrated from
 - **Data deletion** with optional constraint to only delete already-downlinked data
 - **Data reprioritization** between bins
 
-The model uses Aerie's `LinearBoundaryConsistencySolver` to handle the cyclic dependencies between parent and child buckets when enforcing volume upper bounds.
+Downlink rate is allocated across bins in priority order (the highest-priority non-empty bin first) on each relevant input change, and each bucket enforces its volume upper bound via cascading child bounds.
 
 ## Package
 
@@ -24,6 +24,7 @@ The model uses Aerie's `LinearBoundaryConsistencySolver` to handle the cyclic de
 - `DataMissionModel` - Interface that mission models implement to expose the `Data` object to activities.
 - Activities: `ChangeDataGenerationRate`, `DeleteData`, `GenerateData`, `PlaybackData`, `ReprioritizeData`
 - Mappers: `CommonValueMappers` (Optional, Instant support), `InstantValueMapper`
+- Optional downlink telemetry (opt-in; call after `registerStates`): `registerDownlinkTelemetry(registrar, groupSize)` registers behaviour-neutral derived resources for the UI — `onboard.highestDownlinkPriority` (the next bin to downlink), `ground.currentDownlinkPriority` (the bin currently draining), and grouped bin volumes (`onboard.binGroup_SS_EE.volume`, summed in blocks of `groupSize`). The three are also exposed individually as `registerHighestDownlinkPriority`, `registerCurrentDownlinkPriority`, and `registerGroupedBinVolumes`.
 
 ## Usage
 
