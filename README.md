@@ -190,4 +190,4 @@ Each example and building block has its own README. When adding new content:
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+Licensed under the MIT License — see [LICENSE](LICENSE).
