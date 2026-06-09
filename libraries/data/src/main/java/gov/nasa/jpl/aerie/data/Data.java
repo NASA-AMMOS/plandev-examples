@@ -158,9 +158,9 @@ public class Data {
   public void registerStates(Registrar registrar) {
     onboard.registerStates(registrar);
     ground.registerStates(registrar);
-    registrar.real("volumeRequestedToDownlink", assumeLinear(volumeRequestedToDownlink));
-    registrar.real("durationRequestedToDownlink", assumeLinear(durationRequestedToDownlink));
-    registrar.real("playbackDataRate", assumeLinear(dataRate));
+    registrar.real("volumeRequestedToDownlink", assumeLinear(volumeRequestedToDownlink), "bit");
+    registrar.real("durationRequestedToDownlink", assumeLinear(durationRequestedToDownlink), "s");
+    registrar.real("playbackDataRate", assumeLinear(dataRate), "bit/s");
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -241,7 +241,7 @@ public class Data {
           .reduce(PolynomialResources::add)
           .orElse(polynomialResource(0.0));
       String groupName = String.format("%s.binGroup_%02d_%02d.volume", onboard.name, startBin, endBin - 1);
-      registrar.real(groupName, assumeLinear(groupTotal));
+      registrar.real(groupName, assumeLinear(groupTotal), "bit");
     }
   }
 

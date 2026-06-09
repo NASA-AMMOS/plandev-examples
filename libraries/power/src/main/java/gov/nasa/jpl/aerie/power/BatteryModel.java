@@ -148,17 +148,17 @@ public class BatteryModel {
      */
     public void registerStates(Registrar registrar) {
         registrar.real(name + "battery.batteryCurrent",
-                ResourceMonad.map(this.batteryCurrent, p -> Linear.linear( p.extract(), p.getCoefficient(1) )));
+                ResourceMonad.map(this.batteryCurrent, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "A");
         registrar.real(name + "battery.batteryCurrentUnclamped",
-                ResourceMonad.map(this.batteryCurrentUnclamped, p -> Linear.linear( p.extract(), p.getCoefficient(1) )));
+                ResourceMonad.map(this.batteryCurrentUnclamped, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "A");
         registrar.discrete(name + "battery.batteryFull", batteryFull, new BooleanValueMapper());
         registrar.discrete(name + "battery.batteryEmpty", batteryEmpty, new BooleanValueMapper());
         registrar.real(name + "battery.batterySOC",
-                ResourceMonad.map(this.batterySOC, p -> Linear.linear( p.extract(), p.getCoefficient(1) )));
+                ResourceMonad.map(this.batterySOC, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "%");
         registrar.real(name + "battery.batteryCharge",
-                ResourceMonad.map(this.batteryCharge, p -> Linear.linear( p.extract(), p.getCoefficient(1) )));
+                ResourceMonad.map(this.batteryCharge, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "Ah");
         registrar.real(name + "battery.batteryChargeSec",
-                ResourceMonad.map(this.batteryChargeSec, p -> Linear.linear( p.extract(), p.getCoefficient(1) )));
+                ResourceMonad.map(this.batteryChargeSec, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "A-s");
     }
 
 }

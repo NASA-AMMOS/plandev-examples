@@ -35,6 +35,6 @@ public class RtgPowerProduction extends PowerSource {
     @Override
     public void registerStates(Registrar registrar) {
         registrar.real("rtg.powerProduction",
-                ResourceMonad.map(this.powerProduction, p -> Linear.linear( p.extract(), p.getCoefficient(1) )));
+                ResourceMonad.map(this.powerProduction, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "W");
     }
 }

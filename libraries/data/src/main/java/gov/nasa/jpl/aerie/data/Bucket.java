@@ -208,20 +208,20 @@ public class Bucket {
    * @param registrar
    */
   public void registerStates(Registrar registrar) {
-    registrar.real(name + ".desiredReceiveRate", assumeLinear(desiredReceiveRate));
-    registrar.real(name + ".desiredRemoveRate", assumeLinear(desiredRemoveRate));
-    registrar.real(name + ".desiredRate", assumeLinear(desiredRate));
-    registrar.real(name + ".actualRate", assumeLinear(actualRate));
-    registrar.real(name + ".desiredReceivedVolume", assumeLinear(desiredReceived));
-    registrar.real(name + ".desiredRemovedVolume", assumeLinear(desiredRemoved));
-    registrar.real(name + ".receivedVolume", assumeLinear(received));
-    registrar.real(name + ".removedVolume", assumeLinear(removed));
-    registrar.real(name + ".volume", assumeLinear(volume));
+    registrar.real(name + ".desiredReceiveRate", assumeLinear(desiredReceiveRate), "bit/s");
+    registrar.real(name + ".desiredRemoveRate", assumeLinear(desiredRemoveRate), "bit/s");
+    registrar.real(name + ".desiredRate", assumeLinear(desiredRate), "bit/s");
+    registrar.real(name + ".actualRate", assumeLinear(actualRate), "bit/s");
+    registrar.real(name + ".desiredReceivedVolume", assumeLinear(desiredReceived), "bit");
+    registrar.real(name + ".desiredRemovedVolume", assumeLinear(desiredRemoved), "bit");
+    registrar.real(name + ".receivedVolume", assumeLinear(received), "bit");
+    registrar.real(name + ".removedVolume", assumeLinear(removed), "bit");
+    registrar.real(name + ".volume", assumeLinear(volume), "bit");
     registrar.discrete(name + ".isEmpty", isEmpty, new BooleanValueMapper());
-    if (clampedVolume != null) registrar.real(name + ".clampedVolume", assumeLinear(clampedVolume));
-    if (correctedVolume != null) registrar.real(name + ".correctedVolume", assumeLinear(correctedVolume));
+    if (clampedVolume != null) registrar.real(name + ".clampedVolume", assumeLinear(clampedVolume), "bit");
+    if (correctedVolume != null) registrar.real(name + ".correctedVolume", assumeLinear(correctedVolume), "bit");
     if (!volume_ub.equals(max_bound)) {
-      registrar.real(name + ".maxVolume", assumeLinear(volume_ub));
+      registrar.real(name + ".maxVolume", assumeLinear(volume_ub), "bit");
     }
     for (Bucket child : this.children) {
       child.registerStates(registrar);

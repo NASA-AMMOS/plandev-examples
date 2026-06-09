@@ -88,8 +88,8 @@ public class GenericSolarArray extends PowerSource {
     @Override
     public void registerStates(Registrar registrar) {
         registrar.real("array.powerProduction",
-                ResourceMonad.map(this.powerProduction, p -> Linear.linear( p.extract(), p.getCoefficient(1) )));
-        registrar.discrete("spacecraft.solarDistance", solarDistance, new DoubleValueMapper());
-        registrar.discrete("spacecraft.arrayToSunAngle", arrayToSunAngle, new DoubleValueMapper());
+                ResourceMonad.map(this.powerProduction, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "W");
+        registrar.discrete("spacecraft.solarDistance", solarDistance, new DoubleValueMapper(), "AU");
+        registrar.discrete("spacecraft.arrayToSunAngle", arrayToSunAngle, new DoubleValueMapper(), "deg");
     }
 }
