@@ -197,11 +197,11 @@ public class TelecomModel {
     }
 
     public void registerResources(final Registrar registrar) {
-        registrar.discrete("/telecom/downlinkBitRate", downlinkBitRate, new DoubleValueMapper()); // actually occurring
+        registrar.discrete("/telecom/downlinkBitRate", downlinkBitRate, new DoubleValueMapper(), "Mbps"); // actually occurring
         for (final var entry : this.downlinkBitRateCapability.entrySet()) {
             final var communicationConfig = entry.getKey();
             final var resource = entry.getValue();
-            registrar.discrete("/telecom/downlinkBitRateCapability/" + communicationConfig.transmitter + "->" + communicationConfig.receiver + "[" + communicationConfig.band() + "]", resource.value(), new DoubleValueMapper()); // theoretical maximum
+            registrar.discrete("/telecom/downlinkBitRateCapability/" + communicationConfig.transmitter + "->" + communicationConfig.receiver + "[" + communicationConfig.band() + "]", resource.value(), new DoubleValueMapper(), "Mbps"); // theoretical maximum
         }
     }
 

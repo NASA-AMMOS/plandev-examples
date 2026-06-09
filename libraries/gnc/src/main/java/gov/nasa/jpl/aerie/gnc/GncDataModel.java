@@ -41,7 +41,7 @@ public class GncDataModel {
     PointingAxis = resource(discrete(Z));
     registerVector(registrar, "PointingAxis", PointingAxis);
     PointingRotationAngle = resource(discrete(0.0));
-    registrar.discrete("PointingRotation", PointingRotationAngle, dvm);
+    registrar.discrete("PointingRotation", PointingRotationAngle, dvm, "deg");
     RotationRate = resource(discrete(Vector3D.ZERO));
     registerVector(registrar, "RotationRate", RotationRate);
     IsSlewing = resource(discrete(Boolean.FALSE));
