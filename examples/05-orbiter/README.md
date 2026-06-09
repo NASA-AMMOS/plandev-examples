@@ -16,6 +16,8 @@ Migrated from [aerie-orbiter-model](https://github.com/NASA-AMMOS/aerie-orbiter-
 | **Telecom** | A simple downlink-rate stub: a `Downlink` activity sets the playback data rate from a parameter. The full Friis link-budget model lives in `libraries/telecom` (experimental — not yet wired in here). |
 | **Radar** | Radar instrument with observation modes (low/med/hi-res) and data collection |
 
+Every activity is tagged with Aerie's `@Subsystem(...)` annotation (geometry / power / data / telecom / radar), and the model declares them via `@WithSubsystem(...)` in `package-info.java`, so Aerie can group activities by subsystem in the UI. The data activities carry their `@Subsystem("data")` tag in `libraries/data`; the rest are tagged on the orbiter's own activity classes.
+
 ## Activities
 
 21 activity types across all subsystems:

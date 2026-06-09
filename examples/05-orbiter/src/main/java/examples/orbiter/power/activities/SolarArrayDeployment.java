@@ -2,6 +2,7 @@ package examples.orbiter.power.activities;
 
 import examples.orbiter.Mission;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
@@ -10,6 +11,7 @@ import gov.nasa.jpl.aerie.power.ArrayDeploymentStates;
 import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
 
 @ActivityType("SolarArrayDeployment")
+@Subsystem("power")
 public class SolarArrayDeployment {
 
    @Parameter

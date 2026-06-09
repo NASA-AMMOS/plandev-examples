@@ -4,6 +4,7 @@ import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.WithDefaults;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
@@ -16,6 +17,7 @@ import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomi
 import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
 
 @ActivityType("TakeRadarObservation")
+@Subsystem("radar")
 public class TakeRadarObservation {
 
   @Export.Parameter

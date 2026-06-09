@@ -2,6 +2,7 @@ package examples.orbiter.radar;
 
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import examples.orbiter.Mission;
 import gov.nasa.jpl.aerie.data.activities.ChangeDataGenerationRate;
@@ -9,6 +10,7 @@ import gov.nasa.jpl.aerie.data.activities.ChangeDataGenerationRate;
 import static examples.orbiter.generated.ActivityActions.call;
 
 @ActivityType("ChangeRadarDataMode")
+@Subsystem("radar")
 public class ChangeRadarDataMode {
 
   @Export.Parameter

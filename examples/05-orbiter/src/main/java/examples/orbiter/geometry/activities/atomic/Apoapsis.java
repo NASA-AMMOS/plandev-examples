@@ -1,6 +1,7 @@
 package examples.orbiter.geometry.activities.atomic;
 
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import examples.orbiter.Mission;
@@ -13,6 +14,7 @@ import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
  #        center of mass of the body.
  */
 @ActivityType("Apoapsis")
+@Subsystem("geometry")
 public class Apoapsis {
 
   @Parameter

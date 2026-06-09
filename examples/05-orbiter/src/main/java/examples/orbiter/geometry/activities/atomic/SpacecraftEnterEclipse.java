@@ -1,6 +1,7 @@
 package examples.orbiter.geometry.activities.atomic;
 
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import examples.orbiter.Mission;
@@ -13,6 +14,7 @@ import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEf
 import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
 
 @ActivityType("SpacecraftEnterEclipse")
+@Subsystem("geometry")
 public class SpacecraftEnterEclipse {
   @Parameter
   public String body;

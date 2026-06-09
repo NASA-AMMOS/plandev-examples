@@ -1,6 +1,7 @@
 package examples.orbiter.geometry.activities.spawner;
 
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import gov.nasa.jpl.time.Time;
@@ -19,6 +20,7 @@ import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
 import static examples.orbiter.generated.ActivityActions.spawn;
 
 @ActivityType("AddOccultations")
+@Subsystem("geometry")
 public class AddOccultations {
 
   @Export.Parameter
