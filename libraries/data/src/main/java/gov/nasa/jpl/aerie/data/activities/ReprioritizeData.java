@@ -4,17 +4,21 @@ import gov.nasa.jpl.aerie.contrib.streamline.core.Resources;
 import gov.nasa.jpl.aerie.merlin.framework.ModelActions;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
+import gov.nasa.jpl.aerie.contrib.metadata.Unit;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.data.Data;
 import gov.nasa.jpl.aerie.data.DataMissionModel;
 
 import static gov.nasa.jpl.aerie.contrib.streamline.core.Resources.*;
 
 @ActivityType("ReprioritizeData")
+@Subsystem("data")
 public class ReprioritizeData {
   /**
    * The volume to reprioritize
    */
   @Export.Parameter
+  @Unit("bit")
   public double volume; // bits
 
   /**

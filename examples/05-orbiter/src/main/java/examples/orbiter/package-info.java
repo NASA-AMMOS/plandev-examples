@@ -41,12 +41,13 @@
 @WithActivityType(ChangeRadarDataMode.class)
 @WithActivityType(TakeRadarObservation.class)
 
-// @WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class) // for unit support
+@WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class)
 package examples.orbiter;
 
 import gov.nasa.jpl.aerie.contrib.serialization.rulesets.BasicValueMappers;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithMetadata;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithConfiguration;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithMappers;
 import gov.nasa.jpl.aerie.data.activities.*;

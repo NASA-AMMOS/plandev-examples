@@ -3,6 +3,8 @@ package gov.nasa.jpl.aerie.data.activities;
 import gov.nasa.jpl.aerie.contrib.streamline.core.Resources;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
+import gov.nasa.jpl.aerie.contrib.metadata.Unit;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import gov.nasa.jpl.aerie.data.Data;
 import gov.nasa.jpl.aerie.data.DataMissionModel;
@@ -10,6 +12,7 @@ import gov.nasa.jpl.aerie.data.DataMissionModel;
 import java.util.Optional;
 
 @ActivityType("GenerateData")
+@Subsystem("data")
 public class GenerateData {
   /**
    * The bin to generate data in
@@ -21,12 +24,14 @@ public class GenerateData {
    * The rate of data generation
    */
   @Export.Parameter
+  @Unit("bit/s")
   public Optional<Double> rate = Optional.of(0.0);
 
   /**
    * The volume of data generation
    */
   @Export.Parameter
+  @Unit("bit")
   public Optional<Double> volume = Optional.of(0.0);
 
   /**

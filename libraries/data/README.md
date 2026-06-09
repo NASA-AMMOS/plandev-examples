@@ -54,6 +54,27 @@ dependencies {
 }
 ```
 
+## Activity metadata (units & subsystem)
+
+The activities carry Aerie metadata annotations:
+
+- **Units** — numeric parameters are annotated with `@Unit` (`bit`, `bit/s`). **To use these
+  activities your `@MissionModel` package-info must declare the metadata annotation**, or
+  value-mapper generation fails:
+  ```java
+  @WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class)
+  ```
+  (Resource units — bucket volumes/rates — are attached at registration and need no such
+  declaration.)
+- **Subsystem** — each activity is tagged `@Subsystem("data")`. This is inert unless the
+  consuming model declares the subsystem, in which case the activities group under it:
+  ```java
+  @WithSubsystem("data")
+  ```
+  (Declaring it is optional; omitting it does not break the build.)
+
+See `examples/04-hopper` and `examples/05-orbiter` for both in use.
+
 ## Building
 
 ```sh

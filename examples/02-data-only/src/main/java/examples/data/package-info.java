@@ -8,6 +8,7 @@
 @MissionModel.WithMappers(CommonValueMappers.class)
 @MissionModel.WithMappers(BasicValueMappers.class)
 @MissionModel.WithConfiguration(Configuration.class)
+@MissionModel.WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class)
 
 @MissionModel.WithActivityType(ChangeDataGenerationRate.class)
 @MissionModel.WithActivityType(DeleteData.class)

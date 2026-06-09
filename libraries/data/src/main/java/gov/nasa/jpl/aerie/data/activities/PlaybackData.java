@@ -5,6 +5,8 @@ import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
 import gov.nasa.jpl.aerie.merlin.framework.Condition;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
+import gov.nasa.jpl.aerie.contrib.metadata.Unit;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import gov.nasa.jpl.aerie.merlin.protocol.types.RealDynamics;
 import gov.nasa.jpl.aerie.data.DataMissionModel;
@@ -17,11 +19,13 @@ import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomi
 import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.waitUntil;
 
 @ActivityType("PlaybackData")
+@Subsystem("data")
 public class PlaybackData {
   /**
    * Desired volume of data to downlink.  May not be achieved if data is not present.
    */
   @Export.Parameter
+  @Unit("bit")
   public Optional<Double> volume = Optional.empty(); // bits
   @Export.Parameter
   public Optional<Duration> duration = Optional.empty();

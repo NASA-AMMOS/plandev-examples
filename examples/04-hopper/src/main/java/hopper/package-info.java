@@ -2,6 +2,11 @@
 @WithMappers(CommonValueMappers.class)
 @WithMappers(BasicValueMappers.class)
 @WithConfiguration(Configuration.class)
+@WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class)
+@WithSubsystem("mobility")
+@WithSubsystem("payload")
+@WithSubsystem("telecom")
+@WithSubsystem("data")
 
 @WithActivityType(PerformHop.class)
 @WithActivityType(TakePicture.class)
@@ -22,4 +27,6 @@ import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithConfiguration;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithMappers;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithMetadata;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithSubsystem;
 

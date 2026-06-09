@@ -7,6 +7,7 @@ import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
 import gov.nasa.jpl.aerie.data.activities.DeleteData;
 import gov.nasa.jpl.aerie.data.activities.PlaybackData;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 
@@ -23,6 +24,7 @@ import static hopper.generated.ActivityActions.spawn;
  * and then turns off the telecom subsystem.
  */
 @ActivityType("Downlink")
+@Subsystem("telecom")
 public class Downlink {
 
   @Parameter

@@ -4,6 +4,7 @@ import hopper.Mission;
 import hopper.SimplePEL.CameraState;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
@@ -17,6 +18,7 @@ import java.util.Optional;
  * Data: generates science data into the specified onboard storage bin.
  */
 @ActivityType("TakePicture")
+@Subsystem("payload")
 public class TakePicture {
 
   @Parameter

@@ -2,6 +2,8 @@ package gov.nasa.jpl.aerie.data.activities;
 
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
+import gov.nasa.jpl.aerie.contrib.metadata.Unit;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.data.Data;
 import gov.nasa.jpl.aerie.data.DataMissionModel;
 
@@ -9,11 +11,13 @@ import static gov.nasa.jpl.aerie.contrib.streamline.core.Resources.*;
 import static java.lang.Math.max;
 
 @ActivityType("DeleteData")
+@Subsystem("data")
 public class DeleteData {
   /**
    * The maximum volume to delete depending on {@link #limitToSentData} and the volume of the bin
    */
   @Export.Parameter
+  @Unit("bit")
   public double volume; // bits
 
   /**

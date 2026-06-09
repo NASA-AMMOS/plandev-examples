@@ -4,6 +4,7 @@ import hopper.Mission;
 import hopper.SimplePEL.HopState;
 import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
+import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
 import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
 import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
@@ -12,6 +13,7 @@ import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
  * Perform a hop which activates hop mode and draws power for the duration of the hop.
  */
 @ActivityType("PerformHop")
+@Subsystem("mobility")
 public class PerformHop {
 
   @Parameter
