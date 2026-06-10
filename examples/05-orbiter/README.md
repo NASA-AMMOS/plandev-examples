@@ -35,6 +35,8 @@ This model requires SPICE kernels for orbital geometry calculations. The kernels
 
 The kernel directory is configurable via the `SPICE_DIRECTORY` environment variable (defaults to `spice-kernels`, resolved relative to the JVM's working directory).
 
+> **Valid plan window: 2024-01-01 → 2024-05-06.** The MRO spacecraft ephemeris kernel (`mro_psp.bsp`, body `-74`) only covers this ~4-month interval; every other kernel spans decades, so this one is the limiting factor. Plans must stay inside this window — simulating outside it makes SPICE geometry lookups fail with insufficient-ephemeris errors. This is why the demo plans all start at `2024-01-02`. To plan in a different period, swap `mro_psp.bsp` for an MRO SPK covering your target dates (from the [NAIF MRO archive](https://naif.jpl.nasa.gov/pub/naif/pds/data/mro-m-spice-6-v1.0/mrosp_1000/data/spk/)), or point `spiceSpacecraftId` at a different spacecraft with its own SPK.
+
 ### Running locally
 
 The kernels are already in place — just build and the model will find them.

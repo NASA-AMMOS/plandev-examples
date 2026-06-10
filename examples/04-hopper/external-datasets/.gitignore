@@ -1,0 +1,4 @@
+# Local Python virtualenv for the dataset generator (see README)
+.venv/
+__pycache__/
+*.pyc

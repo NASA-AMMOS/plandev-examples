@@ -77,11 +77,19 @@ DEFAULT_STEP_MINUTES = 60      # hourly. Elevation varies slowly, so linear segm
 
 
 def repo_spice_dir() -> Path:
-    """Shared kernel directory: $SPICE_DIRECTORY, else top-level spice-kernels/."""
+    """Shared kernel directory: $SPICE_DIRECTORY, else the nearest spice-kernels/
+    found by walking up from this file (robust to where the example lives)."""
     env = os.environ.get("SPICE_DIRECTORY")
     if env:
         return Path(env)
-    return Path(__file__).resolve().parents[4] / "spice-kernels"
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        candidate = parent / "spice-kernels"
+        if candidate.is_dir():
+            return candidate
+    raise FileNotFoundError(
+        f"No 'spice-kernels' directory found above {here}; set SPICE_DIRECTORY."
+    )
 
 
 def furnish_kernels(spice_dir: Path) -> None:
