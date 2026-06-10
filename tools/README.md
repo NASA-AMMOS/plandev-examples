@@ -51,3 +51,33 @@ using it in this repo, edit the `path` variable and the `package` string near th
 script to match the target example's convention (e.g. `examples.orbiter.power.pel`). Treat the
 generated code as a starting point — the maintained PELs in `examples/01-power-only/` and
 `examples/05-orbiter/src/.../power/pel/` show the current expected shape.
+
+## `generate_external_events.py` — scale-test external events
+
+Generates large, varied [Aerie external-event](../examples/10-external-events/) datasets for
+hopper/orbiter scale testing. Stdlib only. Emits two files in Aerie's canonical ingest format:
+
+- `<prefix>_schema.json` — event-type + source-type definitions (upload to Aerie **first**)
+- `<prefix>_source.json` — one external source with N events spanning a mission window
+
+Eight hopper/orbiter-relevant event types, each with its own attribute schema: `DSNContact`
+(station / band / peak elevation / bitrate), `Eclipse`, `Occultation`, `ThermalCycle`,
+`KeepOutWindow`, `MomentumDump`, `SolarFlare`, `GroundStationOutage`. Events are placed with
+simple per-type cadences (exponential spacing) over the window — the aim is **scale and
+variety, not physical accuracy** (no SPICE/geometry; randomized attributes).
+
+```bash
+# ~5000 events across 2028 (defaults)
+python3 tools/generate_external_events.py --out-dir /tmp/ev
+
+# 20k events, custom window + seed
+python3 tools/generate_external_events.py --count 20000 --start 2028-100 --end 2028-200 --seed 7 --out-dir /tmp/ev
+
+# match the hopper comms_pass_schema (event type DSS_Pass instead of DSNContact)
+python3 tools/generate_external_events.py --contact-type DSS_Pass --out-dir /tmp/ev
+```
+
+The default `DSNContact` comms type lines up with example 10's `ScheduleDownlinksDuringContacts`
+goal (which queries that type). Output JSON is generated on demand and **not committed** —
+thousands of events is a multi-MB source file; size `--count` to your ingest budget (Aerie
+ingests external events at roughly hundreds/sec).
