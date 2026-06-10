@@ -134,20 +134,22 @@ public class Bucket {
 
     this.children = children;
 
-    // Children's volume bounds cascade in priority order: child[i] gets
-    // child[i-1].volume_ub - child[i-1].volume, so higher-priority bins consume
-    // parent capacity first. Per-child rate is clamped via choose() on isEmpty/isFull.
+    // All children share the parent's capacity limit (no cascading per-bin reservations).
+    // Total capacity is enforced by the parent's volume = sum(children.volume); per-child rate
+    // is clamped via choose() on isEmpty/isFull.
+    //
+    // NOTE: an earlier version derived each bin's bound from the previous bin
+    // (volume_ub[i] = min(own, volume_ub[i-1] - clampedVolume[i-1])) to make higher-priority
+    // bins consume parent capacity first. That made volume_ub[i] reference volume_ub[i-1] twice
+    // (directly, and via clampedVolume[i-1]); since streamline derived resources aren't memoized
+    // across references, evaluating the deepest bin's dynamics fanned out as O(2^binCount) and
+    // hung model instantiation at high bin counts (e.g. the orbiter's 20 bins). If priority-
+    // ordered capacity reservation is ever needed, reintroduce the cascade with cached
+    // intermediates (Resources.cache) to keep evaluation O(n).
     for (int i = 0; i < this.children.size(); ++i) {  // TODO -- what if a child has children?
       Bucket child = this.children.get(i);
 
-      if (!volume_ub.equals(max_bound)) {
-        if (i == 0) {
-          child.volume_ub = child.volume_ub.equals(max_bound) ? volume_ub : min(child.volume_ub, volume_ub);
-        } else {
-          var child_volume_ub = subtract(children.get(i - 1).volume_ub, children.get(i - 1).clampedVolume);
-          child.volume_ub = child.volume_ub.equals(max_bound) ? child_volume_ub : min(child.volume_ub, child_volume_ub);
-        }
-      }
+      child.volume_ub = child.volume_ub.equals(max_bound) ? volume_ub : min(child.volume_ub, volume_ub);
 
       child.clampedVolume = clamp(child.volume, constant(0), child.volume_ub);
 
