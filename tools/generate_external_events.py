@@ -232,9 +232,14 @@ def generate(count, start, end, seed, contact_type):
         made = 0
         i = 0
         while t < end and made < n * 2:  # *2 cap guards against pathological tiny gaps
+            # Aerie requires each event's whole [start, start+duration] to fit within the
+            # source period, so clamp the duration to what's left before the window end.
+            remaining = (end - t).total_seconds()
+            if remaining < 2:
+                break
             i += 1
             dlo, dhi = spec["dur_s"]
-            dur = rng.uniform(dlo, dhi)
+            dur = min(rng.uniform(dlo, dhi), remaining - 1)
             events.append({
                 "key": f"{name}_{i:05d}",
                 "event_type_name": name,
