@@ -209,7 +209,7 @@ def event_catalog(contact_type: str):
             },
         },
         "SolarFlare": {
-            "weight": 0.05,
+            "weight": 0.008,
             "dur_s": (10 * 60, 3 * 3600),
             "schema": {
                 "type": "object",
@@ -225,7 +225,7 @@ def event_catalog(contact_type: str):
             },
         },
         "GroundStationOutage": {
-            "weight": 0.02,
+            "weight": 0.003,
             "dur_s": (2 * 3600, 23 * 3600),
             "schema": {
                 "type": "object",
