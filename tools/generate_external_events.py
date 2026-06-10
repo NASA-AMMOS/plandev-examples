@@ -52,6 +52,34 @@ def fmt_duration(seconds: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d}"
 
 
+def make_key(name: str, contact_type: str, attrs: dict, i: int) -> str:
+    """Build a descriptive, unique event key (this shows as the timeline label).
+
+    Leads with the event's headline attribute(s) so the label reads like
+    'Pass_DSS-14_X_00007' or 'Eclipse_MARS_UMBRA_00042' rather than a bare counter.
+    The trailing index keeps keys unique within the source.
+    """
+    if name == contact_type:
+        head = f"Pass_{attrs['station']}_{attrs['band']}"
+    elif name == "Eclipse":
+        head = f"Eclipse_{attrs['body']}_{attrs['shadow_type']}"
+    elif name == "Occultation":
+        head = f"Occultation_{attrs['occulting_body']}_by_{attrs['observer']}"
+    elif name == "ThermalCycle":
+        head = f"Thermal_{attrs['phase']}"
+    elif name == "KeepOutWindow":
+        head = f"KeepOut_{attrs['target_body']}"
+    elif name == "MomentumDump":
+        head = f"MomentumDump_{attrs['trigger']}"
+    elif name == "SolarFlare":
+        head = f"Flare_{attrs['xray_class']}"
+    elif name == "GroundStationOutage":
+        head = f"Outage_{attrs['station']}_{attrs['reason']}"
+    else:
+        head = name
+    return f"{head}_{i:05d}"
+
+
 # --- event-type catalog -----------------------------------------------------------------
 #
 # Each entry defines: the JSON-schema for its attributes (properties / required), a weight
@@ -240,12 +268,13 @@ def generate(count, start, end, seed, contact_type):
             i += 1
             dlo, dhi = spec["dur_s"]
             dur = min(rng.uniform(dlo, dhi), remaining - 1)
+            attrs = spec["attrs"](rng)
             events.append({
-                "key": f"{name}_{i:05d}",
+                "key": make_key(name, contact_type, attrs, i),
                 "event_type_name": name,
                 "start_time": fmt_instant(t),
                 "duration": fmt_duration(dur),
-                "attributes": spec["attrs"](rng),
+                "attributes": attrs,
             })
             made += 1
             t += timedelta(seconds=rng.expovariate(1.0 / mean_gap))
