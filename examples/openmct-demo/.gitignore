@@ -1,0 +1,5 @@
+node_modules/
+host/lib/openmct-plandev.js
+host/lib/openmct-plandev.js.map
+host/openmct/
+*.log

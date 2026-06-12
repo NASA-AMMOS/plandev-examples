@@ -48,7 +48,7 @@ mission-specific additions (radar, an equipment-level PEL, SPICE-driven orbital 
 
 ## Other Aerie surfaces (not the modeling path)
 
-Two example sets in this repo are **not** part of the mission-modeling learning path above.
+These example sets in this repo are **not** part of the mission-modeling learning path above.
 They demonstrate different parts of Aerie and use a different language/toolchain (TypeScript,
 not Java). You don't need them to learn mission modeling — explore them once you're
 comfortable with the core workflow.
@@ -57,6 +57,7 @@ comfortable with the core workflow.
 |-----------|-----------|----------|
 | `examples/actions/` | **Actions** — server-side automation that runs against a plan (validation, calling external services) *after* a model exists | TypeScript / Node |
 | `examples/ui-plugins/` | **UI plugins** — Aerie web-UI customizations (e.g. showing Mars LMST or a fixed timezone on the timeline) | TypeScript / JS |
+| `examples/openmct-demo/` | **OpenMCT integration (experimental demo)** — a spike exploring how PlanDev plans, simulations, and resources could surface in [OpenMCT](https://github.com/nasa/openmct) as telemetry + Gantt objects, plus a synthesized predict-vs-actual view. Not a production plugin. | TypeScript / JS |
 
 ## Repository Structure
 
@@ -81,7 +82,8 @@ plandev-examples/
 │   ├── 09-testing-patterns/
 │   ├── 10-external-events/
 │   ├── actions/                    # Other surface: server-side automation (TypeScript)
-│   └── ui-plugins/                 # Other surface: Aerie UI customizations (TypeScript)
+│   ├── ui-plugins/                 # Other surface: Aerie UI customizations (TypeScript)
+│   └── openmct-demo/               # Other surface: OpenMCT plugin pulling PlanDev data (TypeScript)
 ├── archive/lander/                 # Legacy reference (unmaintained)
 └── tools/                          # PEL generator (see tools/README.md)
 ```

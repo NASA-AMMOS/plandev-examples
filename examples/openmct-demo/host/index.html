@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>PlanDev × OpenMCT</title>
+    <!-- OpenMCT core (served from node_modules/openmct/dist by host/server.mjs) -->
+    <script src="/openmct/openmct.js"></script>
+    <!-- Host config + the bundled openmct-plandev plugin -->
+    <script src="/config.js"></script>
+    <script src="/lib/openmct-plandev.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // Postgres-interval (HH:MM:SS[.ffffff], optional "N days") → ms. Small,
+      // self-contained copy just for picking initial conductor bounds; the
+      // plugin itself uses the postgres-interval package for parity.
+      function durationToMs(text) {
+        if (!text) return 0;
+        let ms = 0;
+        const days = String(text).match(/([+-]?\d+)\s+days?/);
+        if (days) ms += parseInt(days[1], 10) * 86400000;
+        const time = String(text).match(/(\d+):(\d+):(\d+)(\.\d+)?/);
+        if (time) {
+          ms +=
+            (parseInt(time[1], 10) * 3600 + parseInt(time[2], 10) * 60 + parseInt(time[3], 10)) *
+              1000 +
+            Math.round(parseFloat('0' + (time[4] || '0')) * 1000);
+        }
+        return ms;
+      }
+
+      // Fetch the most recent plan's span so the time conductor opens on real data.
+      async function latestPlanBounds(cfg) {
+        const login = await fetch(cfg.loginUrl, {
+          body: JSON.stringify({ password: '', username: cfg.username }),
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        });
+        const { token } = await login.json();
+        const res = await fetch(cfg.graphqlUrl, {
+          body: JSON.stringify({
+            query: '{ plan(order_by: {id: desc}, limit: 1) { start_time duration } }',
+          }),
+          headers: {
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            'x-hasura-role': cfg.role || 'aerie_admin',
+          },
+          method: 'POST',
+        });
+        const json = await res.json();
+        const plan = json.data && json.data.plan && json.data.plan[0];
+        if (!plan) return null;
+        const start = Date.parse(plan.start_time);
+        return { end: start + durationToMs(plan.duration), start };
+      }
+
+      window.addEventListener('DOMContentLoaded', async function () {
+        const cfg = window.PLANDEV_CONFIG;
+        openmct.setAssetPath('/openmct');
+
+        openmct.install(openmct.plugins.LocalStorage());
+        openmct.install(openmct.plugins.MyItems());
+        openmct.install(openmct.plugins.UTCTimeSystem());
+        openmct.install(openmct.plugins.Espresso());
+        openmct.install(openmct.plugins.PlanLayout({ creatable: true }));
+        openmct.install(openmct.plugins.DisplayLayout({ showAsView: [] })); // renders the ready-made Resource Plot
+        openmct.install(openmct.plugins.Timeline()); // Time Strip view
+        openmct.install(openmct.plugins.Timelist());
+        openmct.install(openmct.plugins.LADTable());
+
+        // The PlanDev integration: Plans → Sims → Resources + Activities.
+        openmct.install(openmctPlandev(cfg));
+
+        // Open the time conductor on the latest plan's span (fixed mode).
+        let bounds = await latestPlanBounds(cfg).catch(function () {
+          return null;
+        });
+        if (!bounds) {
+          const now = Date.now();
+          bounds = { end: now, start: now - 32 * 86400000 };
+        }
+        openmct.install(
+          openmct.plugins.Conductor({
+            menuOptions: [{ bounds: bounds, name: 'Fixed', timeSystem: 'utc' }],
+          }),
+        );
+        openmct.time.setTimeSystem('utc', bounds);
+
+        openmct.start();
+      });
+    </script>
+  </body>
+</html>
