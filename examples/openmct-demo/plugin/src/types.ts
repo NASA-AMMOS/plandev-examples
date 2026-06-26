@@ -1,6 +1,8 @@
 /**
  * PlanDev (Aerie) GraphQL data shapes, narrowed to the fields this plugin reads.
- * These mirror the shapes in plandev-ui (src/types/simulation.ts, src/types/schema.ts).
+ * These mirror the shapes in plandev-ui (src/types/simulation.ts, src/types/schema.ts)
+ * but are owned here on purpose: they travel with this plugin's queries (see
+ * plandev-api.ts) so UI field-selection changes can't reshape them out from under us.
  */
 
 /** PlanDev ValueSchema — describes the type of a resource/profile value. */
@@ -52,12 +54,49 @@ export interface ProfileDescriptor {
   type: ProfileType;
 }
 
+/** A plan's tag, via the `plan_tags` → `tag` relationship (mirrors plandev-ui's GET_PLAN). */
+export interface PlanTag {
+  tag: { color: string | null; name: string };
+}
+
 export interface Plan {
   id: number;
   name: string;
   model_id: number;
   start_time: string; // ISO timestamptz
   duration: string; // Postgres interval
+  owner: string | null;
+  created_at: string; // ISO timestamptz
+  updated_at: string; // ISO timestamptz
+  tags: PlanTag[];
+  /** The mission model that produced this plan (via the `mission_model` relationship). */
+  model: { name: string; version: string } | null;
+}
+
+/** A model's resource type — the authoritative source of a resource's units/description
+ * (the profile's inline schema often omits them, esp. for real resources). */
+export interface ResourceType {
+  name: string;
+  schema: ValueSchema;
+}
+
+/** A planned activity directive — its user-given `name` labels the simulated Gantt bars. */
+export interface ActivityDirective {
+  id: number;
+  name: string;
+  type: string;
+}
+
+/** An external event derived for a plan (via its linked derivation groups). Times are
+ * absolute: `start_time` an ISO timestamptz, `duration` a Postgres interval. */
+export interface ExternalEvent {
+  key: string;
+  event_type_name: string;
+  start_time: string;
+  duration: string;
+  derivation_group_name: string;
+  source_key: string;
+  attributes: unknown;
 }
 
 export interface SimulationDataset {

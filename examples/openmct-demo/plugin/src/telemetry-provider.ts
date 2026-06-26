@@ -1,19 +1,21 @@
 /**
- * Historical telemetry provider for PlanDev resource leaves. On request it
- * fetches the resource's profile, samples it (sample.ts), windows it to the
- * requested bounds, and honors the 'latest' strategy.
+ * Historical telemetry provider for PlanDev resource leaves. On request it gets the
+ * resource's sampled datums (sample.ts, cached via context.getResourceDatums), windows
+ * them to the requested bounds, and honors the 'latest' strategy.
  *
- * Demo scope: completed sims, historical only — no realtime subscription. We
- * return all points in the window (PlanDev profiles are already change-point
- * sampled, so they're small); a connector pulling raw dense telemetry is where
- * min/max decimation would belong, not here.
+ * Demo scope: completed sims, historical only — no realtime subscription. For a plot
+ * request (`strategy: 'minmax'`, `size` ≈ pixel width) on a continuous (real) profile we
+ * min/max-decimate to ~`size` points, so thousands of segments stay responsive while
+ * spikes survive. Discrete/state series (step values) and non-plot strategies (tables,
+ * LAD/meters) keep full data, so they stay exact. Decimation is in-memory on the cached
+ * datums, so pan/zoom never refetches.
  */
 import { actualizeDatums } from './actuals';
 import { RESOURCE_TYPE } from './constants';
 import type { PluginContext } from './context';
 import { parseKey } from './identifiers';
 import type { DomainObject, RequestOptions, TelemetryProvider } from './openmct';
-import { type Datum, sampleProfile } from './sample';
+import { type Datum, minMaxDecimate } from './sample';
 
 export function createTelemetryProvider(context: PluginContext): TelemetryProvider {
   return {
@@ -30,21 +32,37 @@ export function createTelemetryProvider(context: PluginContext): TelemetryProvid
       }
       const isActual = parsed.kind === 'actual';
 
-      const startMs = await context.getPlanStartMs(parsed.planId);
-      const profile = await context.getProfile(parsed.datasetId, parsed.name);
-      if (!profile) {
+      try {
+        const startMs = await context.getPlanStartMs(parsed.planId);
+        const base = await context.getResourceDatums(parsed.datasetId, parsed.name, startMs);
+        if (base.length === 0) {
+          // No data for this resource — a legitimately empty series, not a failure.
+          return [];
+        }
+        const datums = isActual ? actualizeDatums(base, parsed.name) : base;
+
+        if (options.strategy === 'latest') {
+          const latest = lastAtOrBefore(datums, options.end);
+          return latest ? [latest] : [];
+        }
+
+        const windowed = windowDatums(datums, options.start, options.end);
+
+        // Plot request on a continuous (real) profile → decimate to the point budget.
+        if (options.strategy === 'minmax' && options.size) {
+          const profileType = await context.getProfileType(parsed.datasetId, parsed.name);
+          if (profileType?.type === 'real') {
+            return minMaxDecimate(windowed, options.size);
+          }
+        }
+        return windowed;
+      } catch (error) {
+        // A genuine load failure (backend dropped, bad data) — alert the planner
+        // instead of spinning on an empty plot.
+        const message = error instanceof Error ? error.message : String(error);
+        context.notifier.error(`PlanDev: failed to load data for "${parsed.name}" — ${message}`);
         return [];
       }
-
-      const datums = isActual
-        ? actualizeDatums(sampleProfile(profile, startMs), parsed.name)
-        : sampleProfile(profile, startMs);
-      if (options.strategy === 'latest') {
-        const latest = lastAtOrBefore(datums, options.end);
-        return latest ? [latest] : [];
-      }
-
-      return windowDatums(datums, options.start, options.end);
     },
   };
 }

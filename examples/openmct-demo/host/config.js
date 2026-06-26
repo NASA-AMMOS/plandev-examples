@@ -8,10 +8,13 @@
  */
 window.PLANDEV_CONFIG = {
   graphqlUrl: '/api/graphql',
-  loginUrl: '/api/auth/login',
-  // Any username works while PlanDev runs with AUTH_TYPE=none.
-  username: 'openmct-demo',
-  role: 'aerie_admin',
+  // AUTH is server-side: the host (server.mjs) logs in with PLANDEV_SERVICE_USER and
+  // injects the token + PLANDEV_ROLE on every GraphQL call, so nothing auth-related
+  // belongs here — the browser holds no token and can't pick a role.
+  healthUrl: '/api/health',
+  // Base URL of the PlanDev (Aerie) UI, used for "Open in PlanDev" backlinks in
+  // the inspector. Leave '' to hide the link; e.g. 'http://localhost:3000'.
+  planDevUiUrl: 'http://localhost:3000',
   namespace: 'plandev',
   // Floor (ms) for zero-duration activity spans so they show as Gantt bars.
   // 0 keeps instantaneous events as point markers; try 600000 (10 min) for a

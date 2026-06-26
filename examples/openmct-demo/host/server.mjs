@@ -25,6 +25,20 @@ const PORT = Number(process.env.PORT ?? 8888);
 const HASURA_URL = process.env.PLANDEV_HASURA_URL ?? 'http://localhost:8080/v1/graphql';
 const GATEWAY_LOGIN_URL =
   process.env.PLANDEV_GATEWAY_LOGIN_URL ?? 'http://localhost:9000/auth/login';
+// PlanDev liveness check for the OpenMCT URLIndicator. Defaults to Hasura's
+// /healthz (200 "OK" when up), derived from the Hasura origin.
+const HEALTH_URL =
+  process.env.PLANDEV_HEALTH_URL ?? new URL('/healthz', HASURA_URL).toString();
+
+// SERVER-SIDE AUTH. The host logs in once with PLANDEV_SERVICE_USER and injects
+// `Authorization` + a pinned `x-hasura-role` on every proxied GraphQL request — so the
+// browser never logs in, holds a token, or picks a role. The plugin sends no
+// credentials, so this proxy is the single auth point. The default user works with
+// AUTH_TYPE=none; set a real PLANDEV_SERVICE_USER / PLANDEV_SERVICE_PASSWORD for an
+// auth-enabled PlanDev, and PLANDEV_ROLE for a role the account is allowed.
+const SERVICE_USER = process.env.PLANDEV_SERVICE_USER ?? 'openmct-demo';
+const SERVICE_PASSWORD = process.env.PLANDEV_SERVICE_PASSWORD ?? '';
+const SERVICE_ROLE = process.env.PLANDEV_ROLE ?? 'viewer';
 
 const MIME = {
   '.css': 'text/css; charset=utf-8',
@@ -61,6 +75,68 @@ function proxy(targetUrl, req, res) {
   req.pipe(proxyReq);
 }
 
+let serviceToken = null;
+
+/** Logs in once with the service account and caches the JWT; `force` re-logs in. */
+async function serviceLogin(force = false) {
+  if (serviceToken && !force) {
+    return serviceToken;
+  }
+  const res = await fetch(GATEWAY_LOGIN_URL, {
+    body: JSON.stringify({ password: SERVICE_PASSWORD, username: SERVICE_USER }),
+    headers: { 'Content-Type': 'application/json' },
+    method: 'POST',
+  });
+  if (!res.ok) {
+    throw new Error(`service login failed (${res.status})`);
+  }
+  const json = await res.json();
+  serviceToken = json.token ?? json.ssoToken;
+  if (!serviceToken) {
+    throw new Error('service login returned no token');
+  }
+  return serviceToken;
+}
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
+}
+
+/**
+ * Proxies a GraphQL request with the server's service token + pinned role, so the
+ * browser sends no credentials and can't choose its role. Re-logs in once on a 401.
+ */
+async function graphqlServerAuth(req, res) {
+  try {
+    const body = await readBody(req);
+    const send = token =>
+      fetch(HASURA_URL, {
+        body,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'x-hasura-role': SERVICE_ROLE,
+        },
+        method: 'POST',
+      });
+    let upstream = await send(await serviceLogin());
+    if (upstream.status === 401) {
+      upstream = await send(await serviceLogin(true));
+    }
+    const text = await upstream.text();
+    res.writeHead(upstream.status, { 'Content-Type': 'application/json' });
+    res.end(text);
+  } catch (err) {
+    res.writeHead(502, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: `PlanDev service-auth proxy failed: ${err.message}` }));
+  }
+}
+
 function serveStatic(filePath, res) {
   if (!existsSync(filePath) || !statSync(filePath).isFile()) {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -81,10 +157,10 @@ const server = createServer((req, res) => {
   const pathname = decodeURIComponent(new URL(req.url ?? '/', 'http://localhost').pathname);
 
   if (pathname === '/api/graphql') {
-    return proxy(HASURA_URL, req, res);
+    return graphqlServerAuth(req, res); // injects the service token + pinned role
   }
-  if (pathname === '/api/auth/login') {
-    return proxy(GATEWAY_LOGIN_URL, req, res);
+  if (pathname === '/api/health') {
+    return proxy(HEALTH_URL, req, res);
   }
 
   if (pathname === '/' || pathname === '/index.html') {
@@ -103,6 +179,7 @@ server.listen(PORT, () => {
     console.warn(`⚠  OpenMCT dist not found at ${OPENMCT_DIST}. Run "npm install" first.`);
   }
   console.log(`PlanDev × OpenMCT host:  http://localhost:${PORT}`);
-  console.log(`  proxy /api/graphql     → ${HASURA_URL}`);
-  console.log(`  proxy /api/auth/login  → ${GATEWAY_LOGIN_URL}`);
+  console.log(`  proxy /api/graphql     → ${HASURA_URL}  (server-auth as "${SERVICE_USER}", role ${SERVICE_ROLE})`);
+  console.log(`  service login          → ${GATEWAY_LOGIN_URL}`);
+  console.log(`  proxy /api/health      → ${HEALTH_URL}`);
 });

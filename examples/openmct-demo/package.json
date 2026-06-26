@@ -7,7 +7,8 @@
   "scripts": {
     "build": "rollup -c",
     "start": "node host/server.mjs",
-    "dev": "rollup -c && node host/server.mjs"
+    "dev": "rollup -c && node host/server.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "openmct": "4.2.0",
@@ -19,6 +20,7 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "rollup": "^4.18.0",
     "tslib": "^2.6.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.9"
   }
 }
