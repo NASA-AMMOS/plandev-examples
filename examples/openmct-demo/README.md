@@ -1,10 +1,13 @@
 # openmct-plandev — PlanDev inside OpenMCT (experimental demo)
 
-> ⚠️ **Experimental demo — not a supported or production plugin.** It exists
-> to *explore* how PlanDev data could surface in [NASA OpenMCT](https://github.com/nasa/openmct)
-> and to make the close-the-U idea tangible. Expect rough edges; structure, naming,
-> and behavior will change. Don't depend on it. The "actuals" are **synthesized**
-> (predict + noise), not real telemetry, and auth/CORS/perf are demo-grade only.
+> ⚠️ **Experimental reference — meant to learn from and adapt, not a supported or
+> published package yet.** It shows how PlanDev data surfaces in [NASA OpenMCT](https://github.com/nasa/openmct)
+> and makes the close-the-U idea tangible. Two things are demo *choices*, not the real
+> shape: it ships **synthesized actuals** (a stand-in — a real mission feeds real actuals)
+> and the bundled `host/` is a **minimal dev server** (no TLS, defaults to an
+> unauthenticated backend). It targets **historical** data by design. The plugin's auth
+> model (proxy-injected token + pinned role), CORS handling (same-origin proxy), and perf
+> (decimation + caching) are otherwise sound.
 
 A small, self-contained experiment that pulls **PlanDev** (Aerie) planning data into
 OpenMCT, three ways:
