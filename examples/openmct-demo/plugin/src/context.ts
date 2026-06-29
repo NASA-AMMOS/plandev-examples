@@ -23,8 +23,6 @@ export class PluginContext {
   readonly #datums = new Map<string, Datum[]>();
   readonly #resourceSchemas = new Map<number, Promise<Map<string, ValueSchema>>>();
   readonly #directiveNames = new Map<number, Promise<Map<number, string>>>();
-  readonly #derivationGroups = new Map<number, Promise<string[]>>();
-  readonly #externalEvents = new Map<number, Promise<ExternalEvent[]>>();
 
   constructor(api: PlandevApi, namespace: string, notifier: Notifier) {
     this.api = api;
@@ -45,8 +43,6 @@ export class PluginContext {
     this.#datums.clear();
     this.#resourceSchemas.clear();
     this.#directiveNames.clear();
-    this.#derivationGroups.clear();
-    this.#externalEvents.clear();
     this.defaultBounds = null;
   }
 
@@ -253,33 +249,23 @@ export class PluginContext {
     return pending;
   }
 
-  /** Derivation groups linked to a plan, cached + failure-tolerant. The composition
-   * uses this to decide whether to show an "External Events" node. */
+  /** Derivation groups linked to a plan (re-fetched each call so the tree picks up
+   * changes on reload, like sims; failure-tolerant). The composition uses this to decide
+   * whether to show an "External Events" node. */
   getPlanDerivationGroups(planId: number): Promise<string[]> {
-    let pending = this.#derivationGroups.get(planId);
-    if (!pending) {
-      pending = this.api.getPlanDerivationGroups(planId).catch(() => []);
-      this.#derivationGroups.set(planId, pending);
-    }
-    return pending;
+    return this.api.getPlanDerivationGroups(planId).catch(() => []);
   }
 
-  /** A plan's external events (derived from its linked groups), sorted by start, cached
-   * + failure-tolerant. */
-  getExternalEvents(planId: number): Promise<ExternalEvent[]> {
-    let pending = this.#externalEvents.get(planId);
-    if (!pending) {
-      pending = (async () => {
-        const groups = await this.getPlanDerivationGroups(planId);
-        if (groups.length === 0) {
-          return [];
-        }
-        const events = await this.api.getDerivedEvents(groups);
-        return [...events].sort((a, b) => Date.parse(a.start_time) - Date.parse(b.start_time));
-      })().catch(() => []);
-      this.#externalEvents.set(planId, pending);
+  /** A plan's external events (derived from its linked groups), sorted by start.
+   * Re-fetched each call (not cached) so reload/reopen reflects newly-synced events —
+   * matching how sims refresh; failure-tolerant. */
+  async getExternalEvents(planId: number): Promise<ExternalEvent[]> {
+    const groups = await this.getPlanDerivationGroups(planId);
+    if (groups.length === 0) {
+      return [];
     }
-    return pending;
+    const events = await this.api.getDerivedEvents(groups).catch(() => []);
+    return [...events].sort((a, b) => Date.parse(a.start_time) - Date.parse(b.start_time));
   }
 
   /** Records the most-recent plan's span as the default conductor bounds. */

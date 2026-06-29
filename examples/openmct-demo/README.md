@@ -7,7 +7,7 @@
 > (predict + noise), not real telemetry, and auth/CORS/perf are demo-grade only.
 
 A small, self-contained experiment that pulls **PlanDev** (Aerie) planning data into
-OpenMCT, two ways:
+OpenMCT, three ways:
 
 - **Resources as telemetry** — each simulated resource profile becomes an OpenMCT
   telemetry object: numeric resources **plot**; enum/boolean *state* resources plot as
@@ -23,11 +23,6 @@ OpenMCT, two ways:
 It reads PlanDev's Hasura GraphQL directly through a small, framework-agnostic
 client. **No `plandev-ui` or backend changes** are required — everything lives on
 the OpenMCT side.
-
-It's a sketch of **Track B / Phase B** of the [PlanDev × OpenMCT integration memo](../../../claude-plans/plandev/plandev-openmct-integration.md)
-(`~/code/claude-plans/plandev/plandev-openmct-integration.md`) — the "OpenMCT pulls
-from PlanDev" direction — built here to learn from, not to ship. If the approach
-proves out, the real version would be extracted and hardened separately.
 
 ### What this is / isn't
 
@@ -64,12 +59,13 @@ to give plots an explicit height; the trade-off is a fixed canvas width —
 Plot, Time Strip, or layout under *My Items*.
 
 A status-bar **"PlanDev" connectivity light** shows green when the backend is
-reachable, and selecting a plan/sim reveals a **"PlanDev" inspector panel** with its
-metadata — see [Resilience, connectivity & metadata](#resilience-connectivity--metadata).
+reachable, and selecting any node (plan, sim, resource, activity, or external event)
+reveals a **"PlanDev" inspector panel** with its metadata — see
+[Resilience, connectivity & metadata](#resilience-connectivity--metadata).
 
 ## Prerequisites
 
-- **Node 18+**
+- **Node 18+** to build/run (Node 20+ for `npm test`)
 - **A running PlanDev backend** reachable on this machine, with at least one plan
   that has a **completed simulation**. Defaults assume the standard local
   deployment:
@@ -168,11 +164,11 @@ The plugin (`plugin/src/`) registers its providers with OpenMCT:
 
 | File | Role |
 |---|---|
-| [`plandev-api.ts`](plugin/src/plandev-api.ts) | Framework- and **auth-agnostic** typed client over PlanDev's Hasura GraphQL — sends no credentials (the host proxy attaches them); 6-way concurrency cap + per-request timeouts. **Intentionally self-contained** (owns its ~6 queries + result types) rather than depending on `@plandev/api` — see the memo. |
-| [`object-provider.ts`](plugin/src/object-provider.ts) | Resolves any tree node (Root / Plan / Sim / Resource / Plan-object / status) to an OpenMCT domain object. Wrapped so a failed load surfaces a toast + placeholder, never a crash. |
-| [`composition-provider.ts`](plugin/src/composition-provider.ts) | Lists each container's children lazily: Root→Plans, Plan→Sims, Sim→Activities+Resources. Surfaces empty/unreachable states as tree nodes. *Dynamic* — refreshes the tree in place on Reload. |
+| [`plandev-api.ts`](plugin/src/plandev-api.ts) | Framework- and **auth-agnostic** typed client over PlanDev's Hasura GraphQL — sends no credentials (the host proxy attaches them); 6-way concurrency cap + per-request timeouts. **Intentionally self-contained** (owns its ~10 read queries + result types) rather than depending on `@plandev/api` — see the memo. |
+| [`object-provider.ts`](plugin/src/object-provider.ts) | Resolves any tree node (Root / Plan / Sim / Resource / Activities / External Events / status) to an OpenMCT domain object — enriching resources with units + format and plan/sim/resource objects with inspector metadata. Wrapped so a failed load surfaces a toast + placeholder, never a crash. |
+| [`composition-provider.ts`](plugin/src/composition-provider.ts) | Lists each container's children lazily: Root→Plans, Plan→Sims (+ External Events), Sim→Activities+Resources. Surfaces empty/unreachable states as tree nodes. *Dynamic* — on Reload it diffs children by a per-child signature (a sim's includes its status) and refreshes the tree in place. |
 | [`telemetry-provider.ts`](plugin/src/telemetry-provider.ts) | Historical telemetry: windows the resource's (cached) sampled datums to the request, min/max-decimates real-profile plots to the point budget, and alerts (doesn't spin) on a load failure. |
-| [`inspector-view.ts`](plugin/src/inspector-view.ts) | The "PlanDev" inspector panels — plan/sim metadata and selected-activity (span id / arguments / computed attributes) — plus "Open in PlanDev" backlinks. |
+| [`inspector-view.ts`](plugin/src/inspector-view.ts) | The "PlanDev" inspector panels for the selected object — plan (owner/model/tags/…), sim (status), resource (unit/description), activity, and external event (key/source/attributes), nested args pretty-printed — plus "Open in PlanDev" backlinks. |
 | [`plan-object.ts`](plugin/src/plan-object.ts) | Builds OpenMCT Plan bodies — a sim's activity spans (grouped by type, enriched with span id / arguments / computed attributes) and a plan's external events (grouped by event type). |
 | [`sample.ts`](plugin/src/sample.ts) / [`metadata.ts`](plugin/src/metadata.ts) | Port of PlanDev's `sampleProfiles` (+ min/max decimation) and `ValueSchema`→OpenMCT metadata mapping (incl. enum/state telemetry). |
 | [`identifiers.ts`](plugin/src/identifiers.ts) | Self-describing object keys. Resource names are URL-encoded so names with `/` or `:` (e.g. `/data/line_count`) round-trip safely through OpenMCT's keyStrings. |
@@ -228,8 +224,9 @@ Things that are deliberately the simplest-thing-that-works, not production choic
   `minActivityDurationMs` is set.
 - **Resource time is anchored to the plan start** (matching `plandev-ui`'s internal-sim
   path); sims starting at an offset from plan start aren't handled specially.
-- **Displays are view-only** and provider-supplied; auth is gateway-login with a
-  demo username; the host proxy is a minimal dev server.
+- **Displays are view-only** and provider-supplied; auth is **server-side** (the host
+  proxy injects a service token + pinned role — the plugin sends none); the host is a
+  minimal dev server.
 
 ## Close the U (predicts vs actuals)
 
@@ -295,11 +292,10 @@ where the tutorial's realtime server comes in; see [Next steps](#next-steps).
   ticks in and diverges live. Builds on the static `Predict vs Actual` plots above.
 - A bundled **demo plan + minimal mission model** so the example is runnable without
   an existing PlanDev plan.
-- **Richer activity metadata** — surface each span's arguments / computed attributes
-  (already fetched in `span.attributes`) in an activity inspector panel; optionally
-  join the source directive for authored args/tags.
+- **Time Strip view** — stack the plan (Gantt), predict resources, and external events
+  on one shared time axis: the "plan + predicts together" ops view.
 
 > **Note:** `plandev-api.ts` is intentionally **not** migrated to the shared
-> `@plandev/api` package. A 6-query, read-only browser consumer is better off owning
-> its thin query+type set than coupling to the UI's query selections; `@plandev/api`
-> is the right call for broad / write-heavy consumers. See the integration memo.
+> `@plandev/api` package. A read-only browser consumer with its own ~10 queries is better
+> off owning that thin query+type set than coupling to the UI's query selections;
+> `@plandev/api` is the right call for broad / write-heavy consumers. See the integration memo.
