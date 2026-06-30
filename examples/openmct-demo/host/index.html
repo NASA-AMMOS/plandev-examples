@@ -63,19 +63,9 @@
         openmct.install(openmct.plugins.Timelist());
         openmct.install(openmct.plugins.LADTable());
 
-        // Ambient PlanDev connectivity light in the status bar: polls a health
-        // endpoint and shows green ("PlanDev is connected") / yellow ("offline").
-        // Complements the plugin's per-action error toasts + the tree status node.
-        openmct.install(
-          openmct.plugins.URLIndicator({
-            url: cfg.healthUrl || '/api/health',
-            label: 'PlanDev',
-            interval: 15000,
-            iconClass: 'icon-database',
-          }),
-        );
-
-        // The PlanDev integration: Plans → Sims → Resources + Activities.
+        // The PlanDev integration: Plans → Sims → Resources + Activities. The plugin
+        // self-installs the status-bar connectivity light (from cfg.healthUrl) and a
+        // "Set conductor to plan span" action, so it's self-sufficient in any host.
         openmct.install(openmctPlandev(cfg));
 
         // Open the time conductor on the latest plan's span (fixed mode).

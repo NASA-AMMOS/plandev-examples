@@ -29,10 +29,12 @@ the OpenMCT side.
 
 ### What this is / isn't
 
-- **Is:** a throwaway-grade spike to validate the integration shape (object tree,
-  telemetry mapping, plan-as-Gantt, predict-vs-actual overlay) against a live backend.
-- **Isn't:** supported, secure, performance-tuned, or API-stable. Several behaviors
-  are deliberately the simplest thing that works (see [Demo-grade simplifications](#demo-grade-simplifications)).
+- **Is:** a working reference for the integration shape (object tree, telemetry mapping,
+  plan-as-Gantt, predict-vs-actual overlay) against a live PlanDev backend.
+- **Isn't:** a supported/published package, or hardened for an exposed deployment out of
+  the box (the host is a minimal dev server). It targets **historical** data by design.
+  Several behaviors are deliberately the simplest thing that works (see
+  [Demo-grade simplifications](#demo-grade-simplifications)).
 
 | Tree (Plans → Sims → Resources) | Ready-made Resource Plot | Activities as a Gantt |
 |---|---|---|
@@ -113,7 +115,7 @@ Two layers, both optional:
 | key | default | meaning |
 |---|---|---|
 | `graphqlUrl` | `/api/graphql` | Hasura endpoint — a same-origin proxy path that attaches auth (see [Authentication](#authentication)) |
-| `healthUrl` | `/api/health` | liveness endpoint for the status-bar connectivity light |
+| `healthUrl` | `/api/health` | liveness endpoint; when set, the plugin self-installs the status-bar connectivity light (`URLIndicator`). Omit to skip the light |
 | `planDevUiUrl` | `''` | base URL of the PlanDev (Aerie) UI for "Open in PlanDev" backlinks; e.g. `http://localhost:3000`. Omit to hide the link |
 | `namespace` | `plandev` | OpenMCT namespace for PlanDev objects |
 | `minActivityDurationMs` | `0` | floor for zero-duration activity spans so they show as bars; e.g. `600000` (10 min) for a denser Gantt at full zoom |
@@ -157,9 +159,17 @@ Pinning the role server-side also avoids *"requested role is not in allowed role
 fixed to one the service account is allowed, instead of the client requesting an arbitrary
 one.
 
-> **Dropping the plugin into your own OpenMCT host?** Auth/CORS is your deployment's job
-> (true of any OpenMCT telemetry plugin). Point `graphqlUrl` at a proxy that injects the
-> token + role — `host/server.mjs` is a working reference to copy or adapt.
+> **Dropping the plugin into your own OpenMCT host?** The build is a single IIFE exposing
+> the global `openmctPlandev`; install it with `openmct.install(openmctPlandev(config))`
+> after the built-in `Plot` / `TelemetryTables` / `PlanLayout` plugins and before
+> `openmct.start()`. It self-installs its connectivity light and conductor action, so it
+> needs no host glue. Auth/CORS is your deployment's job (true of any OpenMCT telemetry
+> plugin): point `graphqlUrl` at a same-origin proxy or gateway that attaches the token +
+> role — `host/server.mjs` is a working reference, and an OIDC/SSO gateway works the same
+> way since the plugin sends no credentials. Under a basePath (e.g. `/openmct/`), note that
+> a leading-slash `graphqlUrl` like `/api/graphql` is origin-relative — route that path to
+> Hasura at the origin. (Hosts with a plugin-discovery convention can wire the manifest
+> however they prefer; the plugin doesn't impose one.)
 
 ## How it works
 
@@ -172,6 +182,7 @@ The plugin (`plugin/src/`) registers its providers with OpenMCT:
 | [`composition-provider.ts`](plugin/src/composition-provider.ts) | Lists each container's children lazily: Root→Plans, Plan→Sims (+ External Events), Sim→Activities+Resources. Surfaces empty/unreachable states as tree nodes. *Dynamic* — on Reload it diffs children by a per-child signature (a sim's includes its status) and refreshes the tree in place. |
 | [`telemetry-provider.ts`](plugin/src/telemetry-provider.ts) | Historical telemetry: windows the resource's (cached) sampled datums to the request, min/max-decimates real-profile plots to the point budget, and alerts (doesn't spin) on a load failure. |
 | [`inspector-view.ts`](plugin/src/inspector-view.ts) | The "PlanDev" inspector panels for the selected object — plan (owner/model/tags/…), sim (status), resource (unit/description), activity, and external event (key/source/attributes), nested args pretty-printed — plus "Open in PlanDev" backlinks. |
+| [`conductor-action.ts`](plugin/src/conductor-action.ts) | The "Set conductor to plan span" right-click action — derives a plan/sim's bounds from its attached metadata and snaps the time conductor (fixed mode), feature-detecting the 3.x/4.x time API. |
 | [`plan-object.ts`](plugin/src/plan-object.ts) | Builds OpenMCT Plan bodies — a sim's activity spans (grouped by type, enriched with span id / arguments / computed attributes) and a plan's external events (grouped by event type). |
 | [`sample.ts`](plugin/src/sample.ts) / [`metadata.ts`](plugin/src/metadata.ts) | Port of PlanDev's `sampleProfiles` (+ min/max decimation) and `ValueSchema`→OpenMCT metadata mapping (incl. enum/state telemetry). |
 | [`identifiers.ts`](plugin/src/identifiers.ts) | Self-describing object keys. Resource names are URL-encoded so names with `/` or `:` (e.g. `/data/line_count`) round-trip safely through OpenMCT's keyStrings. |
@@ -184,8 +195,13 @@ samples internal-sim resources) and emitted as `{ utc: epochMs, value }` datums.
 The plugin assumes PlanDev can be slow, unreachable, or partial, and tries to make
 that legible rather than silent:
 
-- **Connectivity light** — a status-bar `URLIndicator` polls `/api/health` (Hasura's
-  `/healthz`) and shows green ("PlanDev is connected") / yellow ("offline").
+- **Connectivity light** — the plugin self-installs a status-bar `URLIndicator` (from
+  `healthUrl`) that polls `/api/health` (Hasura's `/healthz`) and shows green ("PlanDev
+  is connected") / yellow ("offline"). It travels with the plugin, so it works in any
+  host, not just the demo's.
+- **Set conductor to plan span** — PlanDev data is historical, so a right-click action on
+  a plan or sim snaps the time conductor to its span (fixed mode). This is how you land on
+  the data in a host whose conductor opens in realtime or on an unrelated range.
 - **Error toasts** — a failed plan/sim/resource/telemetry load raises a dismissible
   error notification with the reason (the upstream/proxy message is surfaced, not just
   a status code); identical messages are de-duped within a few seconds.
@@ -210,7 +226,7 @@ that legible rather than silent:
 Things that are deliberately the simplest-thing-that-works, not production choices:
 
 - **Actuals are synthesized**, not real telemetry — predict + drift/noise ([actuals.ts](plugin/src/actuals.ts)).
-- **Historical only** — completed sims; no realtime streaming.
+- **Historical by design** — the plugin targets completed sims; live telemetry streaming is intentionally out of scope.
 - **Decimation** — real (continuous) profiles are **min/max-decimated** to the plot's
   point budget (`strategy:'minmax'` + `size` ≈ pixel width), preserving spikes, so a
   profile with thousands of segments stays responsive. Sampled datums are cached, so
@@ -253,16 +269,14 @@ replay we implement the tutorial's **historical-provider pattern**
 to run. The actuals perturbation is a pure function of `(timestamp, resource)`, so
 the actual line is stable across pans/zooms.
 
-The **live** variant — streaming actuals over a WebSocket, shifted to "now" — is
-where the tutorial's realtime server comes in; see [Next steps](#next-steps).
-
 ## Troubleshooting
 
 - **Resources show no data / "nothing appears."** The time conductor must overlap
   the simulation's time range. A resource opened with the conductor outside the
-  sim's span plots empty — that's expected, not an error. Set the conductor to the
-  sim's range (the demo auto-opens on the latest plan's span; older plans/sims may
-  need you to adjust it).
+  sim's span plots empty — that's expected, not an error. Right-click the plan or sim →
+  **Set conductor to plan span** to jump there (fixed mode), or set the range manually.
+  (The demo host also auto-opens on the latest plan's span; older plans/sims may need
+  adjusting.)
 - **The "PlanDev" status light is yellow.** The backend isn't reachable at
   `/api/health` (Hasura `/healthz`). Check the server is up and the proxy targets
   (`PLANDEV_HASURA_URL`, etc.) are correct; you'll also see an error toast on the
@@ -290,9 +304,6 @@ where the tutorial's realtime server comes in; see [Next steps](#next-steps).
 
 ## Next steps
 
-- **Live close-the-U**: stream actuals over a WebSocket (the OpenMCT tutorial's
-  realtime-server pattern), shifting both predict and actual to "now", so the actual
-  ticks in and diverges live. Builds on the static `Predict vs Actual` plots above.
 - A bundled **demo plan + minimal mission model** so the example is runnable without
   an existing PlanDev plan.
 - **Time Strip view** — stack the plan (Gantt), predict resources, and external events

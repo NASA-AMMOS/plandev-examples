@@ -19,6 +19,7 @@
  *  auth; `host/server.mjs` is a reference.)
  */
 import { createCompositionProvider } from './composition-provider';
+import { registerConductorAction } from './conductor-action';
 import { RESOURCE_TYPE } from './constants';
 import { PluginContext } from './context';
 import { ROOT_KEY } from './identifiers';
@@ -35,6 +36,12 @@ export interface OpenmctPlandevConfig {
    * `host/server.mjs` does this server-side with a service account + pinned role).
    */
   graphqlUrl: string;
+  /**
+   * Liveness endpoint for the status-bar connectivity light (Hasura's `/healthz`, or a
+   * same-origin proxy path to it). When set, the plugin self-installs a `URLIndicator`
+   * so the light travels with it in any host. Omit to skip the light.
+   */
+  healthUrl?: string;
   /** OpenMCT namespace for PlanDev objects. Defaults to `plandev`. */
   namespace?: string;
   /** Base URL of the PlanDev (Aerie) UI for "Open in PlanDev" backlinks in the
@@ -95,6 +102,26 @@ export default function openmctPlandev(config: OpenmctPlandevConfig) {
     openmct.inspectorViews.addProvider(
       createPlandevActivityInspectorView(config.planDevUiUrl ?? ''),
     );
+
+    // A context-menu action to snap the conductor to a plan/sim span — PlanDev data is
+    // historical, so this is how a planner lands on the data in a host whose default
+    // clock is realtime or set elsewhere (the demo host pre-sets it; others may not).
+    registerConductorAction(openmct, namespace);
+
+    // Ambient connectivity light in the status bar (green = reachable / yellow = offline),
+    // self-installed so it travels with the plugin instead of relying on the host. Polls
+    // the configured health endpoint; complements the per-action error toasts + tree
+    // status node. Guarded: skipped if the host's openmct lacks the bundled URLIndicator.
+    if (config.healthUrl && typeof openmct.plugins?.URLIndicator === 'function') {
+      openmct.install(
+        openmct.plugins.URLIndicator({
+          iconClass: 'icon-database',
+          interval: 15_000,
+          label: 'PlanDev',
+          url: config.healthUrl,
+        }),
+      );
+    }
 
     // OpenMCT's Reload action only reloads the open object view, never the browse
     // tree. So on reload of a PlanDev node we drop caches (fresh fetch) AND refresh

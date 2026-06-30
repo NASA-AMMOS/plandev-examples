@@ -90,6 +90,39 @@ export interface InspectorViewProvider {
   view(selection: InspectorSelection): InspectorView;
 }
 
+/** Time conductor bounds in epoch milliseconds. */
+export interface TimeBounds {
+  start: number;
+  end: number;
+}
+
+/** The slice of OpenMCT's Time API we touch. Method names differ across 3.x/4.x, so
+ * every method is optional and callers feature-detect (see `setConductorBounds`). */
+export interface TimeAPI {
+  setMode?(mode: string, bounds?: TimeBounds): void;
+  setBounds?(bounds: TimeBounds): void;
+  bounds?(bounds?: TimeBounds): TimeBounds;
+  stopClock?(): void;
+  setClock?(key: string): void;
+  setTimeSystem?(key: string, bounds?: TimeBounds): void;
+}
+
+/** A context-menu / toolbar action (the slice we register). `objectPath[0]` is the
+ * selected object; `appliesTo` gates visibility and must be synchronous. */
+export interface ActionDefinition {
+  key: string;
+  name: string;
+  description?: string;
+  cssClass?: string;
+  group?: string;
+  priority?: number;
+  appliesTo(objectPath: DomainObject[], viewProvider?: unknown): boolean;
+  invoke(objectPath: DomainObject[], viewProvider?: unknown): void;
+}
+
+/** A factory for one of OpenMCT's bundled plugins (e.g. `URLIndicator`). */
+export type PluginFactory = (options?: Record<string, unknown>) => unknown;
+
 export interface OpenMCT {
   types: { addType(key: string, definition: Record<string, unknown>): void };
   objects: {
@@ -100,6 +133,14 @@ export interface OpenMCT {
   telemetry: { addProvider(provider: TelemetryProvider): void };
   notifications: Notifications;
   inspectorViews: { addProvider(provider: InspectorViewProvider): void };
+  /** Register a custom action (context menu / toolbar). */
+  actions: { register(action: ActionDefinition): void };
+  /** Install another plugin — used to self-install the bundled `URLIndicator` light. */
+  install(plugin: unknown): void;
+  /** OpenMCT's bundled plugin factories (host-dependent — feature-detect before calling). */
+  plugins: Record<string, PluginFactory>;
+  /** The time conductor API (see `TimeAPI`). */
+  time: TimeAPI;
   /** Emits `'reload'` (with the reloaded object) when a planner uses the Reload action. */
   objectViews: {
     on(event: string, callback: (domainObject: DomainObject) => void): void;
