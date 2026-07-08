@@ -4,7 +4,7 @@
   "description": "Reference examples for developing Aerie Actions",
   "main": "index.js",
   "workspaces": [
-    "examples/*"
+    "*-action"
   ],
   "private": true,
   "scripts": {

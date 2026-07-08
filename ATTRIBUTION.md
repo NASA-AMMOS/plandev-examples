@@ -9,7 +9,7 @@ All upstream repos referenced are at https://github.com/NASA-AMMOS.
 | Path | Initially derived from | Notes |
 |---|---|---|
 | [`00-tutorial/`](00-tutorial/) | [`aerie-modeling-tutorial`](https://github.com/NASA-AMMOS/aerie-modeling-tutorial) | End state of the official docs tutorial. Package renamed `missionmodel` → `tutorial`. |
-| [`libraries/power/`](libraries/power/) | [`aerie-simple-model-power`](https://github.com/NASA-AMMOS/aerie-simple-model-power) | PEL machinery, battery + solar array models. Package renamed `demosystem` → `gov.nasa.jpl.aerie.power`. PEL generator script moved to [`tools/pel_generator.py`](tools/pel_generator.py). |
+| [`libraries/power/`](libraries/power/) | [`aerie-simple-model-power`](https://github.com/NASA-AMMOS/aerie-simple-model-power) | PEL machinery, battery + solar array models. Package renamed `demosystem` → `gov.nasa.jpl.aerie.power`. PEL generator script moved to [`tools/pel_java_generator.py`](tools/pel_java_generator.py). |
 | [`libraries/data/`](libraries/data/) | [`aerie-simple-model-data`](https://github.com/NASA-AMMOS/aerie-simple-model-data) (`model/` subdir) | Multi-bin onboard storage + canonical data activities. Package renamed `gov.nasa.jpl.aerie_data` → `gov.nasa.jpl.aerie.data`. |
 | [`libraries/geometry/`](libraries/geometry/) | [`aerie-multimission-models-bb`](https://github.com/NASA-AMMOS/aerie-multimission-models-bb) (Blackbird) + [`aerie-orbiter-model`](https://github.com/NASA-AMMOS/aerie-orbiter-model) | SPICE infrastructure originates in multimission-bb; orbital event generators and resource models were consolidated here from the orbiter repo during the 2026-03 migration. |
 | [`libraries/gnc/`](libraries/gnc/) | [`aerie-multimission-models-bb`](https://github.com/NASA-AMMOS/aerie-multimission-models-bb) | Attitude / targeting code from Blackbird. Package renamed `missionmodel.gnc` → `gov.nasa.jpl.aerie.gnc`. |
@@ -26,7 +26,7 @@ All upstream repos referenced are at https://github.com/NASA-AMMOS.
 | [`examples/actions/`](examples/actions/) | [`aerie-action-examples`](https://github.com/NASA-AMMOS/aerie-action-examples) | Node.js Aerie actions (`ascii-art`, `basic`, `fresh`). |
 | [`examples/ui-plugins/`](examples/ui-plugins/) | [`aerie-ui-plugin-examples`](https://github.com/NASA-AMMOS/aerie-ui-plugin-examples) | Aerie UI plugin examples (TypeScript). |
 | [`archive/lander/`](archive/lander/) | [`aerie-lander`](https://github.com/NASA-AMMOS/aerie-lander) | Unmaintained legacy InSight-derived reference. Kept for posterity only. |
-| [`tools/pel_generator.py`](tools/pel_generator.py) | [`aerie-simple-model-power`](https://github.com/NASA-AMMOS/aerie-simple-model-power) | Originally at `python/pel_generator.py` in the source repo. |
+| [`tools/pel_java_generator.py`](tools/pel_java_generator.py) | [`aerie-simple-model-power`](https://github.com/NASA-AMMOS/aerie-simple-model-power) | Originally at `python/pel_generator.py` in the source repo. |
 
 ## A note on file-level provenance
 

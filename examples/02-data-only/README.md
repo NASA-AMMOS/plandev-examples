@@ -24,7 +24,7 @@ Demo-specific:
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `initialMaxVolume` | 1e10 (10 Gb) | Onboard storage limit in bits |
-| `initialDataRate` | 1e4 (10 Kbps) | Playback data rate in bits per second |
+| `initialDatarate` | 1e4 (10 Kbps) | Playback data rate in bits per second |
 
 ## Resources
 

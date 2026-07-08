@@ -2,7 +2,7 @@
 
 Reusable spacecraft geometry subsystem models for Aerie mission models. Provides SPICE-backed orbital mechanics, event generation, and reusable resource registrations.
 
-This library lets a mission compute geometric quantities from SPICE kernel data along its spacecraft's trajectory — spacecraft-to-body distance and speed, sub-spacecraft and illumination angles, Sun–body–spacecraft angle, orbit period and inclination, body half-angle size, and more — plus "spawner" activities that schedule spacecraft eclipses, occultations, periapses, and apoapses.
+This library lets a mission compute geometric quantities from SPICE kernel data along its spacecraft's trajectory — spacecraft-to-body distance and speed, sub-spacecraft and illumination angles, Sun–body–spacecraft angle, orbit period and inclination, body half-angle size, and more. It also **detects** discrete orbital events (spacecraft eclipses, occultations, periapses, apoapses); the "spawner" activities that turn those detections into timeline activities live in the orbiter example, not this library (see below).
 
 ## What it models
 
@@ -29,11 +29,18 @@ To point the model at the right spacecraft, set its NAIF ID — for the orbiter 
 - `GenericGeometryResources` — the set of resources every geometry model registers (positions, angles, events)
 - `SpiceResourcePopulater` — drives SPICE calls and writes the resource values
 - `BodyGeometryGenerator`, `VariableTimeStepGenerator` — sample-time strategies
-- Direct SPICE access: `SpiceDirectTimeDependentStateCalculator`, `SpiceDirectEventGenerator`
-- Event spawners (in `geometry.activities.spawner`): `AddApoapsis`, `AddPeriapsis`, `AddOccultations`, `AddSpacecraftEclipses`
-- Atomic events (in `geometry.activities.atomic`): `Apoapsis`, `Periapsis`, `EnterOccultation`, `ExitOccultation`, `SpacecraftEnterEclipse`, `SpacecraftExitEclipse`
+- Direct SPICE access: `SpiceDirectTimeDependentStateCalculator`, `SpiceDirectEventGenerator` (the event *detection* primitive)
 - Return objects: `RADec`, `LatLonCoord`, `OrbitConicElements`, `SubPointInformation`, `IlluminationAngles`
 - Globals: `AbsoluteClock`, `JPLTimeConvertUtility`, `Window`
+
+> **Event activities live in the orbiter example, not this library.** The spawner activities
+> (`AddApoapsis`, `AddPeriapsis`, `AddOccultations`, `AddSpacecraftEclipses`) and the atomic
+> events they emit (`Apoapsis`, `Periapsis`, `EnterOccultation`, `ExitOccultation`,
+> `SpacecraftEnterEclipse`, `SpacecraftExitEclipse`) are defined in
+> [examples/05-orbiter](../../examples/05-orbiter/) under
+> `examples.orbiter.geometry.activities.{spawner,atomic}`. They wrap this library's
+> `SpiceDirectEventGenerator`. This library ships the detection primitives; the mission model
+> decides how to surface them as activities.
 
 ## SPICE kernels
 

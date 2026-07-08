@@ -19,14 +19,16 @@ plandev-examples/
 │   ├── 01-power-only/
 │   ├── 02-data-only/
 │   ├── 03-power-and-data/
-│   ├── 04-orbiter/                 # from aerie-orbiter-model (refactored to use libraries)
-│   ├── 05-constraints-and-scheduling/
-│   ├── 06-advanced-resources/      # Streamline resource types beyond Discrete
-│   ├── 07-activity-patterns/
-│   ├── 08-testing-patterns/
-│   ├── 09-external-events/
+│   ├── 04-hopper/                  # lunar hopper — compose power + data at small scale
+│   ├── 05-orbiter/                 # from aerie-orbiter-model (refactored to use libraries)
+│   ├── 06-constraints-and-scheduling/
+│   ├── 07-advanced-resources/      # Streamline resource types beyond Discrete
+│   ├── 08-activity-patterns/
+│   ├── 09-testing-patterns/
+│   ├── 10-external-events/
 │   ├── actions/                    # from aerie-action-examples
-│   └── ui-plugins/                 # from aerie-ui-plugin-examples
+│   ├── ui-plugins/                 # from aerie-ui-plugin-examples
+│   └── openmct-demo/               # experimental OpenMCT integration (TypeScript)
 ├── archive/lander/                 # Legacy reference (from aerie-lander)
 └── tools/                          # PEL generator, SPICE helpers
 ```
