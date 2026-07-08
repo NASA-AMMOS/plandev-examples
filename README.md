@@ -11,12 +11,23 @@ subsystem building blocks (power, data, geometry) along the way.
 > path below — the examples are the runnable companions to the docs. See
 > [Concepts & docs](#concepts--docs).
 
+## Requirements
+
+- **Java 21** (via Gradle toolchain — will auto-download if needed)
+- **Git LFS** for SPICE kernel files used by the orbiter and geometry library (~238 MB).
+  Install with `git lfs install` before cloning. If you already cloned without LFS, run
+  `git lfs pull` to fetch the kernel files.
+- **GitHub credentials** for Aerie Maven packages:
+  ```bash
+  export GITHUB_USER=your-username
+  export GITHUB_TOKEN=ghp_your-token  # needs read:packages scope
+  ```
+  If you have not done so before, you need to create a **[personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) in your GitHub account** that includes the `read-packages` scope, so that you can download the PlanDev Maven packages from the [GitHub Maven package registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry). Keep track of the username and token after you generate it.
+
+
 ## Quick Start
 
 ```bash
-# Prerequisites: Java 21, Git LFS, GITHUB_USER and GITHUB_TOKEN env vars
-# (GITHUB_TOKEN needs read:packages scope for GitHub Packages)
-
 git lfs install          # one-time setup for SPICE kernel files
 git clone https://github.com/NASA-AMMOS/plandev-examples.git
 cd plandev-examples
@@ -162,18 +173,6 @@ Aerie / PlanDev documentation; the examples here are the worked companions to it
 - Uploading a model and running a simulation
 
 Docs: <https://nasa-ammos.github.io/aerie-docs/>
-
-## Requirements
-
-- **Java 21** (via Gradle toolchain — will auto-download if needed)
-- **Git LFS** for SPICE kernel files used by the orbiter and geometry library (~238 MB).
-  Install with `git lfs install` before cloning. If you already cloned without LFS, run
-  `git lfs pull` to fetch the kernel files.
-- **GitHub credentials** for Aerie Maven packages:
-  ```bash
-  export GITHUB_USER=your-username
-  export GITHUB_TOKEN=ghp_your-token  # needs read:packages scope
-  ```
 
 ## Aerie Version
 
