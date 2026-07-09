@@ -3454,7 +3454,7 @@
         "initialSOC": 100,
         "batteryCapacity": 30
       },
-      "solarArrayConfig": {
+      "powerSourceConfig": {
         "otherLosses": 0.9,
         "arrayMechArea": 16,
         "packingFactor": 1,
