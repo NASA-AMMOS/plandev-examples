@@ -68,6 +68,7 @@ comfortable with the core workflow.
 |-----------|-----------|----------|
 | `examples/actions/` | **Actions** — server-side automation that runs against a plan (validation, calling external services) *after* a model exists | TypeScript / Node |
 | `examples/ui-plugins/` | **UI plugins** — Aerie web-UI customizations (e.g. showing Mars LMST or a fixed timezone on the timeline) | TypeScript / JS |
+| `external-model-backends/` | **External model backends** — run a *foreign* simulator (Blackbird, or a pure-Python model) that plugs into PlanDev over HTTP as an `external` model, plug-and-play via Docker. See its [README](external-model-backends/README.md) | Python / JVM |
 
 ## Repository Structure
 
@@ -93,6 +94,7 @@ plandev-examples/
 │   ├── 10-external-events/
 │   ├── actions/                    # Other surface: server-side automation (TypeScript)
 │   └── ui-plugins/                 # Other surface: Aerie UI customizations (TypeScript)
+├── external-model-backends/        # Foreign simulators that plug in over HTTP (Blackbird, Python)
 ├── archive/lander/                 # Legacy reference (unmaintained)
 └── tools/                          # PEL generator (see tools/README.md)
 ```

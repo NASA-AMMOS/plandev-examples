@@ -1,0 +1,7 @@
+# The JNISpice jar is not redistributable via this repo — provide it locally before building
+# (see vendor/README.md). It is also caught by the repo-root .gitignore `*.jar` rule.
+vendor/*.jar
+
+# Local build artifacts
+*.class
+__pycache__/
