@@ -22,9 +22,11 @@ needs zero per-framework code: a backend is just an adapter that conforms to the
 
 ```
   1. run the backend container(s)          docker compose up --build
-                    │  (:5011 blackbird, :5002 python)
+                    │  (in-cluster, on PlanDev's network; no host ports)
                     ▼
-  2. point PlanDev at them                 merlin env: EXTERNAL_MODEL_BACKENDS=[{name,url}, …]
+  2. point PlanDev at them                 merlin + workers env:
+                    │                        EXTERNAL_MODEL_BACKENDS=[{name,url}, …]
+                    │                        url = http://blackbird-adapter:5011
                     │
                     ▼
   3. discover models                       getExternalModelCatalog  → polls each backend GET /models
@@ -38,17 +40,29 @@ needs zero per-framework code: a backend is just an adapter that conforms to the
 
 ### 1. Run the backend container(s)
 
+Adapters run **in-cluster**, joining PlanDev's own Docker network as peers of `aerie_merlin` and
+`aerie_sequencing`. They are reached by **service name** and are deliberately **not published to the
+host** — an adapter is an operator-run component inside the trust boundary, not a third-party
+endpoint PlanDev calls out to. Plan data never leaves the cluster.
+
 ```bash
 cd external-model-backends
 
+# Point at your PlanDev deployment's network (find it with `docker network ls`):
+export PLANDEV_NETWORK=plandev-dupe-1_default
+
 # The Blackbird image needs a JNISpice jar in ./blackbird/vendor first — see blackbird/vendor/README.md.
+# If your jar isn't the pinned v2022-05, override ONLY the filename:
+#   export JNISPICE_JAR=JNISpice-N0067.jar
 docker compose up --build          # both backends
 docker compose up --build python   # just the pure-Python one (no jar needed)
 ```
 
 Or run either on its own — see [`blackbird/README.md`](blackbird/README.md) and
 [`python/README.md`](python/README.md). The Python backend also runs with **no Docker and no
-dependencies**: `python3 python/py_model_server.py 5002`.
+dependencies**: `python3 python/py_model_server.py 5002` — handy for hacking on an adapter, though
+merlin must then reach it via `host.docker.internal`, which puts the adapter outside the cluster.
+Prefer the in-cluster containers for anything but local development.
 
 ### 2. Point PlanDev at the backends
 
@@ -58,15 +72,19 @@ backend's **base** URL (merlin appends `/models`, `/introspect`, `/simulate`, `/
 the SSRF/trust boundary: **users never type URLs**; they pick a configured backend and a model it
 discovers.
 
-In PlanDev's `docker-compose.yml`, on the `aerie_merlin` service:
+In PlanDev's `docker-compose.yml`, on the `aerie_merlin` service **and on every merlin worker**:
 
 ```yaml
 environment:
-  EXTERNAL_MODEL_BACKENDS: '[{"name":"blackbird-lab","url":"http://host.docker.internal:5011"},{"name":"python-lab","url":"http://host.docker.internal:5002"}]'
+  EXTERNAL_MODEL_BACKENDS: '[{"name":"blackbird-lab","url":"http://blackbird-adapter:5011"},{"name":"python-lab","url":"http://python-adapter:5002"}]'
 ```
 
-`host.docker.internal` lets the merlin container reach the backend containers running on your host.
-(If you run everything on one Docker network instead, use the service names + internal ports.)
+Because the adapters are on the same network, merlin reaches them by service name — no host
+exposure, exactly like `http://aerie_sequencing:27184`.
+
+> ⚠️ **Set this identically on merlin AND every `aerie_merlin_worker_*`.** merlin introspects
+> (registration) while the *workers* simulate. If only merlin has the config, a model registers and
+> shows its types correctly, then every simulation fails.
 
 ### 3. Discover models
 

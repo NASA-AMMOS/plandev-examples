@@ -1,26 +1,48 @@
-# External-model backends PlanDev connects to over HTTP.
+# External-model backends, deployed IN-CLUSTER as peers of PlanDev's own services.
 #
-# PlanDev's merlin-server reaches these on the host via `host.docker.internal` at the ports below.
-# After `docker compose up`, wire them into PlanDev by setting merlin's EXTERNAL_MODEL_BACKENDS env
-# var — see ./README.md ("Wire PlanDev to the backends").
+# These adapters join PlanDev's compose network and are reached by SERVICE NAME
+# (http://blackbird-adapter:5011), exactly like merlin reaches sequencing-server. They are
+# deliberately NOT published to the host: an adapter is an operator-run component inside the
+# trust boundary, not a third-party endpoint PlanDev calls out to. Plan data therefore never
+# leaves the cluster, and an adapter's exposure matches every other PlanDev service.
 #
-#   docker compose up --build         # build + run both
-#   docker compose up --build python  # just the pure-Python one (no JNISpice jar needed)
+#   # 1. Point at your PlanDev deployment's network (see `docker network ls`):
+#   export PLANDEV_NETWORK=plandev-dupe-1_default
+#   # 2. Blackbird only: drop a JNISpice jar in ./blackbird/vendor (see blackbird/vendor/README.md)
+#   docker compose up --build
+#   docker compose up --build python   # just the pure-Python one (no JNISpice jar needed)
 #
-# The blackbird service needs a JNISpice jar in ./blackbird/vendor first — see
-# ./blackbird/vendor/README.md.
+# Then set merlin's AND EVERY merlin worker's EXTERNAL_MODEL_BACKENDS to the service names —
+# see ./README.md ("Wire PlanDev to the backends"). Both must match, or a model will introspect
+# fine and then fail to simulate.
 
 services:
   blackbird:
     build:
       context: ./blackbird
+      # Defaults to the v2022-05 jar that matches jplTime 2025-10a. If you have a different
+      # SPICE toolkit version, export JNISPICE_JAR / JNISPICE_VERSION before `docker compose up`:
+      #   export JNISPICE_JAR=JNISpice-N0067.jar JNISPICE_VERSION=N0067
+      args:
+        JNISPICE_JAR: ${JNISPICE_JAR:-JNISpice-v2022-05.jar}
+        JNISPICE_VERSION: ${JNISPICE_VERSION:-v2022-05}
     image: plandev/blackbird-adapter
-    ports: ["5011:5011"]
+    container_name: blackbird-adapter
+    networks: [plandev]
     restart: unless-stopped
+    # In-cluster only — no host exposure. Uncomment ONLY for local debugging:
+    # ports: ["5011:5011"]
 
   python:
     build:
       context: ./python
     image: plandev/python-adapter
-    ports: ["5002:5002"]
+    container_name: python-adapter
+    networks: [plandev]
     restart: unless-stopped
+    # ports: ["5002:5002"]
+
+networks:
+  plandev:
+    external: true
+    name: ${PLANDEV_NETWORK:-plandev_default}

@@ -13,7 +13,15 @@
 # ---------- Stage 1: build Blackbird + jplTime + the demo power model ----------
 FROM maven:3.9-eclipse-temurin-21 AS builder
 
-# JNISpice jar (v2022-05 matches jplTime 2025-10a). Place it under ./vendor before building.
+# JNISpice jar. Place it under ./vendor before building.
+#   JNISPICE_JAR     — the FILENAME you dropped in ./vendor. Override this if you have a
+#                      different SPICE toolkit release (e.g. JNISpice-N0067.jar).
+#   JNISPICE_VERSION — the Maven COORDINATE jplTime's pom depends on, NOT a description of your
+#                      jar. Whatever file you supply is installed under this coordinate so
+#                      jplTime resolves it. Do NOT set it to your jar's release name: jplTime
+#                      2025-10a hard-requires v2022-05, and the build fails with
+#                      "Could not find artifact gov.nasa.jpl.spice:jnispice:jar:<yours>".
+#                      Change it only if jplTime changes the dependency.
 ARG JNISPICE_JAR=JNISpice-v2022-05.jar
 ARG JNISPICE_VERSION=v2022-05
 COPY vendor/${JNISPICE_JAR} /tmp/jnispice.jar
