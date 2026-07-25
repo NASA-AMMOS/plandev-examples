@@ -76,10 +76,17 @@ def bbtype_to_schema(bt):
     return {"type": "string"}  # map<>/list<>/custom -> string (best-effort)
 
 def fmt_param(bbtype, value):
+    """PlanDev SerializedValue -> the value shape Blackbird's .plan.json reader expects.
+
+    Deliberately NOT quoted for strings. Blackbird has two readers with different conventions: the
+    command-script path strips surrounding quotes (ReflectionUtilities.returnValueOf), but the
+    .plan.json path -- the one we use -- calls getAsString() with no stripping, so a quoted value
+    arrives with the quote characters embedded. Blackbird's own JSONPlanWriter emits strings bare,
+    which is the format to match. Verified against a real exported plan: ActivityEight's parameters
+    come back as "Earth"/"x", not "\\"Earth\\""/"\\"x\\"".
+    """
     if bbtype == "duration" and isinstance(value, (int, float)):
         return us_to_bbdur(int(value))
-    if bbtype == "string":
-        return '"%s"' % value
     return value
 
 # ---------- Blackbird invocation (classpath per model) ----------
@@ -150,10 +157,19 @@ def read_res_value(r):
         if tag == "BooleanValue":
             return e.text.strip().lower() == "true"
         return e.text  # StringValue, TimeValue (UTC string, matching the schema above)
-    # Fallback: a CUSTOM Comparable value type (Resource<V extends Comparable>, so V can be any
-    # user class -- List/Map are impossible). Blackbird names the tag <{SimpleClassName}Value> and
+    # Structured values. Only ACTIVITY PARAMETERS reach these -- a Resource<V extends Comparable>
+    # can never hold a List or Map -- but the reader is shared, so handle them here. Blackbird nests
+    # <Element index="N"> for lists and <Element index="key"> for structs, each wrapping an ordinary
+    # value tag, so the recursion is the same reader one level down.
+    lv = r.find("ListValue")
+    if lv is not None:
+        return [read_res_value(e) for e in lv.findall("Element")]
+    sv = r.find("StructValue")
+    if sv is not None:
+        return {e.get("index"): read_res_value(e) for e in sv.findall("Element")}
+    # Fallback: a CUSTOM Comparable value type. Blackbird names the tag <{SimpleClassName}Value> and
     # writes valueOut.toString(), so we cannot know the shape, but we CAN carry the text. That
-    # matches the "string" schema parse_res_specs assigns and beats dropping the resource silently.
+    # matches the "string" schema parse_res_specs assigns and beats dropping the value silently.
     for e in r:
         if e.tag.endswith("Value") and e.text is not None:
             return e.text
@@ -209,8 +225,13 @@ def build_plan_json(plan_start, directives, workdir, param_types):
         params = []
         for pname, pval in (d.get("arguments") or {}).items():
             bt = ptypes.get(pname, "string")
-            v = fmt_param(bt, pval)
-            params.append({"name": pname, "type": bt, "value": v if isinstance(v, str) else json.dumps(v)})
+            # Emit the value NATIVELY, matching what Blackbird's own JSONPlanWriter produces -- that is
+            # the one shape its reader is guaranteed to accept, since writing and re-opening a plan
+            # round-trips exactly. Verified against a real export: float -> bare number 42.5,
+            # list<string> -> ["a","b","c"], map<string, string> -> {"k1":"v1"}, duration/time -> their
+            # formatted strings. Serializing those to JSON *text* instead (the old behavior) handed
+            # Blackbird a string where it expected an array, an object, or a number.
+            params.append({"name": pname, "type": bt, "value": fmt_param(bt, pval)})
         bb_id = str(uuid.uuid5(uuid.NAMESPACE_OID, "plandev-directive-" + str(d["id"])))
         directive_by_uuid[bb_id] = d["id"]
         acts.append({"type": typ, "start": start, "parameters": params, "notes": "", "id": bb_id, "parent": None})
@@ -236,13 +257,14 @@ def parse_output(xml_path, plan_start, sim_duration_us, initials, directive_by_u
             if a.findtext("Name") == "start": start = a.find("TimeValue").text
             if a.findtext("Name") == "span":  span = a.find("DurationValue").text
         for p in inst.findall("./Parameters/Parameter"):
-            pn = p.findtext("Name")
-            dv, sv = p.find("DurationValue"), p.find("StringValue")
-            iv, fv = p.find("IntegerValue"), p.find("DoubleValue")
-            if dv is not None:   args[pn] = bb_dur_to_us(dv.text)
-            elif fv is not None: args[pn] = float(fv.text)
-            elif iv is not None: args[pn] = int(iv.text)
-            elif sv is not None: args[pn] = sv.text
+            # Use the SAME reader as resources. This was a hand-rolled second copy handling only
+            # Duration/Double/Integer/String, so a Time, Boolean, List, Map, or custom-typed argument
+            # was silently dropped from the span -- the activity looked like it ran with fewer
+            # arguments than it was given. PlanDev's ingest gate now flags exactly that as a missing
+            # required parameter, which is how it surfaced.
+            v = read_res_value(p)
+            if v is not None:
+                args[p.findtext("Name")] = v
         spans.append({"spanId": sid, "type": inst.findtext("Type"),
                       "startOffset": bb_time_to_us_offset(start, plan_start),
                       "duration": bb_dur_to_us(span), "arguments": args,

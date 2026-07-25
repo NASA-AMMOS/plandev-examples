@@ -1,0 +1,175 @@
+{
+    "activities": [
+        {
+            "type": "SciencePass",
+            "start": "2024-001T01:00:00.000000",
+            "parameters": [
+            ],
+            "notes": "",
+            "id": "f2ff0985-3551-467c-8a59-6637f0726d3d",
+            "parent": null
+        },
+        {
+            "type": "CollectScience",
+            "start": "2024-001T01:00:00.000000",
+            "parameters": [
+                {
+                    "name": "d",
+                    "type": "duration",
+                    "value": "00:05:00.000000"
+                }
+            ],
+            "notes": "",
+            "id": "6f5c8b79-f2e1-4f72-9b41-5c670e81afcb",
+            "parent": "f2ff0985-3551-467c-8a59-6637f0726d3d"
+        },
+        {
+            "type": "Downlink",
+            "start": "2024-001T01:05:00.000000",
+            "parameters": [
+                {
+                    "name": "d",
+                    "type": "duration",
+                    "value": "00:05:00.000000"
+                }
+            ],
+            "notes": "",
+            "id": "f86a845c-c650-4130-a408-cfd2322d1dd0",
+            "parent": "f2ff0985-3551-467c-8a59-6637f0726d3d"
+        },
+        {
+            "type": "ActivityOne",
+            "start": "2024-001T02:00:00.000000",
+            "parameters": [
+                {
+                    "name": "d",
+                    "type": "duration",
+                    "value": "01:00:00.000000"
+                }
+            ],
+            "notes": "",
+            "id": "b046b12b-b7d9-43fb-a390-5c919dd1f088",
+            "parent": null
+        },
+        {
+            "type": "ActivityEight",
+            "start": "2024-001T03:00:00.000000",
+            "parameters": [
+                {
+                    "name": "first",
+                    "type": "string",
+                    "value": "Earth"
+                },
+                {
+                    "name": "second",
+                    "type": "string",
+                    "value": "x"
+                }
+            ],
+            "notes": "",
+            "id": "5010ff46-67f1-4e6b-85a7-b8c6cc0b7f79",
+            "parent": null
+        },
+        {
+            "type": "ActivityTwo",
+            "start": "2024-001T04:00:00.000000",
+            "parameters": [
+                {
+                    "name": "amount",
+                    "type": "float",
+                    "value": 42.5
+                }
+            ],
+            "notes": "",
+            "id": "ded00cb7-db21-4a06-bf87-a219fab9892a",
+            "parent": null
+        },
+        {
+            "type": "ActivityOne",
+            "start": "2024-001T04:00:00.000000",
+            "parameters": [
+                {
+                    "name": "d",
+                    "type": "duration",
+                    "value": "00:00:01.000000"
+                }
+            ],
+            "notes": "",
+            "id": "1b4f113f-e588-4bd3-b617-6361d92712f8",
+            "parent": "ded00cb7-db21-4a06-bf87-a219fab9892a"
+        },
+        {
+            "type": "ActivityOne",
+            "start": "2024-001T04:01:40.000000",
+            "parameters": [
+                {
+                    "name": "d",
+                    "type": "duration",
+                    "value": "00:00:01.000000"
+                }
+            ],
+            "notes": "",
+            "id": "2b657162-aab7-467c-8297-9f45d4d6b77c",
+            "parent": "ded00cb7-db21-4a06-bf87-a219fab9892a"
+        },
+        {
+            "type": "ActivityThree",
+            "start": "2024-001T05:00:00.000000",
+            "parameters": [
+                {
+                    "name": "d",
+                    "type": "duration",
+                    "value": "00:30:00.000000"
+                },
+                {
+                    "name": "stringList",
+                    "type": "list<string>",
+                    "value": [
+                        "a",
+                        "b",
+                        "c"
+                    ]
+                }
+            ],
+            "notes": "",
+            "id": "93e3711b-d0e8-41f9-9891-a96c3ca48cae",
+            "parent": null
+        },
+        {
+            "type": "ActivityFour",
+            "start": "2024-001T06:00:00.000000",
+            "parameters": [
+                {
+                    "name": "d",
+                    "type": "duration",
+                    "value": "00:10:00.000000"
+                },
+                {
+                    "name": "stringMap",
+                    "type": "map<string, string>",
+                    "value": {
+                        "k1": "v1",
+                        "k2": "v2"
+                    }
+                }
+            ],
+            "notes": "",
+            "id": "bf448600-1199-41fd-9bb6-be378900c163",
+            "parent": null
+        },
+        {
+            "type": "ActivityNine",
+            "start": "2024-001T07:00:00.000000",
+            "parameters": [
+                {
+                    "name": "endTime",
+                    "type": "time",
+                    "value": "2024-001T08:00:00.000000"
+                }
+            ],
+            "notes": "",
+            "id": "7751e018-7844-4ec6-a392-8450ca6d6938",
+            "parent": null
+        }
+    ]
+}
