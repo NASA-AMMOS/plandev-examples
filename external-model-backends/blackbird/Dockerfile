@@ -48,8 +48,14 @@ RUN git clone --depth 1 https://github.com/nasa-jpl/Blackbird.git \
 # Java expands the trailing /* classpath wildcard itself.
 COPY powermodel/src /src/powermodel/src
 RUN mkdir -p /out/powermodel \
- && javac -cp "/out/classes:/out/lib/*" -d /out/powermodel \
+ && javac -parameters -cp "/out/classes:/out/lib/*" -d /out/powermodel \
       $(find /src/powermodel/src -name '*.java')
+
+# Conformance probe: declares one resource of every Blackbird type so adapter coverage is testable.
+COPY covermodel/src /src/covermodel/src
+RUN mkdir -p /out/covermodel \
+ && javac -parameters -cp "/out/classes:/out/lib/*" -d /out/covermodel \
+      $(find /src/covermodel/src -name '*.java')
 
 # ---------- Stage 2: runtime ----------
 FROM eclipse-temurin:21-jre-jammy
@@ -64,7 +70,7 @@ ENV BLACKBIRD_MAIN="gov.nasa.jpl.Blackbird"
 # BB_MODELS maps each model key to a classpath = Blackbird core + its deps + one adaptation.
 # Here we serve the demo power model. NOTE: /opt/blackbird/classes also contains Blackbird's
 # bundled example activities, so this model exposes those too — see README.md ("Caveat").
-ENV BB_MODELS='{"powermodel":"/opt/blackbird/classes:/opt/blackbird/lib/*:/opt/blackbird/powermodel"}'
+ENV BB_MODELS='{"powermodel":"/opt/blackbird/classes:/opt/blackbird/lib/*:/opt/blackbird/powermodel","covermodel":"/opt/blackbird/classes:/opt/blackbird/lib/*:/opt/blackbird/covermodel"}'
 # If your model uses SPICE, copy the native lib (libJNISpice.so) into the image and point here:
 # ENV JPLTIME_LIB="/opt/blackbird/nativelib"
 

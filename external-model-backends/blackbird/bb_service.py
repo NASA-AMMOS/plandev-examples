@@ -109,16 +109,48 @@ def parse_res_specs(root):
             vs, is_real = {"type": "real"}, True
         elif dtype in ("float", "double"):
             vs, is_real = {"type": "real"}, False
-        elif dtype in ("int", "integer", "long"):
+        elif dtype in ("int", "integer", "long", "byte"):
             vs, is_real = {"type": "int"}, False
+        elif dtype == "boolean":
+            vs, is_real = {"type": "boolean"}, False
         elif dtype == "duration":
             vs, is_real = {"type": "duration"}, False
+        elif dtype == "time":
+            # PlanDev's ValueSchema has no absolute-time type, so a TimeResource is carried as its
+            # UTC string. (The TOL also gives milliseconds-since-epoch if a numeric form is ever wanted.)
+            vs, is_real = {"type": "string"}, False
         elif poss:
             vs, is_real = {"type": "variant", "variants": [{"key": p, "label": p} for p in poss]}, False
         else:
+            # list/map/custom -> best-effort string. Their values are NOT read below, so such a
+            # resource will surface with no segments rather than wrong ones.
             vs, is_real = {"type": "string"}, False
         res_specs[name] = (vs, is_real)
     return res_specs
+
+# Blackbird writes a resource value as <{DataTypeClassName}Value>, with Duration and Time
+# special-cased to also carry a milliseconds= attribute (see TOLResourceValue.writeResValBlock).
+# KEEP IN SYNC WITH parse_res_specs: a type mapped to a schema there but missing a tag here
+# surfaces in PlanDev with a schema and NO segments -- a silent empty profile.
+_VALUE_TAGS = ("DoubleValue", "IntegerValue", "IntValue", "LongValue", "ByteValue",
+               "BooleanValue", "StringValue", "DurationValue", "TimeValue")
+
+def read_res_value(r):
+    """Value of a <Resource> node, or None if it carries no tag we understand."""
+    for tag in _VALUE_TAGS:
+        e = r.find(tag)
+        if e is None or e.text is None:
+            continue
+        if tag == "DoubleValue":
+            return float(e.text)
+        if tag in ("IntegerValue", "IntValue", "LongValue", "ByteValue"):
+            return int(e.text)
+        if tag == "DurationValue":
+            return bb_dur_to_us(e.text)
+        if tag == "BooleanValue":
+            return e.text.strip().lower() == "true"
+        return e.text  # StringValue, TimeValue (UTC string, matching the schema above)
+    return None
 
 def parse_initials(root):
     """resource composite-name -> earliest (initial) value."""
@@ -129,14 +161,9 @@ def parse_initials(root):
         r = rec.find("Resource"); name = composite_name(r)
         if name in seen:
             continue
-        for tag in ("DoubleValue", "IntegerValue", "IntValue", "StringValue", "DurationValue"):
-            e = r.find(tag)
-            if e is not None:
-                if tag == "DoubleValue":                  seen[name] = float(e.text)
-                elif tag in ("IntegerValue", "IntValue"): seen[name] = int(e.text)
-                elif tag == "DurationValue":              seen[name] = bb_dur_to_us(e.text)
-                else:                                     seen[name] = e.text
-                break
+        v = read_res_value(r)
+        if v is not None:
+            seen[name] = v
     return seen
 
 def load_model(key, cp):
@@ -222,15 +249,7 @@ def parse_output(xml_path, plan_start, sim_duration_us, initials, directive_by_u
         name = composite_name(r)
         if name not in res_specs:
             continue
-        val = None
-        for tag in ("DoubleValue", "IntegerValue", "IntValue", "StringValue", "DurationValue"):
-            e = r.find(tag)
-            if e is not None:
-                if tag == "DoubleValue":                val = float(e.text)
-                elif tag in ("IntegerValue", "IntValue"): val = int(e.text)
-                elif tag == "DurationValue":            val = bb_dur_to_us(e.text)
-                else:                                   val = e.text
-                break
+        val = read_res_value(r)
         samples.setdefault(name, []).append((bb_time_to_us_offset(rec.findtext("TimeStamp"), plan_start), val))
 
     real_profiles, discrete_profiles = {}, {}
@@ -245,7 +264,19 @@ def parse_output(xml_path, plan_start, sim_duration_us, initials, directive_by_u
             length = end - off
             if length <= 0:
                 continue
-            dyn = {"initial": float(v), "rate": 0.0} if is_real else v
+            if is_real:
+                # `is_real` means Blackbird declared Interpolation=linear, so the true profile RAMPS
+                # between samples. PlanDev's RealDynamics is value = initial + rate*elapsedSECONDS
+                # (RealDynamics.java:54), so derive the slope from the next sample. Emitting rate=0
+                # here would render a linear resource as a staircase -- plausible-looking but wrong,
+                # and constraints evaluated between samples would disagree with Blackbird.
+                nxt = segs[i+1][1] if i + 1 < len(segs) else None
+                rate = 0.0
+                if isinstance(v, (int, float)) and isinstance(nxt, (int, float)) and length > 0:
+                    rate = (float(nxt) - float(v)) / (length / 1_000_000.0)
+                dyn = {"initial": float(v), "rate": rate}
+            else:
+                dyn = v
             out_segs.append({"duration": length, "dynamics": dyn})
         (real_profiles if is_real else discrete_profiles)[name] = {"schema": vs, "segments": out_segs}
     return real_profiles, discrete_profiles, spans
