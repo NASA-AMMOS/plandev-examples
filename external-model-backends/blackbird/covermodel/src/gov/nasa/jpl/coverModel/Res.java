@@ -36,6 +36,9 @@ public class Res extends ResourceDeclaration {
     public static SumDoubleResource  SumDbl = new SumDoubleResource(Dbl, Ramp, "cover");
     public static SumIntegerResource SumInt = new SumIntegerResource(Int, Int, "cover");
 
+    // --- custom Comparable value type: the only non-scalar a Resource can hold ---
+    public static RgbResource Rgb_ = new RgbResource(new Rgb(1, 2, 3), "cover");
+
     // --- arrayed (flattened by the adapter to Name.Index) ---
     public static ArrayedResource<DoubleResource> Vec =
         new ArrayedResource<DoubleResource>(new String[]{"x", "y"}) {};

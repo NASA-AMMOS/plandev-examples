@@ -150,6 +150,13 @@ def read_res_value(r):
         if tag == "BooleanValue":
             return e.text.strip().lower() == "true"
         return e.text  # StringValue, TimeValue (UTC string, matching the schema above)
+    # Fallback: a CUSTOM Comparable value type (Resource<V extends Comparable>, so V can be any
+    # user class -- List/Map are impossible). Blackbird names the tag <{SimpleClassName}Value> and
+    # writes valueOut.toString(), so we cannot know the shape, but we CAN carry the text. That
+    # matches the "string" schema parse_res_specs assigns and beats dropping the resource silently.
+    for e in r:
+        if e.tag.endswith("Value") and e.text is not None:
+            return e.text
     return None
 
 def parse_initials(root):

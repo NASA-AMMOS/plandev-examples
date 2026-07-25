@@ -33,6 +33,7 @@ EXPECTED_SCHEMA = {
     "Integ":   "real",     # IntegratingResource
     "SumDbl":  "real",     # SumDoubleResource
     "SumInt":  "int",      # SumIntegerResource
+    "Rgb_":    "string",   # custom Comparable value type -> carried as its toString()
     "Vec.x":   "real",     # ArrayedResource, flattened to Name.Index
     "Vec.y":   "real",
 }

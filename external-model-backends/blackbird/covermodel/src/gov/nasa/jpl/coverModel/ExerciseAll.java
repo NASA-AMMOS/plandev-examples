@@ -45,6 +45,7 @@ public class ExerciseAll extends Activity {
         StrEnum.set("Degraded");
         Int.set(43);
         Vec.get("x").set(2.0);
+        Rgb_.set(new Rgb(9, 8, 7));
 
         waitFor(half);
     }
