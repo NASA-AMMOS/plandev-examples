@@ -67,13 +67,41 @@ def composite_name(el):
     idxs = [i.text or "" for i in el.findall("Index")]
     return base + "".join("." + i for i in idxs)
 
+def split_type_args(inner):
+    """Split 'string, list<int>' -> ['string', 'list<int>'], respecting nesting."""
+    parts, depth, cur = [], 0, ""
+    for ch in inner:
+        if ch == "<": depth += 1
+        elif ch == ">": depth -= 1
+        if ch == "," and depth == 0:
+            parts.append(cur.strip()); cur = ""
+        else:
+            cur += ch
+    if cur.strip(): parts.append(cur.strip())
+    return parts
+
 def bbtype_to_schema(bt):
-    bt = (bt or "").lower()
-    if bt in ("double", "float", "real"): return {"type": "real"}
-    if bt in ("int", "integer", "long"): return {"type": "int"}
-    if bt == "duration": return {"type": "duration"}
-    if bt in ("boolean", "bool"): return {"type": "boolean"}
-    return {"type": "string"}  # map<>/list<>/custom -> string (best-effort)
+    bt = (bt or "").strip()
+    low = bt.lower()
+    if low in ("double", "float", "real"): return {"type": "real"}
+    if low in ("int", "integer", "long", "short", "byte"): return {"type": "int"}
+    if low == "duration": return {"type": "duration"}
+    if low in ("boolean", "bool"): return {"type": "boolean"}
+    if low.startswith("list<") and low.endswith(">"):
+        return {"type": "series", "items": bbtype_to_schema(bt[5:-1])}
+    if low.startswith("map<") and low.endswith(">"):
+        args = split_type_args(bt[4:-1])
+        if len(args) == 2:
+            # A map is a SERIES OF {key, value} STRUCTS -- merlin's own convention for Map parameters
+            # (contrib MapValueMapper.getValueSchema). ValueSchema has no dictionary type, and ofStruct
+            # needs a closed key set, but that is satisfied by the envelope: the struct's keys are
+            # literally "key" and "value", not the map's keys, which stay free. Matching this exactly is
+            # what makes a Blackbird map behave like any other Aerie map in constraints, the UI, and the
+            # generated typings.
+            return {"type": "series", "items": {"type": "struct", "items": {
+                "key": bbtype_to_schema(args[0]), "value": bbtype_to_schema(args[1])}}}
+    # time and custom ConvertableFromString types: carried as their string form.
+    return {"type": "string"}
 
 def fmt_param(bbtype, value):
     """PlanDev SerializedValue -> the value shape Blackbird's .plan.json reader expects.
@@ -84,9 +112,27 @@ def fmt_param(bbtype, value):
     arrives with the quote characters embedded. Blackbird's own JSONPlanWriter emits strings bare,
     which is the format to match. Verified against a real exported plan: ActivityEight's parameters
     come back as "Earth"/"x", not "\\"Earth\\""/"\\"x\\"".
+
+    Containers are translated between the two conventions. PlanDev carries a map as a series of
+    {key, value} structs (merlin's MapValueMapper); Blackbird writes a native JSON object. Lists agree
+    on shape but their elements still need converting.
     """
-    if bbtype == "duration" and isinstance(value, (int, float)):
+    bt = (bbtype or "").strip()
+    low = bt.lower()
+    if low == "duration" and isinstance(value, (int, float)):
         return us_to_bbdur(int(value))
+    if low.startswith("list<") and low.endswith(">") and isinstance(value, list):
+        return [fmt_param(bt[5:-1], v) for v in value]
+    if low.startswith("map<") and low.endswith(">") and isinstance(value, list):
+        args = split_type_args(bt[4:-1])
+        if len(args) == 2:
+            out = {}
+            for entry in value:
+                if not isinstance(entry, dict) or "key" not in entry:
+                    continue
+                # Blackbird map keys are the JSON object's field names, so they are text by construction.
+                out[str(fmt_param(args[0], entry["key"]))] = fmt_param(args[1], entry.get("value"))
+            return out
     return value
 
 # ---------- Blackbird invocation (classpath per model) ----------
@@ -166,7 +212,10 @@ def read_res_value(r):
         return [read_res_value(e) for e in lv.findall("Element")]
     sv = r.find("StructValue")
     if sv is not None:
-        return {e.get("index"): read_res_value(e) for e in sv.findall("Element")}
+        # Blackbird's StructValue IS a map -- it has no fixed-shape struct type -- so emit PlanDev's
+        # representation of a map: a series of {key, value} structs, matching merlin's MapValueMapper.
+        # A bare {k: v} object would contradict the declared schema and the ingest gate would flag it.
+        return [{"key": e.get("index"), "value": read_res_value(e)} for e in sv.findall("Element")]
     # Fallback: a CUSTOM Comparable value type. Blackbird names the tag <{SimpleClassName}Value> and
     # writes valueOut.toString(), so we cannot know the shape, but we CAN carry the text. That
     # matches the "string" schema parse_res_specs assigns and beats dropping the value silently.
@@ -207,10 +256,18 @@ def load_model(key, cp):
         root = ET.parse(xml).getroot()
         res_specs = parse_res_specs(root)
         initials = parse_initials(root)
+    # Hash the TRANSLATED schemas, not Blackbird's raw type strings. PlanDev stores ValueSchemas, and the
+    # attestation exists to detect that what PlanDev stored no longer describes what will run. Hashing
+    # the Blackbird-side names missed a whole class of drift: upgrading the adapter so that, say,
+    # map<string, string> maps to a key/value series instead of a bare string leaves every stored
+    # parameter schema wrong while the hash claims nothing changed. Including the adapter's own mapping
+    # in the digest means such an upgrade correctly invalidates exactly the models it affects -- a model
+    # using none of the changed types keeps its hash and is left alone.
     identity = hashlib.sha256(json.dumps({
-        "acts": {n: sorted(param_types[n]) for n in param_types},
+        "acts": {n: sorted(([pn, bbtype_to_schema(bt)] for pn, bt in param_types[n]), key=lambda p: p[0])
+                 for n in param_types},
         "res": {n: vs for n, (vs, _) in res_specs.items()},
-    }, sort_keys=True).encode()).hexdigest()[:16]
+    }, sort_keys=True, default=str).encode()).hexdigest()[:16]
     return {"cp": cp, "name": key, "version": "1.0.0", "param_types": param_types,
             "param_defaults": param_defaults, "res_specs": res_specs, "initials": initials, "identity": identity}
 
@@ -379,8 +436,16 @@ def introspect(model):
 def simulate(req, model):
     plan_start = iso_to_dt(req["planStart"])
     sim_dur = int(req["duration"])
+    # Fill model defaults before building the plan, exactly as validate() does. Blackbird's .plan.json
+    # reader requires every declared parameter to be present and rejects the WHOLE FILE on an arity
+    # mismatch -- not just the offending activity -- and PlanDev only stores arguments a user explicitly
+    # set. So a single directive leaving a defaulted parameter unset failed the entire simulation.
+    directives = [
+        {**d, "arguments": effective_args(
+            d["type"], d.get("arguments") or {}, model["param_types"], model["param_defaults"])}
+        for d in req.get("directives", [])]
     with tempfile.TemporaryDirectory() as wd:
-        plan_json, directive_by_uuid = build_plan_json(plan_start, req.get("directives", []), wd, model["param_types"])
+        plan_json, directive_by_uuid = build_plan_json(plan_start, directives, wd, model["param_types"])
         xml_path = os.path.join(wd, "out.xml")
         script = os.path.join(wd, "sim.script")
         open(script, "w").write("OPEN_FILE %s unfrozen decompose\nREMODEL\nWRITE %s\n" % (plan_json, xml_path))
