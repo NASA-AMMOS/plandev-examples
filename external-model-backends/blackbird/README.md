@@ -20,6 +20,9 @@ owns the plan, directives, and UI; Blackbird does the simulation.
 - **`bb_service.py`** — the multi-model HTTP backend PlanDev calls. Stdlib-only. Speaks the four
   wire-contract endpoints (`/models`, `/introspect`, `/simulate`, `/validate`); each addresses a
   model by `?model=<key>`. Configured with `BB_MODELS` (a JSON map of `modelKey -> classpath`).
+- **`bb_import.py`** — offline converter that turns an existing Blackbird `.plan.json` into a
+  PlanDev `PlanTransfer` file for the stock **Import Plan** button (see below). Stdlib-only;
+  needs no PlanDev changes. `test_bb_import.py` covers it.
 - **`bb_adapter.py`** — *legacy / optional* one-shot "push" tool that runs Blackbird once and
   pushes type metadata + a run's results straight into PlanDev via Hasura actions
   (`registerModelTypes` / `ingestExternalSimulationResults`). Superseded by the
@@ -86,6 +89,76 @@ subclasses on the classpath, so any model whose classpath includes `/opt/blackbi
 expose those example activities **in addition** to your adaptation's. For the demo this is
 harmless. To serve a single clean model, build Blackbird without its example adaptation (or strip
 that package from the classes dir) so the classpath carries only the framework + your adaptation.
+
+## Importing an existing Blackbird plan — `bb_import.py`
+
+The adapter above lets PlanDev *simulate* a Blackbird model, but a team that already has Blackbird
+`.plan.json` files still needs to get those activities into a plan. `bb_import.py` converts one
+into a PlanDev `PlanTransfer` file, which you then feed to the stock **Import Plan** button on the
+plans page (or `POST /uploadActivities` on the gateway). No PlanDev-side changes.
+
+```bash
+python3 bb_import.py mission.plan.json \
+    --introspect-url http://blackbird-adapter:5011 --model powermodel \
+    -o mission.plandev.json --report mission.report.json
+```
+
+Activity types and parameter schemas have to come from the model, so pick one source:
+
+| flag | how it introspects |
+|---|---|
+| `--introspect-url URL` | `GET <URL>/introspect` on a running `bb_service` (plus one `/validate?effectiveOnly` call to recover parameter defaults, which `/introspect` does not carry) |
+| `--classpath CP` | runs `load_model` locally — needs `java` and the model on disk |
+
+Both produce byte-identical output. `--model` is optional when the backend serves one model.
+Other flags: `--plan-name`, `--plan-start`, `--duration-days`, and `-` in place of the input path
+to read the plan from stdin.
+
+### You must type the plan window into the import dialog
+
+A Blackbird plan file is exactly `{"activities": [...]}` — **no header**, so no plan start, no
+duration, and no model reference. The converter derives a window from the activities and prints it:
+
+```
+bb_import: 11 source activities -> 7 directives, 4 dropped, 1 warning(s)
+  the plan file has no header, so ENTER THESE IN THE IMPORT DIALOG:
+    plan start : 2024-01-01T00:00:00Z
+    duration   : 1 days 00:00:00
+```
+
+The plan start is the first activity's start **floored to the UTC day**, which keeps every offset
+non-negative and leaves headroom ahead of the first activity. The gateway takes the real name,
+model, start and duration from the import form, not from the file — the file carries them only
+because PlanDev's UI prefills that form from them.
+
+### What it drops, and why that matters
+
+Blackbird stores the **decomposition tree flattened alongside** the top-level activities, marked
+only by `parent`. Only `parent == null` activities become PlanDev directives; the rest are spans
+that re-simulation regenerates, so importing them would double-count. Nothing downstream catches
+that — the plan loads, validates and simulates, just with duplicated activities — and no heuristic
+substitutes for the rule: in the reference fixture `ActivityOne` appears both as a directive and as
+a decomposition child, and one child starts at the same instant as its parent.
+
+Values are re-encoded to target the model's `ValueSchema` (the inverse of `fmt_param`): a duration
+becomes integer microseconds, a `map<k, v>` becomes PlanDev's series of `{key, value}` structs, and
+a `time` is carried **verbatim** in Blackbird's day-of-year form — normalizing it to ISO-8601 would
+produce something Blackbird itself rejects on the way back in. Every activity keeps its Blackbird
+uuid in `metadata.blackbirdId`.
+
+The report — printed to stderr, and written as JSON with `--report` — lists every dropped activity
+and warns about anything that survived but changed meaning: an absolute `time` parameter, a
+parameter the model no longer declares, one filled in from a default, a value that would not
+coerce, a duplicate or dangling uuid, or an activity outside the derived window.
+
+```bash
+python3 test_bb_import.py        # offline: no adapter, no JVM, no network
+```
+
+The tests run against `fixtures/powermodel-export.plan.json`, a real Blackbird export (see
+[`fixtures/README.md`](fixtures/README.md)). A live round-trip test feeds the converted directives
+back to `/simulate` and asserts the original 11 spans come out; it skips unless a backend is
+reachable at `$BB_ADAPTER_URL` (default `http://localhost:5011`).
 
 ## Wire contract & full PlanDev flow
 

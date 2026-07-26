@@ -27,7 +27,6 @@ from urllib.parse import urlparse, parse_qs
 BLACKBIRD_MAIN = os.environ.get("BLACKBIRD_MAIN", "gov.nasa.jpl.Blackbird")
 JPLTIME_LIB = os.environ.get("JPLTIME_LIB", "jplTime/lib")
 JAVA_BIN = os.environ.get("JAVA_BIN", "java")
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 5001
 
 # modelKey -> {cp, name, version, param_types, param_defaults, res_specs, initials, identity}
 MODELS = {}
@@ -532,6 +531,10 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
 
 if __name__ == "__main__":
+    # Read the port HERE, not at module scope: this module is also imported as a library (bb_import.py
+    # reuses its time/value helpers), and at module scope `int(sys.argv[1])` blew up on the importer's
+    # own first argument before a single helper was available.
+    PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 5001
     cfg = os.environ.get("BB_MODELS")
     cp_map = json.loads(cfg) if cfg else {"default": os.environ["BLACKBIRD_CP"]}
     for key, cp in cp_map.items():
