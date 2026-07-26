@@ -221,17 +221,32 @@ def build_plan_json(plan_start, directives, workdir, param_types):
     for d in directives:
         typ = d["type"]
         start = dt_to_bbtime(plan_start + timedelta(microseconds=d["startOffset"]))
-        ptypes = dict(param_types.get(typ, []))
+        args = d.get("arguments") or {}
         params = []
-        for pname, pval in (d.get("arguments") or {}).items():
-            bt = ptypes.get(pname, "string")
+        # Iterate the model's DECLARED parameter order, not the order the arguments happen to arrive in.
+        # Blackbird's .plan.json reader binds parameters POSITIONALLY and ignores `name` entirely
+        # (PlanJSONHistoryReader.getParametersFromJSON), so the order we emit is the binding. Merlin
+        # builds the arguments object from SerializedValue's Map.copyOf, and java.util immutable maps
+        # iterate in a per-JVM-run salted order -- verified flipping between runs on this machine. So
+        # the previous "iterate whatever arrived" was a coin flip per merlin restart: for two same-typed
+        # parameters it silently swapped their values, and for differently-typed ones it produced an
+        # intermittent simulation failure that would not reproduce.
+        for pname, bt in param_types.get(typ, []):
+            if pname not in args:
+                continue   # absent: Blackbird applies the model default (see effective_args)
             # Emit the value NATIVELY, matching what Blackbird's own JSONPlanWriter produces -- that is
             # the one shape its reader is guaranteed to accept, since writing and re-opening a plan
             # round-trips exactly. Verified against a real export: float -> bare number 42.5,
             # list<string> -> ["a","b","c"], map<string, string> -> {"k1":"v1"}, duration/time -> their
             # formatted strings. Serializing those to JSON *text* instead (the old behavior) handed
             # Blackbird a string where it expected an array, an object, or a number.
-            params.append({"name": pname, "type": bt, "value": fmt_param(bt, pval)})
+            params.append({"name": pname, "type": bt, "value": fmt_param(bt, args[pname])})
+        # An argument the model does not declare cannot be positioned, and appending it would shift
+        # every later parameter. Dropping it lets Blackbird report the arity mismatch against a plan
+        # that is at least internally consistent.
+        for pname in args:
+            if pname not in dict(param_types.get(typ, [])):
+                print("warning: dropping undeclared argument '%s' on %s" % (pname, typ), file=sys.stderr)
         bb_id = str(uuid.uuid5(uuid.NAMESPACE_OID, "plandev-directive-" + str(d["id"])))
         directive_by_uuid[bb_id] = d["id"]
         acts.append({"type": typ, "start": start, "parameters": params, "notes": "", "id": bb_id, "parent": None})
