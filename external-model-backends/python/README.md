@@ -24,9 +24,11 @@ than a running cursor, so cumulative segment offsets always equal wall-clock off
 does not depend on the order directives arrive in.
 
 Everything is **clamped to the simulation window**: a directive starting past the end contributes
-nothing, one extending past the end is truncated in both its span and its profile, and the emitted
-segments always sum to exactly the simulation duration. Merlin clamps profiles on its own but does
-*not* clamp spans, so an unclamped span would persist at full length inside a shorter dataset.
+nothing, one extending past the end is truncated in its profile, and the emitted segments always sum
+to exactly the simulation duration. Its span is reported **unfinished** rather than clamped — both
+`duration` and `computedAttributes` are omitted, which is how merlin tells a still-running activity
+from a completed one. Clamping the span instead would claim it ended at the window edge, which is a
+different and false statement.
 
 `validate` is **authoritative**: merlin delegates argument checking to the backend for external
 models, so this typechecks every argument against its declared `ValueSchema`. Anything it passes is
@@ -59,6 +61,21 @@ curl -s -X POST localhost:5002/validate \
 
 See the top-level [external-model-backends/README.md](../README.md) for the full plug-and-play
 flow (wiring PlanDev's `EXTERNAL_MODEL_BACKENDS`, discovery, registration) and the wire contract.
+
+## Tests
+
+```bash
+cd external-model-backends/python
+python3 test_py_model_server.py        # offline: no server, no Docker, no network
+python3 test_py_model_server.py -v
+```
+
+`test_py_model_server.py` calls the module's functions directly — server startup is behind
+`if __name__ == "__main__"`, so importing it binds no socket. The suite pins the behaviours that
+break *silently*: superposition and order-independence, agreement between a span's `startOffset` and
+where its rate change lands in the profile, window clamping, the finished/unfinished span
+distinction, and the `ValueSchema` typechecker. CI runs it on every push and pull request
+(`.github/workflows/external-model-backends.yml`).
 
 ## Use it as a template for your own model
 

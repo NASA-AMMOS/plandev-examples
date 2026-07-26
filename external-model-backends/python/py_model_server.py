@@ -194,12 +194,16 @@ def simulate(req):
             problem = nonconformance(eff.get(name), schema)
             if problem:
                 raise BadRequest("directive %s (%s) parameter '%s' %s" % (d.get("id"), typ, name, problem))
+        if "startOffset" not in d:
+            raise BadRequest("directive %s (%s) has no startOffset" % (d.get("id"), typ))
         start, dur = int(d["startOffset"]), int(eff["duration"])
         if dur < 0:
             raise BadRequest("directive %s (%s) has negative duration %d" % (d.get("id"), typ, dur))
         if start >= sim_dur:
             continue                                   # begins after the window; contributes nothing
-        end = min(start + dur, sim_dur)                # the profile only ever covers the window
+        # Belt-and-braces; the real clamping is the breakpoint filter below, which drops anything
+        # outside [0, sim_dur]. Kept so `end` is meaningful on its own.
+        end = min(start + dur, sim_dur)
         rate = float(eff["rate"]) if typ == "Charge" else -float(eff["load"])
         acts.append({"start": start, "end": end, "rate": rate, "type": typ})
         # An activity still running when the simulation ended is reported UNFINISHED -- `duration`
@@ -211,11 +215,11 @@ def simulate(req):
         if start + dur <= sim_dur:
             span["duration"] = dur
             # Computed attributes are values the model DERIVED, as opposed to arguments it was given.
-            # socDelta is the charge this activity actually moved within the simulation window, which is
-            # not knowable from the arguments alone once an activity is truncated by the window. PlanDev
-            # exposes these as `computed.*` to command expansion. Only on finished spans: an unfinished
-            # activity has not produced its final values yet, and PostgresResultsCellRepository uses the
-            # presence of computed attributes as part of how it tells the two apart.
+            # socDelta is the charge this activity moved. Only finished spans get them: an unfinished
+            # activity has not produced its final values, and PostgresResultsCellRepository uses the
+            # presence of computed attributes as part of how it tells the two apart. (Which also means
+            # this only ever runs when end == start + dur, so it is not doing truncation arithmetic --
+            # an earlier comment here claimed it was.)
             span["computedAttributes"] = {"socDelta": rate * ((end - start) / US_PER_S)}
         spans.append(span)
 
@@ -259,12 +263,17 @@ def identity_hash():
     requiredParameters and defaults are included deliberately. PlanDev persists requiredParameters in
     activity_type and merlin's gate enforces them, so flipping a parameter between required and optional
     changes what PlanDev believes without changing the model's schemas -- and merlin's drift check would
-    never notice. Parameters are sorted so a pure reordering of the declaration does NOT move the hash;
-    order is not something PlanDev stores or cares about, and a spurious change here refuses simulations
-    and invalidates the cache for nothing.
+    never notice.
+
+    Parameters are hashed in DECLARATION ORDER. An earlier version sorted them, on the theory that order
+    is not something PlanDev stores. It is: merlin assigns each parameter an `order` from its index in
+    the introspection array (ResponseSerializers.serializeParameters), persists it, reads activity types
+    back sorted by it (GetActivityTypesAction), and plandev-ui lays the argument form out in that order.
+    Sorting here hid a reordered declaration from the attestation, leaving the stored order stale and the
+    form rendering in the old sequence.
     """
     return hashlib.sha256(json.dumps({
-        "acts": {t: sorted(([n, s, d] for n, s, d in ps), key=lambda p: p[0]) for t, ps in MODEL.items()},
+        "acts": {t: [[n, s, d] for n, s, d in ps] for t, ps in MODEL.items()},
         "res": RESOURCE_TYPES,
         "params": [[n, s, d] for n, s, d in CONFIG],
         # Stored in activity_type, so a change is drift the attestation must catch.

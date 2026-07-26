@@ -1,0 +1,54 @@
+name: External model backends
+
+# Unit tests for the Python adapter scripts under external-model-backends/.
+#
+# These are stdlib-only and hermetic: no Docker, no JVM, no network, no live adapter. They are in
+# their own workflow rather than in build.yml because build.yml is the Gradle/Java build and these
+# share nothing with it -- no Java, no Gradle cache, and no reason for one to block the other.
+#
+# NOT run here: external-model-backends/blackbird/check_coverage.py. That is a conformance harness,
+# not a unit test -- it drives a LIVE adapter over HTTP (`python3 check_coverage.py <base_url>`)
+# and asserts that every Blackbird resource type maps to the right PlanDev ValueSchema and actually
+# emits segments. Running it needs the blackbird image built (Maven + JDK 21 + a JNISpice jar that
+# is not redistributable, see blackbird/vendor/README.md) and the adapter listening on :5011. It
+# would fit a separate, opt-in integration job that does `docker compose up --build blackbird`,
+# waits for /models, then runs the harness -- deliberately left out until the vendored jar has a
+# CI-accessible source.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # The two interpreters these scripts actually ship on: python/Dockerfile is python:3.12-slim,
+        # and blackbird/Dockerfile's runtime is eclipse-temurin:21-jre-jammy + the distro python3 (3.10).
+        python-version: ['3.10', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: py_model_server tests
+        working-directory: external-model-backends/python
+        run: python3 test_py_model_server.py -v
+
+      # The 2 tests that need a live Blackbird adapter skip cleanly when nothing answers on
+      # BB_ADAPTER_URL; the other 41 run against the checked-in fixture.
+      - name: bb_import tests
+        working-directory: external-model-backends/blackbird
+        run: python3 test_bb_import.py -v
+
+      - name: Syntax-check the scripts that have no tests yet
+        run: python3 -m compileall -q external-model-backends

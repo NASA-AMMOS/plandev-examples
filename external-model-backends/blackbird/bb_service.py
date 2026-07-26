@@ -324,8 +324,13 @@ def load_model(key, cp):
     # in the digest means such an upgrade correctly invalidates exactly the models it affects -- a model
     # using none of the changed types keeps its hash and is left alone.
     identity = hashlib.sha256(json.dumps({
-        "acts": {n: sorted(([pn, bbtype_to_schema(bt)] for pn, bt in param_types[n]), key=lambda p: p[0])
-                 for n in param_types},
+        # Parameters are hashed in DECLARATION ORDER, not sorted. Order is not cosmetic: merlin assigns
+        # each parameter an `order` from its index in this array (ResponseSerializers.serializeParameters),
+        # stores it, reads activity types back sorted by it (GetActivityTypesAction), and plandev-ui lays
+        # the argument form out in that order. So a reordered declaration changes what PlanDev stores, and
+        # sorting here would hide exactly that from the attestation -- the stored order would go stale
+        # while the hash claimed nothing had moved.
+        "acts": {n: [[pn, bbtype_to_schema(bt)] for pn, bt in param_types[n]] for n in param_types},
         "res": {n: vs for n, (vs, _) in res_specs.items()},
         # Config parameters are part of what PlanDev stores (mission_model_parameters), so they belong in
         # the attestation for the same reason activity and resource types do.
