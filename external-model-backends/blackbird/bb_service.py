@@ -336,10 +336,19 @@ def parse_output(xml_path, plan_start, sim_duration_us, initials, directive_by_u
             v = read_res_value(p)
             if v is not None:
                 args[p.findtext("Name")] = v
-        spans.append({"spanId": sid, "type": inst.findtext("Type"),
-                      "startOffset": bb_time_to_us_offset(start, plan_start),
-                      "duration": bb_dur_to_us(span), "arguments": args,
-                      "parentId": parent_sid, "directiveId": directive_id})
+        start_us, dur_us = bb_time_to_us_offset(start, plan_start), bb_dur_to_us(span)
+        if start_us >= sim_duration_us:
+            continue   # entirely outside PlanDev's window; Blackbird has no window concept, PlanDev does
+        rec_out = {"spanId": sid, "type": inst.findtext("Type"), "startOffset": start_us,
+                   "arguments": args, "parentId": parent_sid, "directiveId": directive_id}
+        # An activity still running at the end of PlanDev's window is reported UNFINISHED (no duration)
+        # rather than at its full Blackbird length. Merlin clamps profiles but not spans, so the full
+        # length would persist inside a shorter dataset; and clamping it here would instead claim it
+        # ended exactly at the window edge, which Blackbird never said. Unfinished is the one honest
+        # option, and PlanDev stores it natively as a span with a null end.
+        if start_us + dur_us <= sim_duration_us:
+            rec_out["duration"] = dur_us
+        spans.append(rec_out)
 
     samples = {}
     for rec in root.iter("TOLrecord"):

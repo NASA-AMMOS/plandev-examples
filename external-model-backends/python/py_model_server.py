@@ -176,15 +176,18 @@ def simulate(req):
             raise BadRequest("directive %s (%s) has negative duration %d" % (d.get("id"), typ, dur))
         if start >= sim_dur:
             continue                                   # begins after the window; contributes nothing
-        end = min(start + dur, sim_dur)                # clamp: nothing may extend past the simulation
+        end = min(start + dur, sim_dur)                # the profile only ever covers the window
         rate = float(eff["rate"]) if typ == "Charge" else -float(eff["load"])
         acts.append({"start": start, "end": end, "rate": rate, "type": typ})
-        # The span reports the CLAMPED window, and the coerced effective arguments -- not a raw echo of
-        # the request. Merlin does not clamp spans (it does clamp profiles), so an unclamped span would
-        # persist at its full length inside a shorter dataset.
-        spans.append({"spanId": len(spans) + 1, "type": typ, "startOffset": start,
-                      "duration": end - start, "arguments": eff, "parentId": None,
-                      "directiveId": d.get("id")})
+        # An activity still running when the simulation ended is reported UNFINISHED -- `duration`
+        # omitted -- rather than clamped. Clamping would claim it ended at the window edge, which is a
+        # different and false statement; PlanDev models this state directly and stores the span with a
+        # null end. Arguments are the coerced effective ones, not a raw echo of the request.
+        span = {"spanId": len(spans) + 1, "type": typ, "startOffset": start,
+                "arguments": eff, "parentId": None, "directiveId": d.get("id")}
+        if start + dur <= sim_dur:
+            span["duration"] = dur
+        spans.append(span)
 
     # Build the profile from a breakpoint timeline rather than a running cursor. A cursor cannot express
     # overlap -- and for a battery, a Charge overlapping a Discharge is the ordinary case, not an edge
