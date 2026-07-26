@@ -42,6 +42,7 @@ CONFIG = [
     ("initialSoC",    {"type": "real"}, 50.0),
     ("initialCycles", {"type": "int"},  0),
 ]
+COMPUTED_ATTRIBUTES_SCHEMA = {"type": "struct", "items": {"socDelta": {"type": "real"}}}
 RESOURCE_TYPES = {
     "SoC":    {"type": "real"},
     "Mode":   {"type": "variant", "variants": [{"key": k, "label": k} for k in ("Idle", "Charging", "Discharging")]},
@@ -209,6 +210,13 @@ def simulate(req):
                 "arguments": eff, "parentId": None, "directiveId": d.get("id")}
         if start + dur <= sim_dur:
             span["duration"] = dur
+            # Computed attributes are values the model DERIVED, as opposed to arguments it was given.
+            # socDelta is the charge this activity actually moved within the simulation window, which is
+            # not knowable from the arguments alone once an activity is truncated by the window. PlanDev
+            # exposes these as `computed.*` to command expansion. Only on finished spans: an unfinished
+            # activity has not produced its final values yet, and PostgresResultsCellRepository uses the
+            # presence of computed attributes as part of how it tells the two apart.
+            span["computedAttributes"] = {"socDelta": rate * ((end - start) / US_PER_S)}
         spans.append(span)
 
     # Build the profile from a breakpoint timeline rather than a running cursor. A cursor cannot express
@@ -259,12 +267,15 @@ def identity_hash():
         "acts": {t: sorted(([n, s, d] for n, s, d in ps), key=lambda p: p[0]) for t, ps in MODEL.items()},
         "res": RESOURCE_TYPES,
         "params": [[n, s, d] for n, s, d in CONFIG],
+        # Stored in activity_type, so a change is drift the attestation must catch.
+        "computed": COMPUTED_ATTRIBUTES_SCHEMA,
     }, sort_keys=True).encode()).hexdigest()[:16]
 
 def introspect():
     return {
         "activityTypes": [{"name": t, "parameters": [{"name": n, "schema": s} for n, s, _ in ps],
-                           "requiredParameters": [n for n, _, d in ps if d is None]}
+                           "requiredParameters": [n for n, _, d in ps if d is None],
+                           "computedAttributesSchema": COMPUTED_ATTRIBUTES_SCHEMA}
                           for t, ps in MODEL.items()],
         "resourceTypes": [{"name": n, "schema": s} for n, s in RESOURCE_TYPES.items()],
         "parameters": [{"name": n, "schema": s} for n, s, _d in CONFIG],

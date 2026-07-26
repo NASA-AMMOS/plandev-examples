@@ -239,6 +239,10 @@ def parse_initials(root):
 
 BB_TOOLS = os.environ.get("BB_TOOLS", "/opt/blackbird/tools")
 
+# Every Blackbird span carries its originating activity UUID as a computed attribute, so a PlanDev span
+# can be traced back to a record in a Blackbird plan file or TOL.
+COMPUTED_ATTRIBUTES_SCHEMA = {"type": "struct", "items": {"blackbirdId": {"type": "string"}}}
+
 def config_script_lines(configuration, config_specs):
     """PlanDev simulation configuration -> Blackbird `SET_PARAMETER Class.Field value` lines.
 
@@ -326,6 +330,9 @@ def load_model(key, cp):
         # Config parameters are part of what PlanDev stores (mission_model_parameters), so they belong in
         # the attestation for the same reason activity and resource types do.
         "cfg": [[c["name"], bbtype_to_schema(c["bbtype"])] for c in config_specs],
+        # Computed-attribute schemas are stored in activity_type too, so a change to them is drift the
+        # attestation must catch -- otherwise the gate starts rejecting spans against a stale schema.
+        "computed": COMPUTED_ATTRIBUTES_SCHEMA,
     }, sort_keys=True, default=str).encode()).hexdigest()[:16]
     return {"cp": cp, "name": key, "version": "1.0.0", "param_types": param_types,
             "param_defaults": param_defaults, "res_specs": res_specs, "initials": initials,
@@ -400,8 +407,14 @@ def parse_output(xml_path, plan_start, sim_duration_us, initials, directive_by_u
         start_us, dur_us = bb_time_to_us_offset(start, plan_start), bb_dur_to_us(span)
         if start_us >= sim_duration_us:
             continue   # entirely outside PlanDev's window; Blackbird has no window concept, PlanDev does
+        # Computed attributes: values the model produced rather than was given. Blackbird's own activity
+        # UUID goes here because it belongs to the executed INSTANCE, not to the directive -- it is what
+        # lets a PlanDev span be traced back to a record in a Blackbird plan file or TOL. PlanDev reads
+        # these as `computed.*` in command expansion, and they must be DECLARED in introspect or the
+        # ingest gate rejects them.
         rec_out = {"spanId": sid, "type": inst.findtext("Type"), "startOffset": start_us,
-                   "arguments": args, "parentId": parent_sid, "directiveId": directive_id}
+                   "arguments": args, "parentId": parent_sid, "directiveId": directive_id,
+                   "computedAttributes": {"blackbirdId": inst.findtext("ID") or ""}}
         # An activity still running at the end of PlanDev's window is reported UNFINISHED (no duration)
         # rather than at its full Blackbird length. Merlin clamps profiles but not spans, so the full
         # length would persist inside a shorter dataset; and clamping it here would instead claim it
@@ -497,7 +510,9 @@ def introspect(model):
         defaults = model["param_defaults"].get(name, {})
         acts.append({"name": name,
                      "parameters": [{"name": pn, "schema": bbtype_to_schema(bt)} for pn, bt in params],
-                     "requiredParameters": [pn for pn, _ in params if pn not in defaults]})
+                     "requiredParameters": [pn for pn, _ in params if pn not in defaults],
+                     # Declared so the gate accepts what parse_output attaches to every span.
+                     "computedAttributesSchema": COMPUTED_ATTRIBUTES_SCHEMA})
     res = [{"name": n, "schema": vs} for n, (vs, _) in model["res_specs"].items()]
     # Simulation configuration: the adaptation's globals, editable per-plan in PlanDev exactly like a
     # JAR model's configuration. Blackbird's own defaults are reported so the UI can pre-fill them.
