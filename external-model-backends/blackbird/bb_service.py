@@ -237,6 +237,62 @@ def parse_initials(root):
             seen[name] = v
     return seen
 
+BB_TOOLS = os.environ.get("BB_TOOLS", "/opt/blackbird/tools")
+
+def config_script_lines(configuration, config_specs):
+    """PlanDev simulation configuration -> Blackbird `SET_PARAMETER Class.Field value` lines.
+
+    Only declared parameters are emitted; an unknown key is reported rather than passed through, since
+    Blackbird would fail the whole script on it. Values go through fmt_param so a duration arrives in
+    Blackbird's own notation rather than as raw microseconds.
+    """
+    by_name = {c["name"]: c for c in config_specs}
+    lines = []
+    for name, value in (configuration or {}).items():
+        spec = by_name.get(name)
+        if spec is None:
+            print("warning: ignoring unknown configuration parameter '%s'" % name, file=sys.stderr)
+            continue
+        if value is None:
+            continue                                   # unset: leave the adaptation's own default
+        v = fmt_param(spec["bbtype"], value)
+        # SET_PARAMETER parses the rest of the line as the value, so it must be a single token's worth
+        # of text; containers have no representation here and Blackbird has no syntax for them.
+        if isinstance(v, (list, dict)):
+            print("warning: configuration parameter '%s' is a container, which SET_PARAMETER cannot "
+                  "express; ignoring" % name, file=sys.stderr)
+            continue
+        lines.append("SET_PARAMETER %s %s\n" % (name, v))
+    return "".join(lines)
+
+def load_config_specs(cp, workdir):
+    """The adaptation's SIMULATION CONFIGURATION: public static fields on ParameterDeclaration subclasses.
+
+    Blackbird names them `Class.Field` and sets them with `SET_PARAMETER Class.Field value`, so that
+    dotted form is used as the PlanDev parameter name -- it is what a planner would type into a Blackbird
+    script, and it keeps two adaptation classes free to declare the same field name. Returns [] rather
+    than failing if the helper is unavailable, since an adaptation with no configuration is normal.
+    """
+    tools = BB_TOOLS
+    if not os.path.isdir(tools):
+        return []
+    try:
+        p = subprocess.run([JAVA_BIN, "-cp", cp + os.pathsep + tools,
+                            "-Djava.library.path=%s" % JPLTIME_LIB, "BbParams"],
+                           cwd=workdir, capture_output=True, text=True)
+        if p.returncode != 0:
+            print("warning: could not read adaptation parameters: %s" % p.stderr[-300:], file=sys.stderr)
+            return []
+        specs = []
+        for e in json.loads(p.stdout or "[]"):
+            specs.append({"name": "%s.%s" % (e["class"], e["field"]),
+                          "cls": e["class"], "field": e["field"],
+                          "bbtype": e.get("type") or "string", "default": e.get("default")})
+        return specs
+    except Exception as ex:
+        print("warning: could not read adaptation parameters: %s" % ex, file=sys.stderr)
+        return []
+
 def load_model(key, cp):
     """Introspect one adaptation: activity param types/defaults (CREATE_DICTIONARY) + resource
     schemas/initials (zero-activity REMODEL). Identity = hash of the introspected types."""
@@ -255,6 +311,7 @@ def load_model(key, cp):
         root = ET.parse(xml).getroot()
         res_specs = parse_res_specs(root)
         initials = parse_initials(root)
+        config_specs = load_config_specs(cp, wd)
     # Hash the TRANSLATED schemas, not Blackbird's raw type strings. PlanDev stores ValueSchemas, and the
     # attestation exists to detect that what PlanDev stored no longer describes what will run. Hashing
     # the Blackbird-side names missed a whole class of drift: upgrading the adapter so that, say,
@@ -266,9 +323,13 @@ def load_model(key, cp):
         "acts": {n: sorted(([pn, bbtype_to_schema(bt)] for pn, bt in param_types[n]), key=lambda p: p[0])
                  for n in param_types},
         "res": {n: vs for n, (vs, _) in res_specs.items()},
+        # Config parameters are part of what PlanDev stores (mission_model_parameters), so they belong in
+        # the attestation for the same reason activity and resource types do.
+        "cfg": [[c["name"], bbtype_to_schema(c["bbtype"])] for c in config_specs],
     }, sort_keys=True, default=str).encode()).hexdigest()[:16]
     return {"cp": cp, "name": key, "version": "1.0.0", "param_types": param_types,
-            "param_defaults": param_defaults, "res_specs": res_specs, "initials": initials, "identity": identity}
+            "param_defaults": param_defaults, "res_specs": res_specs, "initials": initials,
+            "config_specs": config_specs, "identity": identity}
 
 # ---------- plan build / output parse (per-model) ----------
 def build_plan_json(plan_start, directives, workdir, param_types):
@@ -438,7 +499,10 @@ def introspect(model):
                      "parameters": [{"name": pn, "schema": bbtype_to_schema(bt)} for pn, bt in params],
                      "requiredParameters": [pn for pn, _ in params if pn not in defaults]})
     res = [{"name": n, "schema": vs} for n, (vs, _) in model["res_specs"].items()]
-    return {"activityTypes": acts, "resourceTypes": res, "parameters": [],
+    # Simulation configuration: the adaptation's globals, editable per-plan in PlanDev exactly like a
+    # JAR model's configuration. Blackbird's own defaults are reported so the UI can pre-fill them.
+    cfg = [{"name": c["name"], "schema": bbtype_to_schema(c["bbtype"])} for c in model.get("config_specs", [])]
+    return {"activityTypes": acts, "resourceTypes": res, "parameters": cfg,
             "identityHash": model["identity"]}
 
 def simulate(req, model):
@@ -456,7 +520,11 @@ def simulate(req, model):
         plan_json, directive_by_uuid = build_plan_json(plan_start, directives, wd, model["param_types"])
         xml_path = os.path.join(wd, "out.xml")
         script = os.path.join(wd, "sim.script")
-        open(script, "w").write("OPEN_FILE %s unfrozen decompose\nREMODEL\nWRITE %s\n" % (plan_json, xml_path))
+        # SET_PARAMETER lines go BEFORE the plan is opened and remodelled, so the adaptation's globals are
+        # in place while it models. Blackbird holds these in static fields, but each simulate spawns a
+        # fresh JVM, so there is no leakage between requests -- the defaults are restored by construction.
+        cfg_lines = config_script_lines(req.get("configuration") or {}, model.get("config_specs", []))
+        open(script, "w").write(cfg_lines + "OPEN_FILE %s unfrozen decompose\nREMODEL\nWRITE %s\n" % (plan_json, xml_path))
         run_bb(script, wd, model["cp"])
         rp, dp, spans = parse_output(xml_path, plan_start, sim_dur, model["initials"], directive_by_uuid)
         return {"realProfiles": rp, "discreteProfiles": dp, "spans": spans}

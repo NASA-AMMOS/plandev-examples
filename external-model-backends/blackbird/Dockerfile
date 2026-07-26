@@ -51,6 +51,13 @@ RUN mkdir -p /out/powermodel \
  && javac -parameters -cp "/out/classes:/out/lib/*" -d /out/powermodel \
       $(find /src/powermodel/src -name '*.java')
 
+# Accessor for the adaptation's simulation configuration. Blackbird can enumerate, type and SET its
+# parameters, but has no command that prints them -- CREATE_DICTIONARY emits activities only. Built into
+# /out/tools so it can be run against any adaptation's classpath.
+COPY tools/BbParams.java /src/tools/BbParams.java
+RUN mkdir -p /out/tools \
+ && javac -cp "/out/classes:/out/lib/*" -d /out/tools /src/tools/BbParams.java
+
 # Conformance probe: declares one resource of every Blackbird type so adapter coverage is testable.
 COPY covermodel/src /src/covermodel/src
 RUN mkdir -p /out/covermodel \

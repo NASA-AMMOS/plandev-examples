@@ -27,7 +27,6 @@ from urllib.parse import urlparse, parse_qs
 
 MODEL_KEY, MODEL_NAME, MODEL_VERSION = "battery", "battery", "1.0.0"
 US_PER_S = 1_000_000
-SOC_INIT, CYCLES_INIT = 50.0, 0
 
 # --- model definition (types + defaults + per-parameter validation) --------------------------------
 # Each activity: params as (name, valueSchema, default-or-None). None default => required.
@@ -37,6 +36,12 @@ MODEL = {
     "Discharge": [("duration", {"type": "duration"}, None),
                   ("load",     {"type": "real"},     2.0)],
 }
+# Simulation configuration: model-wide settings a planner edits per plan, distinct from an activity's
+# arguments. PlanDev stores these in mission_model_parameters and sends them as `configuration`.
+CONFIG = [
+    ("initialSoC",    {"type": "real"}, 50.0),
+    ("initialCycles", {"type": "int"},  0),
+]
 RESOURCE_TYPES = {
     "SoC":    {"type": "real"},
     "Mode":   {"type": "variant", "variants": [{"key": k, "label": k} for k in ("Idle", "Charging", "Discharging")]},
@@ -152,10 +157,27 @@ def validate_one(typ, args, effective_only):
 class BadRequest(Exception):
     """A caller error -- reported as 4xx with the offending directive named, not as a 500."""
 
+def effective_config(configuration):
+    """Declared configuration only, defaults filled. Same discipline as activity arguments: an unknown
+    key is reported rather than silently honoured, and a null means 'use the default'."""
+    supplied = {k: v for k, v in (configuration or {}).items() if v is not None}
+    for k in supplied:
+        if k not in {n for n, _s, _d in CONFIG}:
+            raise BadRequest("unknown configuration parameter '%s'" % k)
+    out = {}
+    for name, schema, dflt in CONFIG:
+        v = supplied.get(name, dflt)
+        problem = nonconformance(v, schema)
+        if problem:
+            raise BadRequest("configuration parameter '%s' %s" % (name, problem))
+        out[name] = v
+    return out
+
 def simulate(req):
     sim_dur = int(req["duration"])
     if sim_dur < 0:
         raise BadRequest("simulation duration must be >= 0 (got %d)" % sim_dur)
+    cfg = effective_config(req.get("configuration"))
 
     # Resolve every directive to an absolute half-open window [start, end) clamped into the simulation,
     # BEFORE any profile is built. Everything downstream then works in absolute offsets.
@@ -202,13 +224,13 @@ def simulate(req):
     breaks = sorted(p for p in points if 0 <= p <= sim_dur)
 
     real_segs, mode_segs, cyc_segs = [], [], []
-    soc, cycles = SOC_INIT, CYCLES_INIT
+    soc, cycles = cfg["initialSoC"], cfg["initialCycles"]
     for lo, hi in zip(breaks, breaks[1:]):
         if hi <= lo:
             continue
         active = [a for a in acts if a["start"] <= lo < a["end"]]
         rate = float(sum(a["rate"] for a in active))   # concurrent effects superpose
-        cycles = CYCLES_INIT + sum(1 for a in acts if a["type"] == "Charge" and a["start"] <= lo)
+        cycles = cfg["initialCycles"] + sum(1 for a in acts if a["type"] == "Charge" and a["start"] <= lo)
         mode = "Charging" if rate > 0 else "Discharging" if rate < 0 else "Idle"
         dur = hi - lo
         real_segs.append({"duration": dur, "dynamics": {"initial": soc, "rate": rate}})
@@ -236,7 +258,7 @@ def identity_hash():
     return hashlib.sha256(json.dumps({
         "acts": {t: sorted(([n, s, d] for n, s, d in ps), key=lambda p: p[0]) for t, ps in MODEL.items()},
         "res": RESOURCE_TYPES,
-        "params": [],
+        "params": [[n, s, d] for n, s, d in CONFIG],
     }, sort_keys=True).encode()).hexdigest()[:16]
 
 def introspect():
@@ -245,7 +267,7 @@ def introspect():
                            "requiredParameters": [n for n, _, d in ps if d is None]}
                           for t, ps in MODEL.items()],
         "resourceTypes": [{"name": n, "schema": s} for n, s in RESOURCE_TYPES.items()],
-        "parameters": [],
+        "parameters": [{"name": n, "schema": s} for n, s, _d in CONFIG],
         "identityHash": identity_hash(),
     }
 
