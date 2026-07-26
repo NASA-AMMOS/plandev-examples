@@ -167,10 +167,16 @@ discovery/registration flow are documented once in the **[top-level README](../R
 
 ## Known gaps
 
-- **`map<string,comparable>` params** don't map cleanly onto `ValueSchema`; they register as
-  `string`, so the UI can't offer the right editor.
+- **Absolute `time` params** register as `string`. PlanDev has no absolute-time schema, so the value
+  is carried verbatim in Blackbird's UTC day-of-year form -- and it does *not* move if the plan start
+  changes, unlike the activity's own start.
+- **Custom `ConvertableFromString` params** register as `string` and round-trip as their `toString()`,
+  so the UI cannot offer a structured editor.
+- **Simulation configuration is a no-op end to end.** The wire carries `configuration` and the adapter
+  accepts it, but nothing applies it: Blackbird config lives in `SET_PARAMETER` commands, not the plan
+  file, and `/introspect` reports no model parameters.
 - Blackbird validation errors are *whole-activity* (no per-parameter attribution), so their
-  notices carry `subjects: []`.
+  notices carry `subjects: []` -- which plandev-ui currently drops, making them invisible.
 - Determinism is assumed (`(config, directives) -> results`); nondeterministic models are
   unsupported for the edit -> re-sim -> re-ingest round-trip.
 - SPICE-based models need the native lib mounted and kernels (`LOAD_KERNELS`) loaded.
