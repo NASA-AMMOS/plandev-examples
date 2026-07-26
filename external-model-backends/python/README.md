@@ -14,9 +14,23 @@ internal scheduling. `py_model_server.py` is **stdlib-only** — no dependencies
 | **Resources** | `SoC` (real, **linear** — a genuine rate-based profile), `Mode` (variant: `Idle`/`Charging`/`Discharging`), `Cycles` (int) |
 | **Activities** | `Charge(duration, rate=1.0/s)`, `Discharge(duration, load=2.0/s)` |
 
-Unlike the Blackbird adapter's constant-real profiles, `SoC` demonstrates real **piecewise-linear**
-dynamics (`{initial, rate}` per second). `validate` shows per-parameter error attribution
-(`subjects: ["rate"]`) that renders inline on the field in the UI.
+`SoC` demonstrates real **piecewise-linear** dynamics (`{initial, rate}` per second), and `validate`
+shows per-parameter error attribution (`subjects: ["rate"]`) that renders inline on the field in the
+UI — something Blackbird cannot do, since its validation errors are whole-activity.
+
+Concurrent activities **superpose**: a `Charge` overlapping a `Discharge` yields one segment at the
+summed rate for the overlap. Profiles are built from a breakpoint timeline of absolute offsets rather
+than a running cursor, so cumulative segment offsets always equal wall-clock offsets, and the result
+does not depend on the order directives arrive in.
+
+Everything is **clamped to the simulation window**: a directive starting past the end contributes
+nothing, one extending past the end is truncated in both its span and its profile, and the emitted
+segments always sum to exactly the simulation duration. Merlin clamps profiles on its own but does
+*not* clamp spans, so an unclamped span would persist at full length inside a shorter dataset.
+
+`validate` is **authoritative**: merlin delegates argument checking to the backend for external
+models, so this typechecks every argument against its declared `ValueSchema`. Anything it passes is
+something `simulate` accepts and the ingest gate will accept back.
 
 ## Build & run
 
