@@ -489,6 +489,24 @@ class TestRealSimulation(unittest.TestCase):
                   self.out["realProfiles"]["/power/battery/stateOfCharge"]["segments"]]
         self.assertTrue(all(0.0 <= c <= 1.0 for c in charge))
 
+    def test_the_reported_altitude_is_the_orbit_that_was_configured(self):
+        """The value test that was missing, and that let a real bug ship.
+
+        `scStateOutMsg.r_BN_N` is in the SPICE inertial frame, whose origin is the solar-system
+        BARYCENTRE -- so a naive `|r_BN_N| - R_earth` reports about 1.52e8 km, Earth's heliocentric
+        distance, rather than the ~622 km altitude. Nothing else notices: the dynamics are right,
+        the gravity effector works in absolute positions, and every other resource comes from a
+        Basilisk module that resolves frames itself. Only a resource whose VALUES are asserted
+        catches it, which is exactly what this suite did not have.
+        """
+        altitudes = [s["dynamics"]["initial"] for s in
+                     self.out["realProfiles"]["/geometry/altitudeKm"]["segments"]]
+        # a = 7000 km, e = 1e-4, R_earth = 6378.1 km -> 621.2 .. 622.6 km.
+        self.assertGreater(min(altitudes), 600.0, "altitude is below any plausible LEO")
+        self.assertLess(max(altitudes), 650.0,
+                        "altitude is above the configured orbit -- is r_BN_N being treated as "
+                        "Earth-relative when it is barycentric?")
+
     def test_the_orbit_passes_through_eclipse(self):
         states = {s["dynamics"] for s in self.out["discreteProfiles"]["/geometry/eclipse"]["segments"]}
         self.assertIn("Umbra", states)

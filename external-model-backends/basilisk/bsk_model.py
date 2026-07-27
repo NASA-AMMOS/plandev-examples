@@ -280,6 +280,13 @@ class Spacecraft:
             "storage": self._storage.storageUnitDataOutMsg.recorder(),
             "access": self._station.accessOutMsgs[-1].recorder(),
             "state": self._sc.scStateOutMsg.recorder(),
+            # Earth's own position, recorded on the same task so it is sampled at the same instants.
+            # Needed because `scStateOutMsg.r_BN_N` is expressed in the SPICE inertial frame, whose
+            # origin is the solar-system BARYCENTRE, not the central body: |r_BN_N| is about
+            # 1.52e8 km (Earth's heliocentric distance), not the orbital radius. The dynamics are
+            # unaffected -- the gravity effector works in absolute positions and the orbit really is
+            # the requested 7000 km one -- but any geometry DERIVED here has to subtract Earth first.
+            "earth": self._spice.planetStateOutMsgs[0].recorder(),
         }
         for recorder in self._recorders.values():
             self._sim.AddModelToTask("task", recorder)
@@ -351,7 +358,9 @@ class Spacecraft:
         Unit conversion lives here so the adapter never does arithmetic on raw Basilisk output:
         joules to watt-hours, metres to kilometres, a shadow factor to a three-way eclipse state.
         """
-        radius_m = np.linalg.norm(np.array(self._recorders["state"].r_BN_N), axis=1)
+        # Earth-relative, not barycentre-relative -- see the "earth" recorder in _build_recorders.
+        radius_m = np.linalg.norm(np.array(self._recorders["state"].r_BN_N)
+                                  - np.array(self._recorders["earth"].PositionVector), axis=1)
         shadow = np.array(self._recorders["eclipse"].shadowFactor, dtype=float)
         charge_ws = np.array(self._recorders["battery"].storageLevel, dtype=float)
         access = np.array(self._recorders["access"].hasAccess, dtype=float)

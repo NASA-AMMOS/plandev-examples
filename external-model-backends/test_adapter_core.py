@@ -702,6 +702,47 @@ class TestCheckResponse(unittest.TestCase):
             check_response({"realProfiles": {}, "spans": [], "discreteProfiles": {
                 "X": {"schema": INT, "segments": [{"duration": 1.5, "dynamics": 0}]}}})
 
+    def test_a_value_json_cannot_serialize_is_refused_and_says_where(self):
+        # The failure `json.dumps` gives on its own is "Object of type X is not JSON serializable":
+        # no resource, no segment, no path. Same unhelpfulness the non-finite check exists to avoid.
+        class Foreign:
+            pass
+        with self.assertRaises(ModelError) as ctx:
+            ac.check_response({"discreteProfiles": {"Mode": {"segments": [
+                {"duration": 1, "dynamics": {"inner": Foreign()}}]}}})
+        self.assertIn("Mode", str(ctx.exception))
+        self.assertIn("inner", str(ctx.exception))
+        self.assertIn("Foreign", str(ctx.exception))
+
+    def test_a_numpy_style_scalar_is_refused_with_the_cast_that_fixes_it(self):
+        # Simulated rather than importing numpy: adapter_core is stdlib-only, and what the check
+        # keys on is the type's module, which is exactly what makes the hint reliable.
+        class int64(int):
+            __module__ = "numpy"
+
+            def __repr__(self):
+                return "np.int64(%d)" % int(self)
+        # A subclass of int is genuinely sendable, so the walk must NOT flag it...
+        self.assertIsNone(ac._first_unsendable(int64(3)))
+        # ...but the hint has to be there for the types that are not. `numpy.bool_` is the real
+        # shape of this: not a bool, not an int, and json refuses it.
+        class bool_:
+            __module__ = "numpy"
+        found = ac._first_unsendable({"x": bool_()})
+        self.assertIsNotNone(found)
+        self.assertIn("numpy", found[1])
+        self.assertIn("bool(x)", found[1])
+
+    def test_a_non_string_object_key_is_refused(self):
+        with self.assertRaises(ModelError) as ctx:
+            ac.check_response({"spans": [{"spanId": 1, "startOffset": 0, "duration": 1,
+                                          "computedAttributes": {1: "a"}}]})
+        self.assertIn("keys must be strings", str(ctx.exception))
+
+    def test_ordinary_sendable_values_pass_the_walk(self):
+        for value in (None, True, False, 0, -3, 1.5, "s", [], {}, {"a": [1, {"b": None}]}):
+            self.assertIsNone(ac._first_unsendable(value), repr(value))
+
     def test_an_empty_response_is_fine(self):
         check_response({"realProfiles": {}, "discreteProfiles": {}, "spans": []})
         check_response({})

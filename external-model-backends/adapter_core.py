@@ -530,36 +530,88 @@ class Backend:
 
 
 # ---------- response validation ---------------------------------------------------------------------
-def _first_nonfinite(value, path=""):
-    """Path to the first non-finite float inside `value`, or None."""
-    if isinstance(value, float) and not math.isfinite(value):
-        return path or "<value>"
+def _foreign_type_hint(value):
+    """A note naming the usual culprit, when `value` is of a type json cannot serialize.
+
+    Almost always numpy, and worth spelling out because the way it fails is genuinely misleading:
+    `numpy.float64` IS a subclass of Python's float, so every real-valued channel serializes
+    perfectly and the casts at the boundary look like belt-and-braces. `numpy.int64` and
+    `numpy.bool_` are NOT subclasses of int and bool, so the first integer- or boolean-valued
+    channel anyone adds is where it bites -- long after the pattern looked safe.
+    """
+    module = (type(value).__module__ or "").split(".")[0]
+    if module == "numpy":
+        return (" -- numpy scalars and arrays are not JSON. Cast at the boundary: int(x), float(x),"
+                " bool(x), or x.tolist() for an array. (numpy's float64 is a Python float subclass"
+                " and passes, which is why this only surfaces on an int- or bool-valued channel.)")
+    if module == "decimal":
+        return " -- Decimal is not JSON; cast with float(x), accepting the precision that implies."
+    return " -- only null, booleans, numbers, strings, lists and objects can be sent."
+
+
+def _first_unsendable(value, path=""):
+    """`(path, reason)` for the first value inside `value` that cannot go on the wire, or None.
+
+    One walk, two failure modes, because both die anonymously otherwise:
+
+    * A NON-FINITE number. `json.dumps` emits a bare `NaN`/`Infinity`, which is not legal JSON, so
+      merlin's parser rejects the WHOLE response and the ingest dies before anything can say which
+      resource produced it.
+    * A value of a type json cannot serialize at all. `json.dumps` raises a `TypeError` naming only
+      the type -- "Object of type int64 is not JSON serializable" -- with no resource, no span and
+      no path. That is the same unhelpfulness the non-finite check exists to prevent, one type over.
+    """
+    if isinstance(value, float):
+        # Checked before the general case: bool is a subclass of int, and numpy's float64 is a
+        # subclass of float, so both are legitimately sendable and must not fall through.
+        return (path or "<value>", "a non-finite number (NaN or Infinity)") \
+            if not math.isfinite(value) else None
+    if value is None or isinstance(value, (bool, int, str)):
+        return None
     if isinstance(value, dict):
         for k, v in value.items():
-            found = _first_nonfinite(v, "%s.%s" % (path, k))
+            if not isinstance(k, str):
+                return (path or "<value>",
+                        "a %s key (%r); JSON object keys must be strings" % (type(k).__name__, k))
+            found = _first_unsendable(v, "%s.%s" % (path, k))
             if found:
                 return found
-    elif isinstance(value, (list, tuple)):
+        return None
+    if isinstance(value, (list, tuple)):
         for i, v in enumerate(value):
-            found = _first_nonfinite(v, "%s[%d]" % (path, i))
+            found = _first_unsendable(v, "%s[%d]" % (path, i))
             if found:
                 return found
-    return None
+        return None
+    return (path or "<value>", "a %s%s" % (type(value).__name__, _foreign_type_hint(value)))
 
 
 def _is_int(v):
     return isinstance(v, int) and not isinstance(v, bool)
 
 
+def _int_complaint(what, value):
+    """Why `value` is not an integer, in a way that is not baffling when it plainly looks like one.
+
+    `numpy.int64(10)` is an integer to every reader and not an `int` to Python, so "has a
+    non-integer duration np.int64(10)" reads as a bug in the checker rather than in the model.
+    """
+    return "%s %r%s" % (what, value, _foreign_type_hint(value) if not isinstance(value, (int, float))
+                        else "")
+
+
 def check_response(response):
     """Refuse to serialize a simulation result the model got structurally wrong.
 
-    Both failure modes below are silent if they are not caught here:
+    All three failure modes below are silent, or nearly so, if they are not caught here:
 
     * A non-finite number. `json.dumps` would emit a bare `NaN`/`Infinity`, which is not legal
       JSON; merlin's parser rejects the WHOLE response, so the ingest dies before the gate's own
       non-finite check can report anything useful. Failing here means the message can name the
       resource or span that produced it.
+    * A value of a type json cannot serialize -- a numpy scalar or array, most often. `json.dumps`
+      raises a `TypeError` naming only the type ("Object of type int64 is not JSON serializable"),
+      with no resource, no span and no path, which is the same unhelpfulness as the case above.
     * A span that is half-finished. Merlin tells a finished span from an unfinished one by the
       presence of BOTH `duration` and `computedAttributes` (PostgresResultsCellRepository), so the
       two travel together or not at all. A span carrying computed attributes with no duration
@@ -574,13 +626,14 @@ def check_response(response):
         for name, prof in profiles.items():
             for i, seg in enumerate((prof or {}).get("segments") or []):
                 if not _is_int(seg.get("duration")):
-                    raise ModelError("%s '%s' segment %d has a non-integer duration %r"
-                                     % (kind, name, i, seg.get("duration")))
-                bad = _first_nonfinite(seg.get("dynamics"))
+                    raise ModelError("%s '%s' segment %d %s" % (
+                        kind, name, i, _int_complaint("has a non-integer duration",
+                                                      seg.get("duration"))))
+                bad = _first_unsendable(seg.get("dynamics"))
                 if bad:
-                    raise ModelError(
-                        "resource '%s' segment %d produced a non-finite value (NaN or Infinity) "
-                        "at %s, which cannot be sent as JSON" % (name, i, bad))
+                    path, reason = bad
+                    raise ModelError("resource '%s' segment %d cannot be sent as JSON: %s at %s"
+                                     % (name, i, reason, path))
 
     for span in response.get("spans") or []:
         sid = span.get("spanId")
@@ -592,14 +645,17 @@ def check_response(response):
                 % (sid, "duration" if finished else "computedAttributes",
                    "computedAttributes" if finished else "duration"))
         if not _is_int(span.get("startOffset")):
-            raise ModelError("span %s has a non-integer startOffset %r" % (sid, span.get("startOffset")))
+            raise ModelError("span %s %s" % (
+                sid, _int_complaint("has a non-integer startOffset", span.get("startOffset"))))
         if finished and not _is_int(span.get("duration")):
-            raise ModelError("span %s has a non-integer duration %r" % (sid, span.get("duration")))
+            raise ModelError("span %s %s" % (
+                sid, _int_complaint("has a non-integer duration", span.get("duration"))))
         for part in ("arguments", "computedAttributes"):
-            bad = _first_nonfinite(span.get(part))
+            bad = _first_unsendable(span.get(part))
             if bad:
-                raise ModelError("span %s %s produced a non-finite value (NaN or Infinity) at %s, "
-                                 "which cannot be sent as JSON" % (sid, part, bad))
+                path, reason = bad
+                raise ModelError("span %s %s cannot be sent as JSON: %s at %s"
+                                 % (sid, part, reason, path))
     return response
 
 
