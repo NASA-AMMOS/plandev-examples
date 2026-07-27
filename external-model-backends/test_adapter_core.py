@@ -707,6 +707,109 @@ class TestCheckResponse(unittest.TestCase):
         check_response({})
 
 
+# --- sampled output -> profiles -------------------------------------------------------------------
+class TestSnapUp(unittest.TestCase):
+    """CEIL onto the grid. Nearest-rounding is the tempting wrong answer: it halves the average
+    error and reports activities starting before the effect that a fixed-step simulator will
+    actually apply at the following step."""
+
+    def test_a_time_already_on_the_grid_does_not_move(self):
+        self.assertEqual(ac.snap_up(0, 5), 0)
+        self.assertEqual(ac.snap_up(10, 5), 10)
+
+    def test_anything_between_grid_points_goes_UP(self):
+        self.assertEqual(ac.snap_up(1, 5), 5)
+        self.assertEqual(ac.snap_up(4, 5), 5)
+        # The case that separates ceil from round: nearest would give 0 here, which is a step
+        # earlier than the simulator will actually act.
+        self.assertEqual(ac.snap_up(2, 5), 5)
+
+    def test_a_negative_time_snaps_to_zero(self):
+        self.assertEqual(ac.snap_up(-1, 5), 0)
+        self.assertEqual(ac.snap_up(-5, 5), -5)
+
+
+class TestRealSegments(unittest.TestCase):
+    US = 1_000_000
+
+    def test_rate_is_the_secant_so_the_profile_agrees_with_itself(self):
+        # A SATURATING series -- the case where the instantaneous derivative and the secant differ.
+        # PlanDev evaluates `initial + rate*elapsed`, so every segment's computed end must land
+        # exactly on the next segment's initial or the profile contradicts itself.
+        times = [0, self.US, 2 * self.US, 3 * self.US]
+        values = [0.0, 10.0, 15.0, 15.0]
+        segments = ac.real_segments(times, values, 3 * self.US)
+        self.assertEqual([s["dynamics"]["rate"] for s in segments], [10.0, 5.0, 0.0])
+        for a, b in zip(segments, segments[1:]):
+            self.assertEqual(a["dynamics"]["initial"] + a["dynamics"]["rate"] * (a["duration"] / self.US),
+                             b["dynamics"]["initial"])
+
+    def test_the_final_segment_is_extended_to_close_the_window(self):
+        # The whole point: a fixed-step simulator stops at the last step at or before the requested
+        # time, so its samples fall short. merlin's ingest gate rejects a profile that does not
+        # cover the simulation.
+        segments = ac.real_segments([0, self.US], [1.0, 2.0], self.US + 123)
+        self.assertEqual(sum(s["duration"] for s in segments), self.US + 123)
+        self.assertEqual(segments[-1], {"duration": 123, "dynamics": {"initial": 2.0, "rate": 0.0}})
+
+    def test_the_extension_holds_flat_rather_than_extrapolating(self):
+        # Past the last sample there is no data. Continuing the last secant would invent some.
+        segments = ac.real_segments([0, self.US], [0.0, 100.0], self.US + 500_000)
+        self.assertEqual(segments[-1]["dynamics"]["rate"], 0.0)
+        self.assertEqual(segments[-1]["dynamics"]["initial"], 100.0)
+
+    def test_a_single_sample_still_covers_the_window(self):
+        self.assertEqual(ac.real_segments([0], [7.0], 5 * self.US),
+                         [{"duration": 5 * self.US, "dynamics": {"initial": 7.0, "rate": 0.0}}])
+
+    def test_samples_that_already_reach_the_end_get_no_tail(self):
+        segments = ac.real_segments([0, self.US], [1.0, 2.0], self.US)
+        self.assertEqual(len(segments), 1)
+        self.assertEqual(sum(s["duration"] for s in segments), self.US)
+
+    def test_flat_runs_coalesce_and_the_merge_is_exact(self):
+        # An idle subsystem is a long run of one value; a week at a 5-second step is otherwise
+        # ~120 000 segments per resource.
+        segments = ac.real_segments([0, 1, 2, 3, 4], [5.0, 5.0, 5.0, 5.0, 5.0], 4)
+        self.assertEqual(segments, [{"duration": 4, "dynamics": {"initial": 5.0, "rate": 0.0}}])
+
+    def test_sloped_segments_are_never_merged(self):
+        # Merging them would assert `i + r*(d1+d2) == i + r*d1 + r*d2`, which floating-point
+        # addition does not guarantee.
+        segments = ac.real_segments([0, self.US, 2 * self.US], [0.0, 1.0, 2.0], 2 * self.US)
+        self.assertEqual(len(segments), 2)
+        self.assertEqual([s["dynamics"]["rate"] for s in segments], [1.0, 1.0])
+
+    def test_a_flat_run_at_a_DIFFERENT_value_starts_a_new_segment(self):
+        segments = ac.real_segments([0, 1, 2, 3], [5.0, 5.0, 9.0, 9.0], 3)
+        self.assertEqual([s["dynamics"]["initial"] for s in segments], [5.0, 5.0, 9.0])
+        self.assertEqual(sum(s["duration"] for s in segments), 3)
+
+
+class TestDiscreteSegments(unittest.TestCase):
+    def test_equal_neighbours_coalesce(self):
+        segments = ac.discrete_segments([0, 1, 2, 3], ["A", "A", "B", "B"], 3)
+        self.assertEqual(segments, [{"duration": 2, "dynamics": "A"},
+                                    {"duration": 1, "dynamics": "B"}])
+
+    def test_the_window_is_closed_with_the_last_value(self):
+        segments = ac.discrete_segments([0, 1], [True, False], 10)
+        self.assertEqual(segments, [{"duration": 1, "dynamics": True},
+                                    {"duration": 9, "dynamics": False}])
+        self.assertEqual(sum(s["duration"] for s in segments), 10)
+
+    def test_a_single_sample_still_covers_the_window(self):
+        self.assertEqual(ac.discrete_segments([0], ["Idle"], 42),
+                         [{"duration": 42, "dynamics": "Idle"}])
+
+    def test_False_and_zero_are_not_conflated(self):
+        # `out[-1]["dynamics"] == segment["dynamics"]` would merge these under Python's own
+        # False == 0, storing a boolean profile where an int one was recorded.
+        segments = ac.discrete_segments([0, 1], [False, 0], 2)
+        self.assertEqual(len(segments), 1)
+        self.assertIs(segments[0]["dynamics"], False)
+
+
 # --- registry ----------------------------------------------------------------------------------------
 class TestRegistry(unittest.TestCase):
     def test_a_single_model_may_be_addressed_without_a_key(self):

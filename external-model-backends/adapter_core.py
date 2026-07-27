@@ -603,6 +603,103 @@ def check_response(response):
     return response
 
 
+# ---------- sampled output -> profiles ---------------------------------------------------------------
+# A fixed-step simulator reports SAMPLES -- a value at t0, another at t1 -- while PlanDev stores
+# SEGMENTS, each a duration plus dynamics that hold over it. Converting between the two is generic,
+# and getting it wrong is silent in both directions, so it lives here rather than in each adapter.
+# Blackbird does not need this (its engine reports segments natively); Basilisk and any fixed-step
+# backend do.
+def snap_up(time_us, step_us):
+    """The first grid point at or after `time_us`.
+
+    CEIL, not nearest. A fixed-step simulator applies a scheduled effect at the first step at or
+    after its time, so ceil is what the simulator will actually do; rounding to nearest reports an
+    activity starting up to half a step BEFORE its effect was applied, which is a timeline and a
+    profile disagreeing with each other by a step, with nothing anywhere to flag it.
+    """
+    return -((-time_us) // step_us) * step_us
+
+
+def real_segments(times_us, values, sim_duration_us):
+    """Samples -> linear segments covering [0, sim_duration_us] exactly.
+
+    Two things here are not obvious, and both have already cost real debugging on real adapters.
+
+    RATE IS THE SECANT between consecutive samples, `(v1 - v0) / dt`, never the model's instantaneous
+    derivative. PlanDev evaluates a real profile as `initial + rate * elapsedSeconds`, so a segment's
+    computed end value must equal the next segment's `initial`. Any saturation or nonlinearity -- a
+    battery reaching capacity, a buffer filling -- makes the instantaneous derivative disagree, and
+    the profile then contradicts itself between segments with nothing raised anywhere.
+
+    THE FINAL SEGMENT IS EXTENDED to close the window. A fixed-step simulator halts at the last step
+    at or before the requested stop time, so its samples fall short of the plan's duration by the
+    sub-step remainder -- and merlin's ingest gate rejects a profile that does not cover the
+    simulation. It is held FLAT rather than extrapolated along the last secant: past the final sample
+    there is no data, and a hold is the only statement that invents none.
+    """
+    segments = []
+    for i in range(len(times_us) - 1):
+        span_us = times_us[i + 1] - times_us[i]
+        segments.append({"duration": span_us,
+                         "dynamics": {"initial": float(values[i]),
+                                      "rate": (float(values[i + 1]) - float(values[i]))
+                                      / (span_us / 1_000_000)}})
+    if times_us:
+        tail_us = sim_duration_us - times_us[-1]
+        if tail_us > 0:
+            segments.append({"duration": tail_us,
+                             "dynamics": {"initial": float(values[-1]), "rate": 0.0}})
+    return coalesce_real(segments)
+
+
+def coalesce_real(segments):
+    """Merge adjacent FLAT segments holding the same value.
+
+    Restricted to `rate == 0` on purpose. A zero-rate segment evaluates to its `initial` everywhere,
+    so merging two with a bit-identical initial is exactly equivalent -- no tolerance, no drift.
+    Merging sloped segments would mean asserting `i + r*(d1+d2) == i + r*d1 + r*d2`, which
+    floating-point addition does not guarantee, to save segments that a moving resource does not
+    produce anyway. The win is where it matters: an idle subsystem, a saturated battery and a full
+    recorder are all long flat runs, and a week-long plan at a 5-second step is otherwise ~120 000
+    segments per resource.
+    """
+    out = []
+    for segment in segments:
+        dynamics = segment["dynamics"]
+        if out:
+            previous = out[-1]["dynamics"]
+            if (previous["rate"] == 0.0 and dynamics["rate"] == 0.0
+                    and previous["initial"] == dynamics["initial"]):
+                out[-1]["duration"] += segment["duration"]
+                continue
+        out.append({"duration": segment["duration"], "dynamics": dict(dynamics)})
+    return out
+
+
+def discrete_segments(times_us, values, sim_duration_us):
+    """Samples -> piecewise-constant segments covering [0, sim_duration_us] exactly."""
+    segments = []
+    for i in range(len(times_us) - 1):
+        segments.append({"duration": times_us[i + 1] - times_us[i], "dynamics": values[i]})
+    if times_us:
+        tail_us = sim_duration_us - times_us[-1]
+        if tail_us > 0:
+            segments.append({"duration": tail_us, "dynamics": values[-1]})
+    return coalesce_discrete(segments)
+
+
+def coalesce_discrete(segments):
+    """Merge adjacent segments holding the same value. Exact by definition, and the difference
+    between an eclipse profile of a few dozen segments and one of a hundred thousand."""
+    out = []
+    for segment in segments:
+        if out and out[-1]["dynamics"] == segment["dynamics"]:
+            out[-1]["duration"] += segment["duration"]
+            continue
+        out.append(dict(segment))
+    return out
+
+
 # ---------- endpoint implementations ----------------------------------------------------------------
 def run_validate(backend, req):
     """POST /validate. Generic checks first, then the backend's own, layered on top."""
