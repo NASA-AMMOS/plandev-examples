@@ -111,6 +111,9 @@ def declaration():
             for typ, params in MODEL.items()],
         resource_types=[ResourceType(n, s) for n, s in RESOURCE_TYPES.items()],
         config_parameters=[Parameter(n, s, d) for n, s, d in CONFIG],
+        # A pure simulator: directives in, profiles and spans out, placing nothing of its own. So
+        # PlanDev's scheduler can drive it as an oracle -- the opposite archetype to Blackbird.
+        capabilities={adapter_core.PLANDEV_SCHEDULING: adapter_core.supported()},
         digest_payload=_published_digest_payload)
 
 

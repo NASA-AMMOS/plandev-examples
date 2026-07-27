@@ -175,7 +175,11 @@ def declaration():
             for typ, params in ACTIVITIES.items()],
         resource_types=[ResourceType(n, s) for n, s in
                         list(REAL_RESOURCES.items()) + list(DISCRETE_RESOURCES.items())],
-        config_parameters=[Parameter(n, s, d) for n, s, d in CONFIG])
+        config_parameters=[Parameter(n, s, d) for n, s, d in CONFIG],
+        # A pure simulator, and a fast one: a 24-hour plan runs in well under a second, so the full
+        # re-simulation that PlanDev's scheduler pays per placement is affordable here in a way it
+        # would not be for a backend with a heavy per-run cost.
+        capabilities={adapter_core.PLANDEV_SCHEDULING: adapter_core.supported()})
 
 
 # --- quantization -------------------------------------------------------------------------------

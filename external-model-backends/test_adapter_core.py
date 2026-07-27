@@ -232,6 +232,61 @@ class TestIntrospect(unittest.TestCase):
         self.assertEqual(self.intro["identityHash"], self.decl.identity_hash())
 
 
+# --- capabilities ----------------------------------------------------------------------------------
+class TestCapabilities(unittest.TestCase):
+    """What PlanDev may DO with a model, as opposed to what the model is. PlanDev cannot infer any of
+    it from the declared types, and merlin stores whatever is declared here verbatim."""
+
+    def declaration(self, capabilities=None):
+        return ac.Declaration("m", [], capabilities=capabilities)
+
+    def test_a_backend_that_declares_nothing_reports_an_empty_object(self):
+        # Not null and not absent: "this backend declares no capabilities" is a fact, and it has to
+        # survive the trip so merlin can tell it from a row that predates capabilities entirely.
+        self.assertEqual(self.declaration().introspect()["capabilities"], {})
+
+    def test_an_unsupported_capability_carries_the_reason(self):
+        # The reason is the whole point of the object-not-boolean shape: it is what lets the UI say
+        # why without containing a sentence about any particular framework.
+        caps = {ac.PLANDEV_SCHEDULING: ac.unsupported("it schedules its own activities")}
+        reported = self.declaration(caps).introspect()["capabilities"]
+        self.assertIs(reported[ac.PLANDEV_SCHEDULING]["supported"], False)
+        self.assertEqual(reported[ac.PLANDEV_SCHEDULING]["reason"], "it schedules its own activities")
+
+    def test_a_supported_capability_can_carry_its_own_detail(self):
+        caps = {ac.PLAN_IMPORT: ac.supported(formats=[{"key": "x", "label": "X", "extensions": [".x"]}])}
+        entry = self.declaration(caps).introspect()["capabilities"][ac.PLAN_IMPORT]
+        self.assertIs(entry["supported"], True)
+        self.assertEqual(entry["formats"][0]["extensions"], [".x"])
+
+    def test_an_unknown_capability_name_is_carried_through_untouched(self):
+        # A backend may declare something this version of adapter_core has never heard of; dropping
+        # it here would mean a newer UI could never see it.
+        reported = self.declaration({"somethingNew": {"supported": True}}).introspect()["capabilities"]
+        self.assertEqual(reported["somethingNew"], {"supported": True})
+
+    def test_capabilities_are_part_of_the_identity_attestation(self):
+        # merlin STORES capabilities, so a backend that changes them under a frozen model row leaves
+        # PlanDev's copy stale -- the same failure the attestation exists to catch for types. A
+        # backend that flips plandevScheduling on would otherwise have PlanDev keep offering to
+        # schedule for it (or keep refusing) with nothing noticing.
+        off = self.declaration({ac.PLANDEV_SCHEDULING: ac.unsupported("no")}).identity_hash()
+        on = self.declaration({ac.PLANDEV_SCHEDULING: ac.supported()}).identity_hash()
+        none = self.declaration().identity_hash()
+        self.assertNotEqual(off, on)
+        self.assertNotEqual(off, none)
+        self.assertNotEqual(on, none)
+
+    def test_a_pinned_digest_payload_still_wins(self):
+        # An already-shipped model pins the bytes its published hash was minted from, so adding
+        # capabilities must not re-attest it. Both shipped adapters rely on this.
+        pinned = ac.Declaration("m", [], capabilities={ac.PLANDEV_SCHEDULING: ac.supported()},
+                                digest_payload=lambda _d: {"frozen": True})
+        other = ac.Declaration("m", [], capabilities={ac.PLANDEV_SCHEDULING: ac.unsupported("x")},
+                               digest_payload=lambda _d: {"frozen": True})
+        self.assertEqual(pinned.identity_hash(), other.identity_hash())
+
+
 # --- identity hash --------------------------------------------------------------------------------
 class TestIdentityHash(unittest.TestCase):
     """The attestation merlin stores. A spurious change refuses simulations and invalidates the

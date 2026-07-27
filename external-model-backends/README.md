@@ -139,7 +139,7 @@ consecutively from offset 0; `SerializedValue` is raw JSON (untagged).
 | Endpoint | Purpose |
 |---|---|
 | `GET /models` | **Discovery.** `{ models: [{key, name, version, identityHash}] }` |
-| `GET\|POST /introspect?model=<key>` | Types. `{ activityTypes, resourceTypes, parameters, identityHash }` |
+| `GET\|POST /introspect?model=<key>` | Types. `{ activityTypes, resourceTypes, parameters, capabilities, identityHash }` |
 | `POST /simulate?model=<key>` | Run. `{planStart, duration, configuration, directives[]}` → `{realProfiles, discreteProfiles, spans}` |
 | `POST /validate?model=<key>` | Validate / effective args. `{activities[], effectiveOnly}` → `{results:[{valid, notices[], effectiveArguments}]}` |
 
@@ -161,6 +161,31 @@ consecutively from offset 0; `SerializedValue` is raw JSON (untagged).
 - **Decomposition/dispatched** children carry `parentId` (their parent span) and `directiveId: null`.
 - **`directiveId`** links a top-level span back to the PlanDev directive that produced it.
 - **Arrayed resources** (Blackbird) flatten to dotted names (`PositionVector.x`).
+
+**`capabilities`** — what PlanDev may *do* with this model, which its declared types cannot say.
+Nothing in a list of activity types reveals whether the model places activities of its own during
+simulation, so PlanDev cannot infer it and the backend has to state it.
+
+```jsonc
+{ "plandevScheduling": { "supported": false,
+                         "reason": "This model schedules its own activities: ..." },
+  "planImport":        { "supported": true,
+                         "formats": [{"key":"blackbird-plan-json","label":"Blackbird plan",
+                                      "extensions":[".plan.json"]}] } }
+```
+
+Every capability is an **object, never a bare boolean**, so an unsupported one has somewhere to carry
+the backend's own explanation — which is what keeps plandev-ui free of any branch naming a particular
+framework: it renders "unavailable because *&lt;the backend's sentence&gt;*". An **absent capability
+means unsupported**, so a backend that declares nothing keeps today's behavior rather than silently
+opting into a feature nobody verified. Merlin stores the object verbatim in
+`mission_model.external_capabilities`, including names it has never heard of, so a backend can declare
+something a newer UI understands and an older server will still carry it through.
+
+`plandevScheduling` is the distinction between the two archetypes: a **pure simulator** (the Python
+battery, Basilisk) maps directives to results and places nothing, so PlanDev's scheduler can drive it;
+a **forward-dispatch framework** (Blackbird) places activities during its own run, so its schedule is
+an output and running PlanDev's scheduler too would put two schedulers on one plan.
 
 **`POST /validate`** — each activity yields `{valid, notices:[{subjects, message}], effectiveArguments}`.
 `subjects` names the offending parameter(s) so the UI can render the error inline on that field

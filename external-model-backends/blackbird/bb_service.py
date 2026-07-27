@@ -425,6 +425,20 @@ def build_declaration(key, model):
         # is to emit no SET_PARAMETER line rather than to re-set the value Blackbird would have used.
         config_parameters=[Parameter(c["name"], bbtype_to_schema(c["bbtype"]), None)
                            for c in model.get("config_specs", [])],
+        # Blackbird is the archetype that makes capabilities necessary. It is not a pure simulator:
+        # its own Scheduler dispatches activities DURING the run (dispatchOnCondition, getWindows)
+        # and decompose()/spawn() create more, so the schedule is an OUTPUT of simulating, not an
+        # input to it. PlanDev's scheduler placing activities on top would mean two schedulers
+        # writing the same plan, each unaware of the other's placements. Everything else PlanDev
+        # does -- editing directives, simulating, plotting resources, checking constraints -- works
+        # normally, and the message says so, because "unavailable" with no scope reads as broken.
+        capabilities={
+            adapter_core.PLANDEV_SCHEDULING: adapter_core.unsupported(
+                "This model schedules its own activities: Blackbird's dispatcher places them during "
+                "the simulation, so the schedule is a result of running it rather than an input. "
+                "Using PlanDev's scheduler as well would put two schedulers on the same plan. Plan "
+                "editing, simulation, resource plots and constraints all work normally."),
+        },
         digest_payload=lambda _decl, m=model: published_digest_payload(m))
 
 

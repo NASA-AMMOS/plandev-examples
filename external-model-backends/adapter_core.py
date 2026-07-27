@@ -202,6 +202,35 @@ class ResourceType:
     schema: Dict[str, Any]
 
 
+# ---------- capabilities --------------------------------------------------------------------------
+# What PlanDev may DO with a model, as opposed to what the model is. PlanDev cannot infer any of this
+# from the declared types: nothing in a list of activity types says whether the model places
+# activities of its own during simulation, or whether the backend can read its framework's native
+# plan format. Merlin stores whatever is declared here in mission_model.external_capabilities.
+#
+# Every capability is an OBJECT, never a bare boolean, so that an unsupported one has somewhere to
+# carry the backend's own explanation. That is what keeps plandev-ui free of branches naming a
+# particular framework: it renders "unavailable because <the backend's sentence>" without knowing
+# what Blackbird is. An ABSENT capability means unsupported.
+
+#: PlanDev's own scheduler may place activities in plans using this model. False for a
+#: forward-dispatch framework, which places activities during its own simulation -- running PlanDev's
+#: scheduler against one pits two schedulers against each other.
+PLANDEV_SCHEDULING = "plandevScheduling"
+#: The backend can read its framework's native plan format and return directives.
+PLAN_IMPORT = "planImport"
+
+
+def unsupported(reason):
+    """A capability the backend does not offer, with the sentence the UI should show for it."""
+    return {"supported": False, "reason": reason}
+
+
+def supported(**detail):
+    """A capability the backend offers, plus whatever that capability needs to describe itself."""
+    return dict(detail, supported=True)
+
+
 class Declaration:
     """Everything PlanDev stores about one model, plus the operations that follow from it.
 
@@ -210,13 +239,15 @@ class Declaration:
     """
 
     def __init__(self, key, activity_types, resource_types=(), config_parameters=(),
-                 name=None, version="1.0.0", digest_payload=None):
+                 name=None, version="1.0.0", digest_payload=None, capabilities=None):
         self.key = key
         self.name = name or key
         self.version = version
         self.activity_types = list(activity_types)
         self.resource_types = list(resource_types)
         self.config_parameters = list(config_parameters)
+        # What PlanDev may DO with this model, as opposed to what the model is. See `unsupported`.
+        self.capabilities = dict(capabilities or {})
         self._acts = {a.name: a for a in self.activity_types}
         # `digest_payload`: an override for a model that has ALREADY SHIPPED. The identity hash is
         # an attestation merlin STORES; changing the bytes it is computed from invalidates every
@@ -246,6 +277,10 @@ class Declaration:
             # an activity's arguments. PlanDev stores these in mission_model_parameters and sends
             # them back as `configuration`.
             "parameters": [{"name": p.name, "schema": p.schema} for p in self.config_parameters],
+            # Which PlanDev features apply to this model. PlanDev cannot infer these from the type
+            # surface -- nothing in a model's activity types says whether it places activities of its
+            # own during simulation -- and an absent capability means UNSUPPORTED.
+            "capabilities": self.capabilities,
             "identityHash": self.identity_hash(),
         }
 
@@ -282,6 +317,13 @@ class Declaration:
             # Config parameters are part of what PlanDev stores (mission_model_parameters), so they
             # belong in the attestation for the same reason activity and resource types do.
             "cfg": [[p.name, p.schema, p.default] for p in self.config_parameters],
+            # And so are capabilities. The attestation exists because PlanDev keeps a COPY of
+            # something the backend owns, and the copy can go stale under a redeployed adapter --
+            # which is as true of capabilities as of types. Leaving them out would create a second
+            # unattested copy with exactly the failure mode the first one is guarded against: a
+            # backend that starts placing its own activities while PlanDev still offers to schedule
+            # for it, with two schedulers then writing the same plan.
+            "caps": self.capabilities,
         }
 
     def identity_hash(self):
