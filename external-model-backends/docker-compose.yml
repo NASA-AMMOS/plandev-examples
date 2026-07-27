@@ -10,7 +10,11 @@
 #   export PLANDEV_NETWORK=plandev-dupe-1_default
 #   # 2. Blackbird only: drop a JNISpice jar in ./blackbird/vendor (see blackbird/vendor/README.md)
 #   docker compose up --build
-#   docker compose up --build python   # just the pure-Python one (no JNISpice jar needed)
+#   docker compose up --build python     # just the pure-Python one (no JNISpice jar needed)
+#   docker compose up --build basilisk   # real astrodynamics; no jar either, but a 1.3 GB image
+#
+# The basilisk image bakes in ~128 MB of SPICE kernels at BUILD time, so building it needs egress to
+# naif.jpl.nasa.gov once. After that it runs with no network of its own.
 #
 # Then set merlin's AND EVERY merlin worker's EXTERNAL_MODEL_BACKENDS to the service names —
 # see ./README.md ("Wire PlanDev to the backends"). Both must match, or a model will introspect
@@ -43,6 +47,16 @@ services:
     networks: [plandev]
     restart: unless-stopped
     # ports: ["5002:5002"]
+
+  basilisk:
+    build:
+      context: .
+      dockerfile: basilisk/Dockerfile
+    image: plandev/basilisk-adapter
+    container_name: basilisk-adapter
+    networks: [plandev]
+    restart: unless-stopped
+    # ports: ["5021:5021"]
 
 networks:
   plandev:

@@ -2,16 +2,23 @@
 
 **Run a mission model PlanDev never compiled** — a foreign simulator that plugs in over HTTP as an
 `external` backend. PlanDev owns the plan, directives, validation, scheduling UI, and
-visualization; the backend owns the simulation. This directory has two runnable, plug-and-play
+visualization; the backend owns the simulation. This directory has three runnable, plug-and-play
 example backends:
 
 | Backend | Dir | Port | What it is | Language |
 |---|---|---|---|---|
 | **Blackbird** | [`blackbird/`](blackbird/) | **5011** | Fronts the [Blackbird](https://github.com/nasa-jpl/Blackbird) Java simulator; serves the `powermodel` demo adaptation (multi-model capable) | Python + JVM |
-| **Python** | [`python/`](python/) | **5002** | A ~180-line pure-Python toy spacecraft battery model — proof the contract is language-neutral | Python (stdlib) |
+| **Python** | [`python/`](python/) | **5002** | A small pure-Python toy spacecraft battery — proof the contract is language-neutral | Python (stdlib) |
+| **Basilisk** | [`basilisk/`](basilisk/) | **5021** | A LEO spacecraft in [Basilisk](https://github.com/AVSLab/basilisk): SPICE ephemerides, eclipse geometry, solar array, battery, recorder, ground-station downlink | Python + C++ |
 
-Both speak the **same language-neutral wire contract** (four HTTP endpoints, below). PlanDev/Merlin
+All three speak the **same language-neutral wire contract** (four HTTP endpoints, below). PlanDev/Merlin
 needs zero per-framework code: a backend is just an adapter that conforms to the contract.
+
+They are deliberately different in kind. Blackbird is a discrete-event engine in another JVM; the
+Python model is a toy with no dependencies; Basilisk is a **fixed-step numerical integrator**, which
+is the one that stresses a different part of the contract — see
+[`basilisk/README.md`](basilisk/README.md). The half of each adapter that is not about its simulator
+lives in one shared [`adapter_core.py`](adapter_core.py).
 
 > These are demonstration/spike backends, not published/production components. They are **not**
 > part of the Gradle mission-modeling learning path — the demo Blackbird `powermodel` is a Blackbird
@@ -54,12 +61,17 @@ export PLANDEV_NETWORK=plandev-dupe-1_default
 # The Blackbird image needs a JNISpice jar in ./blackbird/vendor first — see blackbird/vendor/README.md.
 # If your jar isn't the pinned v2022-05, override ONLY the filename:
 #   export JNISPICE_JAR=JNISpice-N0067.jar
-docker compose up --build          # both backends
-docker compose up --build python   # just the pure-Python one (no jar needed)
+docker compose up --build            # all three backends
+docker compose up --build python     # just the pure-Python one (no jar needed)
+docker compose up --build basilisk   # real astrodynamics (no jar either; 1.3 GB image)
 ```
 
-Or run either on its own — see [`blackbird/README.md`](blackbird/README.md) and
-[`python/README.md`](python/README.md). The Python backend also runs with **no Docker and no
+Building the Basilisk image needs egress to `naif.jpl.nasa.gov` **once**, to bake in ~128 MB of SPICE
+kernels. After that it runs with no network of its own.
+
+Or run any of them on its own — see [`blackbird/README.md`](blackbird/README.md),
+[`python/README.md`](python/README.md) and [`basilisk/README.md`](basilisk/README.md). The Python
+backend also runs with **no Docker and no
 dependencies**: `python3 python/py_model_server.py 5002` — handy for hacking on an adapter, though
 merlin must then reach it via `host.docker.internal`, which puts the adapter outside the cluster.
 Prefer the in-cluster containers for anything but local development.
@@ -76,7 +88,7 @@ In PlanDev's `docker-compose.yml`, on the `aerie_merlin` service **and on every 
 
 ```yaml
 environment:
-  EXTERNAL_MODEL_BACKENDS: '[{"name":"blackbird-lab","url":"http://blackbird-adapter:5011"},{"name":"python-lab","url":"http://python-adapter:5002"}]'
+  EXTERNAL_MODEL_BACKENDS: '[{"name":"blackbird-lab","url":"http://blackbird-adapter:5011"},{"name":"python-lab","url":"http://python-adapter:5002"},{"name":"basilisk-lab","url":"http://basilisk-adapter:5021"}]'
 ```
 
 Because the adapters are on the same network, merlin reaches them by service name — no host

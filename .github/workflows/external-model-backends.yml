@@ -61,5 +61,33 @@ jobs:
         working-directory: external-model-backends/blackbird
         run: python3 test_bb_import.py -v
 
+      # Covers basilisk/ too: compileall byte-compiles without importing, so it needs no Basilisk.
       - name: Syntax-check the scripts that have no tests yet
         run: python3 -m compileall -q external-model-backends
+
+  # Separate job because these are the only tests with a heavy third-party dependency. `pip install
+  # bsk` is ~16 s, so it is cheap enough to run on every PR, but there is no reason for it to slow
+  # down or block the hermetic suite above. 3.12 only: basilisk/Dockerfile is python:3.12-slim, and
+  # running the same tests on 3.10 would install a 500 MB wheel to learn nothing.
+  #
+  # NOT installed here: the SPICE kernels. They are 128 MB from naif.jpl.nasa.gov, which on every CI
+  # run would be both flaky and rude; the tests that need a real propagation skip themselves when the
+  # kernels are absent. The container bakes them in, so those tests do run in the image and in the
+  # PlanDev e2e suite (ExternalModelTests).
+  basilisk-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The PyPI name is `bsk`. `pip install Basilisk` fetches an unrelated Redis ORM.
+      - name: Install Basilisk
+        run: pip install "bsk==2.11.0" "numpy>=1.26"
+
+      - name: bsk_service tests
+        working-directory: external-model-backends/basilisk
+        run: python3 test_bsk_service.py -v
