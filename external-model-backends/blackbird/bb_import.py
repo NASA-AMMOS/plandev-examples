@@ -41,9 +41,8 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
-# effective_args reaches coerce_default internally; see ModelSchema.from_url for why that matters.
 from bb_service import (bb_dur_to_us, bb_time_to_us_offset, bbtype_to_schema,
-                        effective_args, iso_to_dt, load_model)
+                        coerce_default, iso_to_dt, load_model)
 
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 ONE_DAY = timedelta(days=1)
@@ -91,6 +90,28 @@ def dt_to_iso(dt, suffix="Z"):
     if dt.microsecond:
         body += ".%06d" % dt.microsecond
     return body + suffix
+
+
+def effective_args(typ, provided, param_types, param_defaults):
+    """Provided arguments, with the model's own defaults filled in for whatever is absent.
+
+    Lives here rather than in bb_service because the adapter no longer needs it: adapter_core's
+    `Declaration.effective_args` does that job from the translated declaration. This importer works
+    from two DIFFERENT schema sources -- a classpath, where defaults arrive as Blackbird text and
+    need `coerce_default`, and a running adapter, where `/introspect` gives no defaults at all and
+    they are recovered ALREADY COERCED from `/validate?effectiveOnly` (see `ModelSchema.from_url`,
+    which is why it registers every parameter as bbtype "string": the pass-through conversion).
+    Keeping the pair of them behind one function is what lets `convert` treat both sources alike.
+
+    Unlike the adapter's version this KEEPS undeclared names, because an unrecognized argument in a
+    plan file is reported to the operator by `convert` rather than dropped silently.
+    """
+    eff = dict(provided or {})
+    ptypes = dict(param_types.get(typ, []))
+    for pname, dflt in param_defaults.get(typ, {}).items():
+        if pname not in eff:
+            eff[pname] = coerce_default(ptypes.get(pname, "string"), dflt)
+    return eff
 
 
 # ---------- argument coercion (the inverse of bb_service.fmt_param) ----------

@@ -40,9 +40,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      # adapter_core owns the half of the wire contract that is not model-specific -- HTTP, routing,
+      # the ValueSchema typechecker, defaults, the identity hash, response validation -- and is shared
+      # by every adapter. It is tested first because a break here breaks all of them.
+      - name: adapter_core tests
+        working-directory: external-model-backends
+        run: python3 test_adapter_core.py -v
+
       - name: py_model_server tests
         working-directory: external-model-backends/python
         run: python3 test_py_model_server.py -v
+
+      - name: bb_service tests
+        working-directory: external-model-backends/blackbird
+        run: python3 test_bb_service.py -v
 
       # The 2 tests that need a live Blackbird adapter skip cleanly when nothing answers on
       # BB_ADAPTER_URL; the other 41 run against the checked-in fixture.

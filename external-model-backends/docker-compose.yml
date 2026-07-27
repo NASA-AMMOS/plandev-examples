@@ -19,7 +19,8 @@
 services:
   blackbird:
     build:
-      context: ./blackbird
+      context: .
+      dockerfile: blackbird/Dockerfile
       # Defaults to the v2022-05 jar that matches jplTime 2025-10a. If you have a different
       # SPICE toolkit version, export JNISPICE_JAR / JNISPICE_VERSION before `docker compose up`:
       #   export JNISPICE_JAR=JNISpice-N0067.jar JNISPICE_VERSION=N0067
@@ -35,7 +36,8 @@ services:
 
   python:
     build:
-      context: ./python
+      context: .
+      dockerfile: python/Dockerfile
     image: plandev/python-adapter
     container_name: python-adapter
     networks: [plandev]

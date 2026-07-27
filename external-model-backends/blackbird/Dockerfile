@@ -24,7 +24,7 @@ FROM maven:3.9-eclipse-temurin-21 AS builder
 #                      Change it only if jplTime changes the dependency.
 ARG JNISPICE_JAR=JNISpice-v2022-05.jar
 ARG JNISPICE_VERSION=v2022-05
-COPY vendor/${JNISPICE_JAR} /tmp/jnispice.jar
+COPY blackbird/vendor/${JNISPICE_JAR} /tmp/jnispice.jar
 RUN mvn -q -B install:install-file \
       -Dfile=/tmp/jnispice.jar \
       -DgroupId=gov.nasa.jpl.spice -DartifactId=jnispice -Dversion=${JNISPICE_VERSION} -Dpackaging=jar
@@ -46,7 +46,7 @@ RUN git clone --depth 1 https://github.com/nasa-jpl/Blackbird.git \
 
 # Compile the demo power model against Blackbird core + jplTime (+ deps).
 # Java expands the trailing /* classpath wildcard itself.
-COPY powermodel/src /src/powermodel/src
+COPY blackbird/powermodel/src /src/powermodel/src
 RUN mkdir -p /out/powermodel \
  && javac -parameters -cp "/out/classes:/out/lib/*" -d /out/powermodel \
       $(find /src/powermodel/src -name '*.java')
@@ -54,12 +54,12 @@ RUN mkdir -p /out/powermodel \
 # Accessor for the adaptation's simulation configuration. Blackbird can enumerate, type and SET its
 # parameters, but has no command that prints them -- CREATE_DICTIONARY emits activities only. Built into
 # /out/tools so it can be run against any adaptation's classpath.
-COPY tools/BbParams.java /src/tools/BbParams.java
+COPY blackbird/tools/BbParams.java /src/tools/BbParams.java
 RUN mkdir -p /out/tools \
  && javac -cp "/out/classes:/out/lib/*" -d /out/tools /src/tools/BbParams.java
 
 # Conformance probe: declares one resource of every Blackbird type so adapter coverage is testable.
-COPY covermodel/src /src/covermodel/src
+COPY blackbird/covermodel/src /src/covermodel/src
 RUN mkdir -p /out/covermodel \
  && javac -parameters -cp "/out/classes:/out/lib/*" -d /out/covermodel \
       $(find /src/covermodel/src -name '*.java')
@@ -71,7 +71,10 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /out /opt/blackbird
-COPY bb_service.py /opt/adapter/bb_service.py
+# Build context is external-model-backends/, not blackbird/, so adapter_core.py -- shared with the
+# Python adapter -- is reachable. Copied next to the service, where its sys.path shim looks first.
+COPY adapter_core.py /opt/adapter/adapter_core.py
+COPY blackbird/bb_service.py /opt/adapter/bb_service.py
 
 ENV BLACKBIRD_MAIN="gov.nasa.jpl.Blackbird"
 # BB_MODELS maps each model key to a classpath = Blackbird core + its deps + one adaptation.

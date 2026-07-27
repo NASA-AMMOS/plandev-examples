@@ -4,6 +4,11 @@
 One generic, model-agnostic adapter that can serve one OR many Blackbird adaptations. It speaks the
 PlanDev external-model wire contract; PlanDev only ever talks to a backend at an operator-configured URL.
 
+Everything that is not about Blackbird -- HTTP, routing, `?model=` resolution, ValueSchema
+typechecking, default resolution, the identity hash, response validation -- lives in `adapter_core`,
+shared with the Python adapter. What is left here is the Blackbird half: translating Blackbird's
+types, plan files and TOL output to and from PlanDev's, and driving the JVM.
+
 Endpoints (each addresses a model by key; if only one model is configured the key is optional):
   GET  /models                         -> { models: [{key, name, version, identityHash}] }   (discovery)
   GET  /introspect?model=<key>         -> { activityTypes, resourceTypes, parameters }
@@ -18,23 +23,31 @@ uses BLACKBIRD_CP.) Each classpath is Blackbird core + jpl_time + exactly one ad
 Run:  BB_MODELS='{"orbiter":"/cp/a","lander":"/cp/b"}' python3 bb_service.py [port]
 stdlib only.
 """
-import hashlib, json, os, re, subprocess, sys, tempfile, uuid
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+import uuid
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
+
+# adapter_core sits one directory up in the repo and NEXT TO this file inside the container image
+# (the Dockerfile copies it in). Appending -- not inserting -- the repo root keeps the co-located
+# copy winning when there is one, so the image always runs the module it shipped with.
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import adapter_core                                                            # noqa: E402
+from adapter_core import (ActivityType, Declaration, Directive,                # noqa: E402,F401
+                          Parameter, ResourceType, digest, iso_to_dt)
 
 BLACKBIRD_MAIN = os.environ.get("BLACKBIRD_MAIN", "gov.nasa.jpl.Blackbird")
 JPLTIME_LIB = os.environ.get("JPLTIME_LIB", "jplTime/lib")
 JAVA_BIN = os.environ.get("JAVA_BIN", "java")
 
-# modelKey -> {cp, name, version, param_types, param_defaults, res_specs, initials, identity}
-MODELS = {}
 
 # ---------- time / value helpers (pure) ----------
-def iso_to_dt(iso):
-    return datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone(timezone.utc)
-
 def dt_to_bbtime(dt):
     return dt.strftime("%Y-%jT%H:%M:%S.%f")
 
@@ -133,6 +146,28 @@ def fmt_param(bbtype, value):
                 out[str(fmt_param(args[0], entry["key"]))] = fmt_param(args[1], entry.get("value"))
             return out
     return value
+
+def coerce_default(bbtype, dflt):
+    """A Blackbird dictionary default (always TEXT) -> PlanDev's value space.
+
+    Blackbird's CREATE_DICTIONARY writes every default as a string, so `"00:01:00"` and `"3"` have to
+    be converted before they can be handed back as `effectiveArguments` or typechecked against the
+    parameter's ValueSchema. Anything unconvertible is passed through untouched rather than dropped:
+    a default we cannot read is still better information than no default at all.
+    """
+    if bbtype in ("int", "integer", "long"):
+        try: return int(dflt)
+        except (ValueError, TypeError): return dflt
+    if bbtype in ("float", "double"):
+        try: return float(dflt)
+        except (ValueError, TypeError): return dflt
+    if bbtype in ("boolean", "bool"):
+        return str(dflt).lower() == "true"
+    if bbtype == "duration":
+        try: return bb_dur_to_us(dflt)
+        except Exception: return dflt
+    return dflt
+
 
 # ---------- Blackbird invocation (classpath per model) ----------
 def run_bb(script, workdir, cp):
@@ -246,17 +281,15 @@ COMPUTED_ATTRIBUTES_SCHEMA = {"type": "struct", "items": {"blackbirdId": {"type"
 def config_script_lines(configuration, config_specs):
     """PlanDev simulation configuration -> Blackbird `SET_PARAMETER Class.Field value` lines.
 
-    Only declared parameters are emitted; an unknown key is reported rather than passed through, since
-    Blackbird would fail the whole script on it. Values go through fmt_param so a duration arrives in
-    Blackbird's own notation rather than as raw microseconds.
+    Iterates the DECLARED parameters, not the request, so an unknown key cannot reach Blackbird and
+    fail the whole script -- adapter_core rejects those upstream in `effective_config`, which is also
+    why nothing here has to warn about them any more. A parameter the request left unset (or set to
+    null) gets no line at all, which leaves the adaptation's own default in place. Values go through
+    fmt_param so a duration arrives in Blackbird's own notation rather than as raw microseconds.
     """
-    by_name = {c["name"]: c for c in config_specs}
     lines = []
-    for name, value in (configuration or {}).items():
-        spec = by_name.get(name)
-        if spec is None:
-            print("warning: ignoring unknown configuration parameter '%s'" % name, file=sys.stderr)
-            continue
+    for spec in config_specs:
+        value = (configuration or {}).get(spec["name"])
         if value is None:
             continue                                   # unset: leave the adaptation's own default
         v = fmt_param(spec["bbtype"], value)
@@ -264,9 +297,9 @@ def config_script_lines(configuration, config_specs):
         # of text; containers have no representation here and Blackbird has no syntax for them.
         if isinstance(v, (list, dict)):
             print("warning: configuration parameter '%s' is a container, which SET_PARAMETER cannot "
-                  "express; ignoring" % name, file=sys.stderr)
+                  "express; ignoring" % spec["name"], file=sys.stderr)
             continue
-        lines.append("SET_PARAMETER %s %s\n" % (name, v))
+        lines.append("SET_PARAMETER %s %s\n" % (spec["name"], v))
     return "".join(lines)
 
 def load_config_specs(cp, workdir):
@@ -299,7 +332,7 @@ def load_config_specs(cp, workdir):
 
 def load_model(key, cp):
     """Introspect one adaptation: activity param types/defaults (CREATE_DICTIONARY) + resource
-    schemas/initials (zero-activity REMODEL). Identity = hash of the introspected types."""
+    schemas/initials (zero-activity REMODEL)."""
     with tempfile.TemporaryDirectory() as wd:
         dpath = os.path.join(wd, "model.dict.json"); s = os.path.join(wd, "d.script")
         open(s, "w").write("CREATE_DICTIONARY %s\n" % dpath); run_bb(s, wd, cp)
@@ -316,14 +349,37 @@ def load_model(key, cp):
         res_specs = parse_res_specs(root)
         initials = parse_initials(root)
         config_specs = load_config_specs(cp, wd)
-    # Hash the TRANSLATED schemas, not Blackbird's raw type strings. PlanDev stores ValueSchemas, and the
-    # attestation exists to detect that what PlanDev stored no longer describes what will run. Hashing
-    # the Blackbird-side names missed a whole class of drift: upgrading the adapter so that, say,
-    # map<string, string> maps to a key/value series instead of a bare string leaves every stored
-    # parameter schema wrong while the hash claims nothing changed. Including the adapter's own mapping
-    # in the digest means such an upgrade correctly invalidates exactly the models it affects -- a model
-    # using none of the changed types keeps its hash and is left alone.
-    identity = hashlib.sha256(json.dumps({
+    return {"cp": cp, "name": key, "version": "1.0.0", "param_types": param_types,
+            "param_defaults": param_defaults, "res_specs": res_specs, "initials": initials,
+            "config_specs": config_specs}
+
+
+# ---------- declaration ----------
+def published_digest_payload(model):
+    """The exact bytes a Blackbird model's PUBLISHED identityHash is minted from.
+
+    adapter_core has a canonical payload (`Declaration.digest_payload`) that a new model should use.
+    This one is pinned because these models have already shipped: merlin STORES the hash as an
+    attestation that it introspected the model it is about to simulate, so re-shaping the payload
+    would invalidate every deployment without a single thing about the model having moved.
+
+    It hashes the TRANSLATED schemas, not Blackbird's raw type strings. PlanDev stores ValueSchemas,
+    and the attestation exists to detect that what PlanDev stored no longer describes what will run.
+    Hashing the Blackbird-side names missed a whole class of drift: upgrading the adapter so that,
+    say, map<string, string> maps to a key/value series instead of a bare string leaves every stored
+    parameter schema wrong while the hash claims nothing changed. Including the adapter's own mapping
+    in the digest means such an upgrade correctly invalidates exactly the models it affects -- a
+    model using none of the changed types keeps its hash and is left alone.
+
+    KNOWN GAP, preserved deliberately so the hash does not move: parameter DEFAULTS and therefore
+    requiredParameters are NOT in here. merlin persists requiredParameters in activity_type and its
+    gate enforces them, so flipping a Blackbird parameter between required and optional changes what
+    PlanDev believes while this hash says nothing happened. The Python adapter's payload does cover
+    defaults, and `Declaration.digest_payload` covers both -- adopting it is the fix, at the cost of
+    a one-time re-attestation of every deployed Blackbird model.
+    """
+    param_types = model["param_types"]
+    return {
         # Parameters are hashed in DECLARATION ORDER, not sorted. Order is not cosmetic: merlin assigns
         # each parameter an `order` from its index in this array (ResponseSerializers.serializeParameters),
         # stores it, reads activity types back sorted by it (GetActivityTypesAction), and plandev-ui lays
@@ -331,26 +387,55 @@ def load_model(key, cp):
         # sorting here would hide exactly that from the attestation -- the stored order would go stale
         # while the hash claimed nothing had moved.
         "acts": {n: [[pn, bbtype_to_schema(bt)] for pn, bt in param_types[n]] for n in param_types},
-        "res": {n: vs for n, (vs, _) in res_specs.items()},
+        "res": {n: vs for n, (vs, _) in model["res_specs"].items()},
         # Config parameters are part of what PlanDev stores (mission_model_parameters), so they belong in
         # the attestation for the same reason activity and resource types do.
-        "cfg": [[c["name"], bbtype_to_schema(c["bbtype"])] for c in config_specs],
+        "cfg": [[c["name"], bbtype_to_schema(c["bbtype"])] for c in model.get("config_specs", [])],
         # Computed-attribute schemas are stored in activity_type too, so a change to them is drift the
         # attestation must catch -- otherwise the gate starts rejecting spans against a stale schema.
         "computed": COMPUTED_ATTRIBUTES_SCHEMA,
-    }, sort_keys=True, default=str).encode()).hexdigest()[:16]
-    return {"cp": cp, "name": key, "version": "1.0.0", "param_types": param_types,
-            "param_defaults": param_defaults, "res_specs": res_specs, "initials": initials,
-            "config_specs": config_specs, "identity": identity}
+    }
+
+
+def build_declaration(key, model):
+    """`load_model`'s Blackbird-shaped introspection -> the PlanDev-shaped Declaration.
+
+    This is the whole translation layer: Blackbird type strings become ValueSchemas, and Blackbird's
+    textual defaults are converted ONCE, here, instead of on every request. Converting at load time
+    is what lets adapter_core fill and typecheck them like any other model's -- a default still in
+    Blackbird notation would fail its own parameter's schema check.
+    """
+    acts = []
+    for name, params in model["param_types"].items():
+        defaults = model["param_defaults"].get(name, {})
+        acts.append(ActivityType(
+            name=name,
+            parameters=[Parameter(pn, bbtype_to_schema(bt),
+                                  coerce_default(bt, defaults[pn]) if pn in defaults else None)
+                        for pn, bt in params],
+            # Declared so the gate accepts what parse_output attaches to every span.
+            computed_attributes_schema=COMPUTED_ATTRIBUTES_SCHEMA))
+    return Declaration(
+        key=key, name=model["name"], version=model["version"],
+        activity_types=acts,
+        resource_types=[ResourceType(n, vs) for n, (vs, _) in model["res_specs"].items()],
+        # Simulation configuration: the adaptation's globals, editable per-plan in PlanDev exactly
+        # like a JAR model's configuration. Declared with NO adapter-side default on purpose -- the
+        # adaptation already holds its own, and the honest way to say "the planner did not set this"
+        # is to emit no SET_PARAMETER line rather than to re-set the value Blackbird would have used.
+        config_parameters=[Parameter(c["name"], bbtype_to_schema(c["bbtype"]), None)
+                           for c in model.get("config_specs", [])],
+        digest_payload=lambda _decl, m=model: published_digest_payload(m))
+
 
 # ---------- plan build / output parse (per-model) ----------
 def build_plan_json(plan_start, directives, workdir, param_types):
     acts = []
     directive_by_uuid = {}
     for d in directives:
-        typ = d["type"]
-        start = dt_to_bbtime(plan_start + timedelta(microseconds=d["startOffset"]))
-        args = d.get("arguments") or {}
+        typ = d.type
+        start = dt_to_bbtime(plan_start + timedelta(microseconds=d.start_offset))
+        args = d.arguments or {}
         params = []
         # Iterate the model's DECLARED parameter order, not the order the arguments happen to arrive in.
         # Blackbird's .plan.json reader binds parameters POSITIONALLY and ignores `name` entirely
@@ -362,7 +447,7 @@ def build_plan_json(plan_start, directives, workdir, param_types):
         # intermittent simulation failure that would not reproduce.
         for pname, bt in param_types.get(typ, []):
             if pname not in args:
-                continue   # absent: Blackbird applies the model default (see effective_args)
+                continue   # absent: Blackbird applies the model default (see Declaration.effective_args)
             # Emit the value NATIVELY, matching what Blackbird's own JSONPlanWriter produces -- that is
             # the one shape its reader is guaranteed to accept, since writing and re-opening a plan
             # round-trips exactly. Verified against a real export: float -> bare number 42.5,
@@ -372,12 +457,13 @@ def build_plan_json(plan_start, directives, workdir, param_types):
             params.append({"name": pname, "type": bt, "value": fmt_param(bt, args[pname])})
         # An argument the model does not declare cannot be positioned, and appending it would shift
         # every later parameter. Dropping it lets Blackbird report the arity mismatch against a plan
-        # that is at least internally consistent.
+        # that is at least internally consistent. (On the /simulate path adapter_core has already
+        # dropped it; this still fires for the raw arguments /validate hands the deep check.)
         for pname in args:
             if pname not in dict(param_types.get(typ, [])):
                 print("warning: dropping undeclared argument '%s' on %s" % (pname, typ), file=sys.stderr)
-        bb_id = str(uuid.uuid5(uuid.NAMESPACE_OID, "plandev-directive-" + str(d["id"])))
-        directive_by_uuid[bb_id] = d["id"]
+        bb_id = str(uuid.uuid5(uuid.NAMESPACE_OID, "plandev-directive-" + str(d.id)))
+        directive_by_uuid[bb_id] = d.id
         acts.append({"type": typ, "start": start, "parameters": params, "notes": "", "id": bb_id, "parent": None})
     path = os.path.join(workdir, "in.plan.json")
     json.dump({"activities": acts}, open(path, "w"))
@@ -412,14 +498,8 @@ def parse_output(xml_path, plan_start, sim_duration_us, initials, directive_by_u
         start_us, dur_us = bb_time_to_us_offset(start, plan_start), bb_dur_to_us(span)
         if start_us >= sim_duration_us:
             continue   # entirely outside PlanDev's window; Blackbird has no window concept, PlanDev does
-        # Computed attributes: values the model produced rather than was given. Blackbird's own activity
-        # UUID goes here because it belongs to the executed INSTANCE, not to the directive -- it is what
-        # lets a PlanDev span be traced back to a record in a Blackbird plan file or TOL. PlanDev reads
-        # these as `computed.*` in command expansion, and they must be DECLARED in introspect or the
-        # ingest gate rejects them.
         rec_out = {"spanId": sid, "type": inst.findtext("Type"), "startOffset": start_us,
-                   "arguments": args, "parentId": parent_sid, "directiveId": directive_id,
-                   "computedAttributes": {"blackbirdId": inst.findtext("ID") or ""}}
+                   "arguments": args, "parentId": parent_sid, "directiveId": directive_id}
         # An activity still running at the end of PlanDev's window is reported UNFINISHED (no duration)
         # rather than at its full Blackbird length. Merlin clamps profiles but not spans, so the full
         # length would persist inside a shorter dataset; and clamping it here would instead claim it
@@ -427,6 +507,18 @@ def parse_output(xml_path, plan_start, sim_duration_us, initials, directive_by_u
         # option, and PlanDev stores it natively as a span with a null end.
         if start_us + dur_us <= sim_duration_us:
             rec_out["duration"] = dur_us
+            # Computed attributes: values the model produced rather than was given. Blackbird's own
+            # activity UUID goes here because it belongs to the executed INSTANCE, not to the
+            # directive -- it is what lets a PlanDev span be traced back to a record in a Blackbird
+            # plan file or TOL. PlanDev reads these as `computed.*` in command expansion, and they
+            # must be DECLARED in introspect or the ingest gate rejects them.
+            #
+            # Attached only to a FINISHED span. Merlin tells the two apart by the presence of BOTH
+            # `duration` and `computedAttributes` (PostgresResultsCellRepository), so an unfinished
+            # span carrying computed attributes reads as finished-with-no-end. This adapter used to
+            # attach them unconditionally; adapter_core's `check_response` now refuses to serialize
+            # that pairing at all.
+            rec_out["computedAttributes"] = {"blackbirdId": inst.findtext("ID") or ""}
         spans.append(rec_out)
 
     samples = {}
@@ -469,7 +561,8 @@ def parse_output(xml_path, plan_start, sim_duration_us, initials, directive_by_u
         (real_profiles if is_real else discrete_profiles)[name] = {"schema": vs, "segments": out_segs}
     return real_profiles, discrete_profiles, spans
 
-# ---------- validation / effective args (per-model) ----------
+
+# ---------- validation ----------
 def clean_bb_error(stderr):
     lines = [l.strip() for l in stderr.splitlines() if l.strip()]
     meaningful = [l for l in lines if not l.startswith("at ")]
@@ -486,146 +579,85 @@ def clean_bb_error(stderr):
             return l[:400]
     return (meaningful[-1] if meaningful else "invalid arguments")[:400]
 
-def coerce_default(bbtype, dflt):
-    if bbtype in ("int", "integer", "long"):
-        try: return int(dflt)
-        except (ValueError, TypeError): return dflt
-    if bbtype in ("float", "double"):
-        try: return float(dflt)
-        except (ValueError, TypeError): return dflt
-    if bbtype in ("boolean", "bool"):
-        return str(dflt).lower() == "true"
-    if bbtype == "duration":
-        try: return bb_dur_to_us(dflt)
-        except Exception: return dflt
-    return dflt
 
-def effective_args(typ, provided, param_types, param_defaults):
-    eff = dict(provided or {})
-    ptypes = dict(param_types.get(typ, []))
-    for pname, dflt in param_defaults.get(typ, {}).items():
-        if pname not in eff:
-            eff[pname] = coerce_default(ptypes.get(pname, "string"), dflt)
-    return eff
+# ---------- the backend ----------
+# Blackbird has no notion of "check these arguments"; the only way to ask whether an activity
+# constructs is to build a one-activity plan and open it. The instant chosen is arbitrary and never
+# reaches PlanDev -- it only has to be a time Blackbird can parse.
+VALIDATE_PLAN_START = datetime(2020, 1, 1, tzinfo=timezone.utc)
 
-# ---------- endpoint impls ----------
-def introspect(model):
-    acts = []
-    for name, params in model["param_types"].items():
-        defaults = model["param_defaults"].get(name, {})
-        acts.append({"name": name,
-                     "parameters": [{"name": pn, "schema": bbtype_to_schema(bt)} for pn, bt in params],
-                     "requiredParameters": [pn for pn, _ in params if pn not in defaults],
-                     # Declared so the gate accepts what parse_output attaches to every span.
-                     "computedAttributesSchema": COMPUTED_ATTRIBUTES_SCHEMA})
-    res = [{"name": n, "schema": vs} for n, (vs, _) in model["res_specs"].items()]
-    # Simulation configuration: the adaptation's globals, editable per-plan in PlanDev exactly like a
-    # JAR model's configuration. Blackbird's own defaults are reported so the UI can pre-fill them.
-    cfg = [{"name": c["name"], "schema": bbtype_to_schema(c["bbtype"])} for c in model.get("config_specs", [])]
-    return {"activityTypes": acts, "resourceTypes": res, "parameters": cfg,
-            "identityHash": model["identity"]}
 
-def simulate(req, model):
-    plan_start = iso_to_dt(req["planStart"])
-    sim_dur = int(req["duration"])
-    # Fill model defaults before building the plan, exactly as validate() does. Blackbird's .plan.json
-    # reader requires every declared parameter to be present and rejects the WHOLE FILE on an arity
-    # mismatch -- not just the offending activity -- and PlanDev only stores arguments a user explicitly
-    # set. So a single directive leaving a defaulted parameter unset failed the entire simulation.
-    directives = [
-        {**d, "arguments": effective_args(
-            d["type"], d.get("arguments") or {}, model["param_types"], model["param_defaults"])}
-        for d in req.get("directives", [])]
-    with tempfile.TemporaryDirectory() as wd:
-        plan_json, directive_by_uuid = build_plan_json(plan_start, directives, wd, model["param_types"])
-        xml_path = os.path.join(wd, "out.xml")
-        script = os.path.join(wd, "sim.script")
-        # SET_PARAMETER lines go BEFORE the plan is opened and remodelled, so the adaptation's globals are
-        # in place while it models. Blackbird holds these in static fields, but each simulate spawns a
-        # fresh JVM, so there is no leakage between requests -- the defaults are restored by construction.
-        cfg_lines = config_script_lines(req.get("configuration") or {}, model.get("config_specs", []))
-        open(script, "w").write(cfg_lines + "OPEN_FILE %s unfrozen decompose\nREMODEL\nWRITE %s\n" % (plan_json, xml_path))
-        run_bb(script, wd, model["cp"])
-        rp, dp, spans = parse_output(xml_path, plan_start, sim_dur, model["initials"], directive_by_uuid)
-        return {"realProfiles": rp, "discreteProfiles": dp, "spans": spans}
+class BlackbirdBackend(adapter_core.Backend):
+    """One Blackbird adaptation, behind the generic contract.
 
-def validate(req, model):
-    effective_only = bool(req.get("effectiveOnly", False))
-    plan_start = datetime(2020, 1, 1, tzinfo=timezone.utc)
-    pt, pd = model["param_types"], model["param_defaults"]
-    results = []
-    with tempfile.TemporaryDirectory() as wd:
-        for a in req.get("activities", []):
-            typ = a.get("type"); args = a.get("arguments") or {}
-            if typ not in pt:
-                results.append({"valid": False,
-                                "notices": [{"subjects": [], "message": "unknown activity type '%s'" % typ}],
-                                "effectiveArguments": None})
-                continue
-            eff = effective_args(typ, args, pt, pd)
-            if effective_only:
-                results.append({"valid": True, "notices": [], "effectiveArguments": eff}); continue
-            plan_json, _ = build_plan_json(plan_start, [{"id": 0, "type": typ, "startOffset": 0, "arguments": args}], wd, pt)
-            script = os.path.join(wd, "validate.script")
-            open(script, "w").write("OPEN_FILE %s unfrozen decompose\n" % plan_json)
-            ok, stderr = run_bb_ok(script, wd, model["cp"])
-            results.append({"valid": ok,
-                            "notices": [] if ok else [{"subjects": [], "message": clean_bb_error(stderr)}],
-                            "effectiveArguments": eff})
-    return {"results": results}
+    Introspection runs ONCE, at construction: a CREATE_DICTIONARY plus a zero-activity REMODEL are
+    two JVM starts, and the identity hash has to be fixed for the life of the process anyway --
+    merlin stores it as an attestation and re-reading the model per request could hand it a
+    different one each time it looks.
+    """
 
-def models_list():
-    return {"models": [{"key": k, "name": m["name"], "version": m["version"], "identityHash": m["identity"]}
-                       for k, m in MODELS.items()]}
+    def __init__(self, key, cp):
+        self.key = key
+        self.model = load_model(key, cp)
+        self._declaration = build_declaration(key, self.model)
 
-# ---------- HTTP ----------
-class Handler(BaseHTTPRequestHandler):
-    def _send(self, code, obj):
-        body = json.dumps(obj).encode()
-        self.send_response(code); self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body)
+    def declaration(self):
+        return self._declaration
 
-    def _resolve(self, key):
-        """Model by key; if none given and exactly one is configured, use it. Raises KeyError otherwise."""
-        if key and key in MODELS:
-            return MODELS[key]
-        if not key and len(MODELS) == 1:
-            return next(iter(MODELS.values()))
-        raise KeyError("unknown or unspecified model '%s'; available: %s" % (key, list(MODELS)))
+    def simulate(self, request):
+        plan_start = request.plan_start
+        with tempfile.TemporaryDirectory() as wd:
+            plan_json, directive_by_uuid = build_plan_json(
+                plan_start, request.directives, wd, self.model["param_types"])
+            xml_path = os.path.join(wd, "out.xml")
+            script = os.path.join(wd, "sim.script")
+            # SET_PARAMETER lines go BEFORE the plan is opened and remodelled, so the adaptation's globals
+            # are in place while it models. Blackbird holds these in static fields, but each simulate
+            # spawns a fresh JVM, so there is no leakage between requests -- the defaults are restored by
+            # construction.
+            cfg_lines = config_script_lines(request.configuration, self.model["config_specs"])
+            open(script, "w").write(
+                cfg_lines + "OPEN_FILE %s unfrozen decompose\nREMODEL\nWRITE %s\n" % (plan_json, xml_path))
+            run_bb(script, wd, self.model["cp"])
+            rp, dp, spans = parse_output(xml_path, plan_start, request.duration,
+                                         self.model["initials"], directive_by_uuid)
+            return {"realProfiles": rp, "discreteProfiles": dp, "spans": spans}
 
-    def _key(self, body=None):
-        q = parse_qs(urlparse(self.path).query).get("model")
-        return (q[0] if q else None) or (body or {}).get("model")
+    def deep_validate(self, subjects):
+        """Ask Blackbird itself whether each activity CONSTRUCTS.
 
-    def do_GET(self):
-        try:
-            path = urlparse(self.path).path.rstrip("/")
-            if path.endswith("/models"):
-                self._send(200, models_list())
-            elif path.endswith("/introspect"):
-                self._send(200, introspect(self._resolve(self._key())))
-            else:
-                self._send(404, {"error": "not found"})
-        except Exception as e:
-            self._send(400 if isinstance(e, KeyError) else 500, {"error": str(e)})
+        This catches what no schema can: a value that is the right JSON type but that the
+        adaptation's own parameter converter refuses, or a constructor that throws. It runs on top
+        of adapter_core's typecheck rather than instead of it -- a subject that already has notices
+        is skipped, because feeding Blackbird an argument the typechecker rejected is exactly how a
+        type error used to surface as a JVM stack trace instead of a message naming the parameter.
 
-    def do_POST(self):
-        try:
-            n = int(self.headers.get("Content-Length", 0))
-            req = json.loads(self.rfile.read(n) or b"{}")
-            path = urlparse(self.path).path.rstrip("/")
-            model = self._resolve(self._key(req))
-            if path.endswith("/validate"):
-                self._send(200, validate(req, model))
-            elif path.endswith("/introspect"):
-                self._send(200, introspect(model))
-            else:
-                self._send(200, simulate(req, model))
-        except Exception as e:
-            import traceback; traceback.print_exc()
-            self._send(400 if isinstance(e, KeyError) else 500, {"error": str(e)})
+        Blackbird reports against the plan file, not against a parameter, so these notices carry no
+        `subjects` and render as an activity-level message.
+        """
+        pt = self.model["param_types"]
+        out = []
+        with tempfile.TemporaryDirectory() as wd:
+            for subject in subjects:
+                if subject.notices:
+                    out.append([])
+                    continue
+                # NOTE: the RAW arguments, not the effective ones. That is what this check has always
+                # done, and it is a KNOWN BUG kept intact by this refactor: Blackbird's .plan.json
+                # reader binds positionally and rejects the whole file on an arity mismatch, so an
+                # activity that simply omits a DEFAULTED parameter is reported invalid here even
+                # though /simulate fills the default and runs it fine. Passing
+                # `subject.effective_arguments` instead is the one-line fix.
+                plan_json, _ = build_plan_json(
+                    VALIDATE_PLAN_START,
+                    [Directive(id=0, type=subject.type, start_offset=0, arguments=subject.arguments)],
+                    wd, pt)
+                script = os.path.join(wd, "validate.script")
+                open(script, "w").write("OPEN_FILE %s unfrozen decompose\n" % plan_json)
+                ok, stderr = run_bb_ok(script, wd, self.model["cp"])
+                out.append([] if ok else [{"subjects": [], "message": clean_bb_error(stderr)}])
+        return out
 
-    def log_message(self, *a): pass
 
 if __name__ == "__main__":
     # Read the port HERE, not at module scope: this module is also imported as a library (bb_import.py
@@ -634,9 +666,10 @@ if __name__ == "__main__":
     PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 5001
     cfg = os.environ.get("BB_MODELS")
     cp_map = json.loads(cfg) if cfg else {"default": os.environ["BLACKBIRD_CP"]}
-    for key, cp in cp_map.items():
-        MODELS[key] = load_model(key, cp)
-    summary = ", ".join("%s(%d acts/%d res, id=%s)" % (k, len(m["param_types"]), len(m["res_specs"]), m["identity"])
-                        for k, m in MODELS.items())
-    print("Blackbird multi-model backend on :%d  models: %s" % (PORT, summary), flush=True)
-    HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    BACKENDS = {key: BlackbirdBackend(key, cp) for key, cp in cp_map.items()}
+    summary = ", ".join("%s(%d acts/%d res, id=%s)"
+                        % (k, len(b.model["param_types"]), len(b.model["res_specs"]),
+                           b.declaration().identity_hash())
+                        for k, b in BACKENDS.items())
+    adapter_core.serve(BACKENDS, PORT,
+                       banner="Blackbird multi-model backend on :%d  models: %s" % (PORT, summary))
