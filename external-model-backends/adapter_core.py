@@ -645,6 +645,29 @@ def _first_unsendable(value, path=""):
     return (path or "<value>", "a %s%s" % (type(value).__name__, _foreign_type_hint(value)))
 
 
+def _check_real_dynamics(name, index, dynamics):
+    """A real segment must carry a finite `initial` and `rate`, both NUMBERS.
+
+    `_first_unsendable` cannot catch this, and the gap is not hypothetical -- it is how a Rust model
+    fails. `serde_json` writes a NaN as `null` and returns Ok, so the non-finite value is already
+    gone by the time it reaches this process: what arrives is a legitimate JSON null, which the walk
+    correctly passes. Only knowing that THIS position must hold a number turns it back into an
+    error. Left alone it reaches merlin, which calls `getJsonNumber("initial")` on a JSON null and
+    dies with a ClassCastException naming nothing.
+    """
+    if not isinstance(dynamics, dict):
+        raise ModelError("real resource '%s' segment %d has dynamics %r; a real segment carries "
+                         "{initial, rate}" % (name, index, dynamics))
+    for field_name in ("initial", "rate"):
+        value = dynamics.get(field_name)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ModelError(
+                "real resource '%s' segment %d has a non-numeric `%s` (%r)%s"
+                % (name, index, field_name, value,
+                   " -- a NaN serialized to null upstream looks exactly like this"
+                   if value is None else ""))
+
+
 def _is_int(v):
     return isinstance(v, int) and not isinstance(v, bool)
 
@@ -693,6 +716,8 @@ def check_response(response):
                     path, reason = bad
                     raise ModelError("resource '%s' segment %d cannot be sent as JSON: %s at %s"
                                      % (name, i, reason, path))
+                if kind == "realProfiles":
+                    _check_real_dynamics(name, i, seg.get("dynamics"))
 
     for span in response.get("spans") or []:
         sid = span.get("spanId")
@@ -1050,6 +1075,12 @@ def serve(backends, port, banner=None, socket_timeout=60, host="0.0.0.0"):
 
 
 # ---------- a model in another process ------------------------------------------------------------
+#: Exit status a child uses to say "your request was wrong", as distinct from "I failed". Without a
+#: reserved value every failure is the model's fault, and a planner who writes an impossible plan is
+#: sent to look at a healthy process.
+EXIT_BAD_REQUEST = 2
+
+
 def _parse_parameters(entries):
     return [Parameter(name=e["name"], schema=e.get("schema") or {"type": "string"},
                       default=e.get("default"), required=e.get("required"))
@@ -1081,7 +1112,11 @@ def declaration_from_json(obj, key=None):
         activity_types=acts,
         resource_types=[ResourceType(name=r["name"], schema=r.get("schema") or {"type": "string"})
                         for r in obj.get("resourceTypes") or []],
-        config_parameters=_parse_parameters(obj.get("parameters")))
+        config_parameters=_parse_parameters(obj.get("parameters")),
+        # Dropping these would not fail, it would MISREPORT: an absent capability means unsupported,
+        # so an out-of-process pure simulator that declares `plandevScheduling` would be published as
+        # one PlanDev's scheduler must not drive, and nothing would say why.
+        capabilities=obj.get("capabilities") or {})
 
 
 class ExecBackend(Backend):
@@ -1099,12 +1134,27 @@ class ExecBackend(Backend):
     it never has to implement `nonconformance` or default resolution -- which is precisely the code
     that drifted when two adapters each kept their own copy.
 
+    Optionally, a third:
+
+        <exe> validate               <- {"subjects":[{type, arguments}, ...]} on stdin
+                                     -> {"notices":[[{subjects, message}, ...], ...]} on stdout
+
+    which is how an out-of-process model performs the semantic checks no schema can express. It is
+    opt-in (`validates=True`) because a child that has never heard of the verb must not be broken by
+    being asked: without the flag the generic typecheck is all an out-of-process model gets, which is
+    the status quo, not a regression.
+
     A nonzero exit, a timeout, or unparseable stdout becomes a proper error carrying the process's
     stderr, so a model that dies says why instead of surfacing as an empty 500. Stderr from a run
     that SUCCEEDS is a log, not a failure, and is forwarded to this adapter's own stderr.
+
+    Exit 2 (`EXIT_BAD_REQUEST`) is reserved: it means "the request was wrong", not "I failed", and
+    becomes a 400 rather than a 500. An in-process backend raises `BadRequest` to say that; a
+    subprocess has only an exit status, so one value has to carry it.
     """
 
-    def __init__(self, key, command, name=None, version=None, timeout=None, cwd=None, env=None):
+    def __init__(self, key, command, name=None, version=None, timeout=None, cwd=None,
+                 env=None, validates=False):
         self.key = key
         self.command = list(command) if isinstance(command, (list, tuple)) else [command]
         self._name = name
@@ -1112,6 +1162,7 @@ class ExecBackend(Backend):
         self.timeout = timeout
         self.cwd = cwd
         self.env = env
+        self.validates = validates
         self._declaration = None
 
     # -- process plumbing ---------------------------------------------------------------------------
@@ -1125,6 +1176,14 @@ class ExecBackend(Backend):
         except subprocess.TimeoutExpired:
             raise ModelError("model '%s' did not answer `%s` within %ss"
                              % (self.key, verb, self.timeout))
+        if p.returncode == EXIT_BAD_REQUEST:
+            # The child is saying the REQUEST was wrong, not that it failed. Without a way to
+            # express that, a planner who writes an impossible plan is told the adapter broke and
+            # goes looking at a healthy process -- the same misreport merlin was making when it
+            # called a backend's 400 a BACKEND_UNAVAILABLE. An in-process backend raises
+            # BadRequest for this; a subprocess has only an exit code, so one is reserved.
+            raise BadRequest((p.stderr or "").strip()[-2000:]
+                             or "model '%s' rejected the request" % self.key)
         if p.returncode != 0:
             raise ModelError("model '%s' exited %d on `%s`\nSTDERR:\n%s"
                              % (self.key, p.returncode, verb, (p.stderr or "").strip()[-2000:]))
@@ -1174,6 +1233,31 @@ class ExecBackend(Backend):
         return {"realProfiles": out.get("realProfiles") or {},
                 "discreteProfiles": out.get("discreteProfiles") or {},
                 "spans": out.get("spans") or []}
+
+
+    def deep_validate(self, subjects):
+        """Ask the child for the semantic checks no schema can express.
+
+        Opt-in via `validates=True`: a child that has never heard of the verb would exit nonzero and
+        turn every validation into a failure, so silence is the safe default -- an out-of-process
+        model without the flag simply gets the generic typecheck, which is where it was before.
+
+        Only the subject's TYPE and EFFECTIVE ARGUMENTS cross: the child does not need the notices
+        this layer already produced, and sending them would invite it to reformat someone else's
+        findings.
+        """
+        if not self.validates or not subjects:
+            return None
+        payload = json.dumps({"subjects": [{"type": s.type, "arguments": s.effective_arguments}
+                                           for s in subjects]})
+        notices = self._run("validate", payload).get("notices")
+        if notices is None:
+            return None
+        if not isinstance(notices, list) or len(notices) != len(subjects):
+            raise ModelError(
+                "model '%s' answered `validate` with %d entries for %d subjects; the list must be "
+                "parallel to the subjects it was given" % (self.key, len(notices or []), len(subjects)))
+        return notices
 
 
 def exec_backends_from_env(var="EXEC_MODELS"):

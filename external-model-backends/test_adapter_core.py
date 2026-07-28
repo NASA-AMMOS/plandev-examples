@@ -798,6 +798,33 @@ class TestCheckResponse(unittest.TestCase):
         for value in (None, True, False, 0, -3, 1.5, "s", [], {}, {"a": [1, {"b": None}]}):
             self.assertIsNone(ac._first_unsendable(value), repr(value))
 
+    def test_a_null_where_a_real_segment_needs_a_number_is_refused(self):
+        # How a Rust model fails. serde_json writes NaN as `null` and returns Ok, so the non-finite
+        # value is already gone before this process sees it -- what arrives is a legitimate JSON
+        # null, which the sendability walk correctly passes. Only knowing that THIS position must
+        # hold a number turns it back into an error. Left alone, merlin calls getJsonNumber on a
+        # JSON null and dies with a ClassCastException naming nothing.
+        with self.assertRaises(ModelError) as ctx:
+            ac.check_response({"realProfiles": {"Temp": {"segments": [
+                {"duration": 1, "dynamics": {"initial": None, "rate": 0.0}}]}}})
+        self.assertIn("Temp", str(ctx.exception))
+        self.assertIn("initial", str(ctx.exception))
+        self.assertIn("NaN", str(ctx.exception), "the message should name the usual cause")
+
+    def test_a_real_segment_missing_rate_is_refused(self):
+        with self.assertRaises(ModelError):
+            ac.check_response({"realProfiles": {"Temp": {"segments": [
+                {"duration": 1, "dynamics": {"initial": 1.0}}]}}})
+
+    def test_a_discrete_null_is_still_fine(self):
+        # Only REAL segments require a number; a discrete profile may legitimately hold null.
+        ac.check_response({"discreteProfiles": {"Mode": {"segments": [
+            {"duration": 1, "dynamics": None}]}}})
+
+    def test_an_int_valued_real_segment_is_fine(self):
+        ac.check_response({"realProfiles": {"Temp": {"segments": [
+            {"duration": 1, "dynamics": {"initial": 3, "rate": 0}}]}}})
+
     def test_an_empty_response_is_fine(self):
         check_response({"realProfiles": {}, "discreteProfiles": {}, "spans": []})
         check_response({})
@@ -1273,16 +1300,54 @@ class TestExecBackend(unittest.TestCase):
                 {"id": 1, "type": "Fill", "startOffset": 0, "arguments": {"duration": "2s"}}]})
         self.assertIn("expected a duration as integer microseconds", str(ctx.exception))
 
-    def test_a_nonzero_exit_becomes_an_error_carrying_stderr(self):
+    def test_a_child_can_say_the_REQUEST_was_wrong_not_that_it_failed(self):
+        # A subprocess has only an exit status to distinguish "your plan is impossible" from "I
+        # broke". Without a reserved value every model-level refusal is a 500, and a planner who
+        # wrote a negative duration is sent to read the logs of a model that is working perfectly.
         backend = self.backend()
         request = backend.declaration().normalize(
             {"duration": 10 * S, "configuration": {},
              "directives": [{"id": 4, "type": "Fill", "startOffset": 0,
                              "arguments": {"duration": -5}}]})
-        with self.assertRaises(ModelError) as ctx:
+        with self.assertRaises(ac.BadRequest) as ctx:
             backend.simulate(request)
-        self.assertIn("exited 1", str(ctx.exception))
+        self.assertNotIsInstance(ctx.exception, ModelError)
         self.assertIn("directive 4: a Fill cannot last -5 microseconds", str(ctx.exception))
+
+    def test_any_other_nonzero_exit_is_still_the_model_failing(self):
+        with self.assertRaises(ModelError) as ctx:
+            self.backend()._run("no-such-verb")
+        self.assertIn("exited 1", str(ctx.exception))
+
+    def test_capabilities_survive_the_stdio_declaration(self):
+        # Dropping them would MISREPORT rather than fail: an absent capability means unsupported,
+        # so a pure simulator would be published as one PlanDev's scheduler must not drive.
+        capabilities = self.backend().declaration().capabilities
+        self.assertTrue(capabilities["plandevScheduling"]["supported"])
+
+    def test_deep_validate_is_silent_unless_the_child_opts_in(self):
+        # A child that has never heard of the verb would exit nonzero and turn every validation
+        # into a failure, so silence is the safe default: no flag means the generic typecheck only,
+        # which is where an out-of-process model was before.
+        subject = ac.ValidationSubject(index=0, type="Fill", arguments={"rate": -1.0},
+                                       effective_arguments={"duration": 1, "rate": -1.0}, notices=[])
+        self.assertIsNone(self.backend().deep_validate([subject]))
+
+    def test_an_opted_in_child_supplies_its_own_semantic_checks(self):
+        subject = ac.ValidationSubject(index=0, type="Fill", arguments={"rate": -1.0},
+                                       effective_arguments={"duration": 1, "rate": -1.0}, notices=[])
+        notices = self.backend(validates=True).deep_validate([subject])
+        self.assertEqual(notices[0][0]["subjects"], ["rate"])
+
+    def test_a_child_returning_the_wrong_number_of_notice_lists_is_refused(self):
+        # The adapter matches notices to subjects BY POSITION, so a short or reordered list would
+        # attribute one activity's complaint to another -- silently.
+        backend = self.backend(validates=True)
+        backend._run = lambda verb, stdin_text=None: {"notices": [[]]}
+        subjects = [ac.ValidationSubject(index=i, type="Fill", arguments={},
+                                         effective_arguments={}, notices=[]) for i in range(2)]
+        with self.assertRaises(ModelError):
+            backend.deep_validate(subjects)
 
     def test_an_unknown_verb_or_missing_executable_is_a_clear_error(self):
         with self.assertRaises(ModelError) as ctx:
@@ -1364,12 +1429,14 @@ class TestExecBackendOverHttp(HttpTestCase):
                          {"duration": 2 * S, "dynamics": {"initial": 2.0, "rate": 3.0}})
         self.assertEqual(out["spans"][0]["computedAttributes"], {"added": 6.0})
 
-    def test_a_model_that_dies_surfaces_its_stderr_as_a_500(self):
+    def test_a_model_level_refusal_reaches_the_caller_as_a_400(self):
+        # End to end: the child exits 2, ExecBackend raises BadRequest, the handler sends 400 with
+        # the model's own sentence. The planner is told their plan is wrong, not that a service is.
         code, out = self.call("POST", "/simulate?model=tank", {
             "duration": 10 * S, "configuration": {},
             "directives": [{"id": 2, "type": "Fill", "startOffset": 0,
                             "arguments": {"duration": -1}}]})
-        self.assertEqual(code, 500)
+        self.assertEqual(code, 400)
         self.assertIn("a Fill cannot last -1 microseconds", out["error"])
 
 

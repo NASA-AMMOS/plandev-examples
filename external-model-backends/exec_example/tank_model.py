@@ -4,6 +4,8 @@
     tank_model.py describe     -> the declaration, as JSON, on stdout
     tank_model.py simulate     <- a normalized request, as JSON, on stdin
                                -> {realProfiles, discreteProfiles, spans} on stdout
+    tank_model.py validate     <- {"subjects":[{type, arguments}, ...]} on stdin
+                               -> {"notices":[[{subjects, message}, ...], ...]} on stdout
 
 `adapter_core.ExecBackend` wraps this into a full PlanDev external-model backend. That is the point
 of the example: NOTHING below typechecks an argument, resolves a default, computes an identity hash,
@@ -18,8 +20,12 @@ The model: a tank with one activity.
   Config:    initialLevel (real, default 0.0).
 
 It is written in Python only so the example needs no toolchain; nothing about the protocol is
-Python-specific. Errors go to stderr with a nonzero exit, which the adapter turns into a 500 that
-quotes them.
+Python-specific.
+
+EXIT CODES carry the difference between "your request was wrong" and "I failed", because a
+subprocess has nothing else to say it with. Exit 2 becomes a 400 naming the offending directive;
+any other nonzero exit becomes a 500. Getting that backwards tells a planner whose plan is
+impossible to go read the adapter's logs.
 """
 import json
 import sys
@@ -42,7 +48,31 @@ DECLARATION = {
     "resourceTypes": [{"name": "Level", "schema": {"type": "real"}},
                       {"name": "Filling", "schema": {"type": "boolean"}}],
     "parameters": [{"name": "initialLevel", "schema": {"type": "real"}, "default": 0.0}],
+    # A pure simulator: directives in, profiles and spans out, placing nothing of its own -- so
+    # PlanDev's scheduler may drive it. Declared here rather than assumed, because an ABSENT
+    # capability means unsupported, and a pure simulator published as unschedulable is a silent
+    # downgrade nothing would explain.
+    "capabilities": {"plandevScheduling": {"supported": True}},
 }
+
+#: Exit status meaning "the request was wrong", not "I failed". Mirrors adapter_core.EXIT_BAD_REQUEST.
+EXIT_BAD_REQUEST = 2
+
+
+def validate(subjects):
+    """Semantic checks no ValueSchema can express, one list of notices per subject.
+
+    The list must be PARALLEL to the subjects: the adapter matches them by position, and a shorter
+    or reordered list would attribute one activity's complaint to another.
+    """
+    out = []
+    for subject in subjects:
+        notices = []
+        rate = subject["arguments"].get("rate")
+        if isinstance(rate, (int, float)) and rate <= 0:
+            notices.append({"subjects": ["rate"], "message": "'rate' must be > 0 (got %s)" % rate})
+        out.append(notices)
+    return out
 
 
 def simulate(req):
@@ -91,8 +121,14 @@ if __name__ == "__main__":
             if d["arguments"]["duration"] < 0:
                 sys.stderr.write("directive %s: a Fill cannot last %d microseconds\n"
                                  % (d["id"], d["arguments"]["duration"]))
-                raise SystemExit(1)
+                # The CALLER's error, so exit 2: the planner gets a 400 naming their directive
+                # rather than a 500 pointing at a model that is working perfectly.
+                raise SystemExit(EXIT_BAD_REQUEST)
         json.dump(simulate(request), sys.stdout)
+    elif verb == "validate":
+        json.dump({"notices": validate(json.load(sys.stdin)["subjects"])}, sys.stdout)
     else:
-        sys.stderr.write("usage: tank_model.py {describe|simulate}\n")
-        raise SystemExit(2)
+        # Not a caller error: the host sent a verb this model does not implement, which is a
+        # protocol mismatch on the model's side.
+        sys.stderr.write("usage: tank_model.py {describe|simulate|validate}\n")
+        raise SystemExit(1)
