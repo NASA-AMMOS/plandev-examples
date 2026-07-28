@@ -35,7 +35,10 @@ const US: i64 = 1_000_000;
 fn config(overrides: Value) -> Map<String, Value> {
     let mut out = Map::new();
     for p in decl::declaration()["parameters"].as_array().unwrap() {
-        out.insert(p["name"].as_str().unwrap().to_string(), p["default"].clone());
+        out.insert(
+            p["name"].as_str().unwrap().to_string(),
+            p["default"].clone(),
+        );
     }
     if let Value::Object(o) = overrides {
         out.extend(o);
@@ -82,8 +85,7 @@ fn run(duration_us: i64, directives: Vec<Directive>, overrides: Value) -> Respon
 
 fn refusal(duration_us: i64, directives: Vec<Directive>, overrides: Value) -> String {
     run::simulate(&request(duration_us, directives, overrides))
-        .err()
-        .expect("expected a refusal")
+        .expect_err("expected a refusal")
         .message()
         .to_string()
 }
@@ -156,7 +158,12 @@ fn every_profile_covers_the_whole_window_to_the_microsecond() {
     let sim_us = 2 * 3600 * US + 123; // deliberately not a round number
     let response = run(
         sim_us,
-        vec![directive(1, decl::OBSERVE, 900 * US, json!({"duration": 600 * US}))],
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            900 * US,
+            json!({"duration": 600 * US}),
+        )],
         json!({}),
     );
     for name in [
@@ -206,7 +213,12 @@ fn an_activity_edge_lands_on_the_microsecond_the_plan_asked_for() {
     let start = 1_234_567;
     let response = run(
         10 * US,
-        vec![directive(1, decl::OBSERVE, start, json!({"duration": 3 * US}))],
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            start,
+            json!({"duration": 3 * US}),
+        )],
         json!({}),
     );
     let edges = boundaries(profile(&response, decl::R_KELVIN));
@@ -236,7 +248,10 @@ fn the_cryocooler_switches_at_instants_no_plan_contains() {
     let kelvin = profile(&response, decl::R_KELVIN);
     for t in (600 * US..4 * 3600 * US).step_by(60 * US as usize) {
         let k = value_at(kelvin, t);
-        assert!((87.9..92.1).contains(&k), "at {t} us the detector was {k} K");
+        assert!(
+            (87.9..92.1).contains(&k),
+            "at {t} us the detector was {k} K"
+        );
     }
 }
 
@@ -267,11 +282,21 @@ fn frames_are_attributed_to_the_observation_that_wrote_them() {
     let response = run(
         200 * US,
         vec![
-            directive(1, decl::OBSERVE, 0, json!({"duration": 30 * US, "framePeriod": 10 * US,
-                                                  "targetName": "M31"})),
-            directive(2, decl::OBSERVE, 100 * US, json!({"duration": 70 * US,
+            directive(
+                1,
+                decl::OBSERVE,
+                0,
+                json!({"duration": 30 * US, "framePeriod": 10 * US,
+                                                  "targetName": "M31"}),
+            ),
+            directive(
+                2,
+                decl::OBSERVE,
+                100 * US,
+                json!({"duration": 70 * US,
                                                          "framePeriod": 10 * US,
-                                                         "targetName": "M31"})),
+                                                         "targetName": "M31"}),
+            ),
         ],
         json!({}),
     );
@@ -291,7 +316,12 @@ fn a_span_that_outlives_the_window_carries_neither_duration_nor_computed_attribu
     // off by the end of the plan that reported them would be stored as having completed.
     let response = run(
         60 * US,
-        vec![directive(1, decl::OBSERVE, 30 * US, json!({"duration": 600 * US}))],
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            30 * US,
+            json!({"duration": 600 * US}),
+        )],
         json!({}),
     );
     let span = span(&response, 1);
@@ -304,7 +334,12 @@ fn a_directive_that_starts_after_the_window_is_not_reported_at_all() {
     // A span for an activity that never ran shows on the timeline exactly like one that did.
     let response = run(
         60 * US,
-        vec![directive(1, decl::OBSERVE, 90 * US, json!({"duration": 10 * US}))],
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            90 * US,
+            json!({"duration": 10 * US}),
+        )],
         json!({}),
     );
     assert!(response.spans.is_empty(), "{:?}", response.spans);
@@ -317,8 +352,18 @@ fn an_instantaneous_retune_reports_the_setpoint_it_replaced() {
     let response = run(
         600 * US,
         vec![
-            directive(1, decl::SET_SETPOINT, 100 * US, json!({"setpointKelvin": 80.0})),
-            directive(2, decl::SET_SETPOINT, 200 * US, json!({"setpointKelvin": 70.0})),
+            directive(
+                1,
+                decl::SET_SETPOINT,
+                100 * US,
+                json!({"setpointKelvin": 80.0}),
+            ),
+            directive(
+                2,
+                decl::SET_SETPOINT,
+                200 * US,
+                json!({"setpointKelvin": 70.0}),
+            ),
         ],
         json!({}),
     );
@@ -337,8 +382,13 @@ fn an_instantaneous_retune_reports_the_setpoint_it_replaced() {
 fn the_target_resource_follows_the_plan_and_goes_back_to_empty() {
     let response = run(
         300 * US,
-        vec![directive(1, decl::OBSERVE, 100 * US, json!({"duration": 100 * US,
-                                                          "targetName": "M31"}))],
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            100 * US,
+            json!({"duration": 100 * US,
+                                                          "targetName": "M31"}),
+        )],
         json!({}),
     );
     let target = profile(&response, decl::R_TARGET);
@@ -355,19 +405,24 @@ fn the_newest_frame_carries_the_temperature_at_the_instant_it_was_exposed() {
     // value is stale by however long ago the last event was -- minutes, in a quiet stretch -- and
     // every frame in that stretch carries the same wrong number, which looks like a stable detector.
     let response = run(
-        1800 * US,
-        vec![directive(1, decl::OBSERVE, 0, json!({"duration": 1200 * US,
-                                                   "framePeriod": 500 * US}))],
+        3600 * US,
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            0,
+            json!({"duration": 3000 * US,
+                                                   "framePeriod": 1000 * US}),
+        )],
         json!({}),
     );
     let kelvin = profile(&response, decl::R_KELVIN);
     let newest = profile(&response, decl::R_NEWEST);
-    let stamped = discrete_at(newest, 600 * US)["detectorKelvin"]
+    let stamped = discrete_at(newest, 2500 * US)["detectorKelvin"]
         .as_f64()
         .unwrap();
-    // The frame in force at 600 s is the one written at 500 s, and the temperature profile says
-    // what the detector was at 500 s.
-    let expected = value_at(kelvin, 500 * US);
+    // The frame in force at 2500 s is the one written at 2000 s, and the temperature profile says
+    // what the detector was at 2000 s.
+    let expected = value_at(kelvin, 2000 * US);
     assert!(
         (stamped - expected).abs() < 1e-9,
         "frame says {stamped}, profile says {expected}"
@@ -381,8 +436,13 @@ fn the_newest_frame_carries_the_temperature_at_the_instant_it_was_exposed() {
 fn the_recorder_saturates_at_capacity_instead_of_growing_without_bound() {
     let response = run(
         200 * US,
-        vec![directive(1, decl::OBSERVE, 0, json!({"duration": 100 * US,
-                                                   "framePeriod": 10 * US}))],
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            0,
+            json!({"duration": 100 * US,
+                                                   "framePeriod": 10 * US}),
+        )],
         json!({"recorderCapacityFrames": 3}),
     );
     let computed = span(&response, 1).computed_attributes.as_ref().unwrap();
@@ -405,8 +465,13 @@ fn a_downlink_cannot_send_frames_that_are_not_there() {
     // plausible line on a chart, and the bug that produced it is a subtraction three files away.
     let response = run(
         200 * US,
-        vec![directive(1, decl::DOWNLINK, 0, json!({"duration": 100 * US,
-                                                    "framePeriod": 10 * US}))],
+        vec![directive(
+            1,
+            decl::DOWNLINK,
+            0,
+            json!({"duration": 100 * US,
+                                                    "framePeriod": 10 * US}),
+        )],
         json!({}),
     );
     let computed = span(&response, 1).computed_attributes.as_ref().unwrap();
@@ -419,9 +484,19 @@ fn a_downlink_drains_what_an_earlier_observation_wrote() {
     let response = run(
         400 * US,
         vec![
-            directive(1, decl::OBSERVE, 0, json!({"duration": 100 * US, "framePeriod": 10 * US})),
-            directive(2, decl::DOWNLINK, 200 * US, json!({"duration": 40 * US,
-                                                          "framePeriod": 10 * US})),
+            directive(
+                1,
+                decl::OBSERVE,
+                0,
+                json!({"duration": 100 * US, "framePeriod": 10 * US}),
+            ),
+            directive(
+                2,
+                decl::DOWNLINK,
+                200 * US,
+                json!({"duration": 40 * US,
+                                                          "framePeriod": 10 * US}),
+            ),
         ],
         json!({}),
     );
@@ -454,9 +529,19 @@ fn two_observations_that_merely_abut_are_allowed() {
     let response = run(
         1000 * US,
         vec![
-            directive(1, decl::OBSERVE, 0, json!({"duration": 400 * US, "targetName": "A"})),
-            directive(2, decl::OBSERVE, 400 * US, json!({"duration": 400 * US,
-                                                         "targetName": "B"})),
+            directive(
+                1,
+                decl::OBSERVE,
+                0,
+                json!({"duration": 400 * US, "targetName": "A"}),
+            ),
+            directive(
+                2,
+                decl::OBSERVE,
+                400 * US,
+                json!({"duration": 400 * US,
+                                                         "targetName": "B"}),
+            ),
         ],
         json!({}),
     );
@@ -475,14 +560,24 @@ fn an_observation_and_a_downlink_may_overlap_and_their_loads_add() {
     let response = run(
         1000 * US,
         vec![
-            directive(1, decl::OBSERVE, 0, json!({"duration": 600 * US, "powerWatts": 45.0})),
-            directive(2, decl::DOWNLINK, 300 * US, json!({"duration": 600 * US,
-                                                          "powerWatts": 30.0})),
+            directive(
+                1,
+                decl::OBSERVE,
+                0,
+                json!({"duration": 600 * US, "powerWatts": 45.0}),
+            ),
+            directive(
+                2,
+                decl::DOWNLINK,
+                300 * US,
+                json!({"duration": 600 * US,
+                                                          "powerWatts": 30.0}),
+            ),
         ],
         json!({}),
     );
-    // bus 20 + instrument 45 + radio 30 + cooler draw 55
-    assert!((value_at(profile(&response, decl::R_LOAD), 400 * US) - 150.0).abs() < 1e-9);
+    // bus 20 + instrument 45 + radio 30 + cooler draw 70
+    assert!((value_at(profile(&response, decl::R_LOAD), 400 * US) - 165.0).abs() < 1e-9);
 }
 
 // ---------- refusals ---------------------------------------------------------------------------------
@@ -492,7 +587,12 @@ fn a_frame_period_that_would_flood_the_recorder_is_refused_by_name() {
     // because that is the parameter the planner has to change.
     let message = refusal(
         3600 * US,
-        vec![directive(1, decl::OBSERVE, 0, json!({"duration": 3600 * US, "framePeriod": 1}))],
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            0,
+            json!({"duration": 3600 * US, "framePeriod": 1}),
+        )],
         json!({}),
     );
     assert!(message.contains("framePeriod"), "{message}");
@@ -521,8 +621,13 @@ fn an_integer_resource_never_serializes_with_a_decimal_point() {
     // the cast that widened it.
     let response = run(
         200 * US,
-        vec![directive(1, decl::OBSERVE, 0, json!({"duration": 100 * US,
-                                                   "framePeriod": 10 * US}))],
+        vec![directive(
+            1,
+            decl::OBSERVE,
+            0,
+            json!({"duration": 100 * US,
+                                                   "framePeriod": 10 * US}),
+        )],
         json!({}),
     );
     for segment in &profile(&response, decl::R_FRAMES).segments {
@@ -568,7 +673,12 @@ fn no_resource_value_or_computed_attribute_is_ever_null() {
         2 * 3600 * US,
         vec![
             directive(1, decl::OBSERVE, 600 * US, json!({"duration": 1800 * US})),
-            directive(2, decl::SET_SETPOINT, 100 * US, json!({"setpointKelvin": 60.0})),
+            directive(
+                2,
+                decl::SET_SETPOINT,
+                100 * US,
+                json!({"setpointKelvin": 60.0}),
+            ),
         ],
         json!({}),
     );
@@ -593,10 +703,20 @@ fn the_same_plan_twice_produces_the_same_bytes() {
     // see by eye.
     let plan = || {
         vec![
-            directive(1, decl::OBSERVE, 600 * US, json!({"duration": 1800 * US,
-                                                         "framePeriod": 60 * US})),
+            directive(
+                1,
+                decl::OBSERVE,
+                600 * US,
+                json!({"duration": 1800 * US,
+                                                         "framePeriod": 60 * US}),
+            ),
             directive(2, decl::DOWNLINK, 3000 * US, json!({"duration": 600 * US})),
-            directive(3, decl::SET_SETPOINT, 120 * US, json!({"setpointKelvin": 85.0})),
+            directive(
+                3,
+                decl::SET_SETPOINT,
+                120 * US,
+                json!({"setpointKelvin": 85.0}),
+            ),
         ]
     };
     let first = serde_json::to_string(&run(4 * 3600 * US, plan(), json!({}))).unwrap();

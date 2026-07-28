@@ -227,7 +227,11 @@ mod tests {
         // "the model produced a non-finite value" with no location leaves an operator grepping a
         // whole simulation; the message has to carry the resource.
         let err = real(f64::NAN, "/thermal/detectorKelvin at 00:10:00").unwrap_err();
-        assert!(err.message().contains("/thermal/detectorKelvin at 00:10:00"), "{err:?}");
+        assert!(
+            err.message()
+                .contains("/thermal/detectorKelvin at 00:10:00"),
+            "{err:?}"
+        );
     }
 
     #[test]

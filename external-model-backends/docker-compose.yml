@@ -58,6 +58,16 @@ services:
     restart: unless-stopped
     # ports: ["5021:5021"]
 
+  nexosim:
+    build:
+      context: .
+      dockerfile: nexosim/Dockerfile
+    image: plandev/nexosim-adapter
+    container_name: nexosim-adapter
+    networks: [plandev]
+    restart: unless-stopped
+    # ports: ["5031:5031"]
+
 networks:
   plandev:
     external: true

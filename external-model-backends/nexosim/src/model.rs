@@ -121,10 +121,14 @@ impl Cryostat {
         (self.parasitic_w + self.instrument_w - cooling) / self.mass_j_per_k
     }
 
-    /// Total electrical load. The cooler's DRAW is not its heat LIFT: it pulls 55 W off the bus to
-    /// move 40 W out of the cold end, which is why turning it on shows up on two resources at once.
+    /// Total electrical load. The cooler's DRAW is not its heat LIFT: it pulls 70 W off the bus to
+    /// move 55 W out of the cold end, which is why turning it on shows up on two resources at once.
     fn load_w(&self) -> f64 {
-        let cooler = if self.cooling { self.cooler_draw_w } else { 0.0 };
+        let cooler = if self.cooling {
+            self.cooler_draw_w
+        } else {
+            0.0
+        };
         self.bus_w + self.instrument_w + self.radio_w + cooler
     }
 
@@ -212,13 +216,13 @@ impl Cryostat {
         // microseconds, and the segment boundary -- which is the event time truncated -- would then
         // disagree with the event by up to a microsecond, in the direction that reports the cooler
         // coming on before it did.
-        // A float-to-int cast saturates in Rust rather than wrapping, so a crossing 10^12 seconds
-        // out lands on i64::MAX here; `checked_add` is what keeps that from overflowing into a
-        // deadline in the past.
         let after_us = (seconds * 1e6).ceil() as i64;
         if after_us < 1 {
             return;
         }
+        // A float-to-int cast SATURATES in Rust rather than wrapping, so a crossing 10^12 seconds
+        // out has just landed on i64::MAX; checked_add is what keeps adding it to the clock from
+        // overflowing into a deadline in the past.
         match self.now_us(cx.time()).checked_add(after_us) {
             Some(at_us) if at_us <= self.horizon_us => {}
             _ => return,

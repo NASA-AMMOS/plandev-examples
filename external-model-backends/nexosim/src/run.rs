@@ -15,8 +15,9 @@ use std::time::Duration;
 
 use crate::decl;
 use crate::model::{Config, Cryostat, Recorder, RecorderRow, ThermalRow};
-use crate::wire::{Directive, Fault, Profile, Request, Response, Segment, Span, caller, int, ramp,
-                  real};
+use crate::wire::{
+    Directive, Fault, Profile, Request, Response, Segment, Span, caller, int, ramp, real,
+};
 
 // ---------- reading the request -------------------------------------------------------------------
 /// A configuration value `adapter_core` promised to send. Its absence is a broken host, not a
@@ -26,10 +27,9 @@ fn cfg_real(cfg: &Map<String, Value>, name: &str) -> Result<f64, Fault> {
         Some(v) if v.is_finite() => Ok(v),
         other => Err(Fault::Model(format!(
             "configuration parameter '{name}' should have arrived as a finite number, got {}",
-            other.map(|_| "a non-finite number".into()).unwrap_or_else(|| format!(
-                "{:?}",
-                cfg.get(name)
-            ))
+            other
+                .map(|_| "a non-finite number".into())
+                .unwrap_or_else(|| format!("{:?}", cfg.get(name)))
         ))),
     }
 }
@@ -105,12 +105,17 @@ pub fn configuration(cfg: &Map<String, Value>) -> Result<Config, Fault> {
 /// An argument `adapter_core` already typechecked against the declared schema. A mismatch here is
 /// the host and this file disagreeing about the declaration, not a planner error.
 fn arg_int(d: &Directive, name: &str) -> Result<i64, Fault> {
-    d.arguments.get(name).and_then(Value::as_i64).ok_or_else(|| {
-        Fault::Model(format!(
-            "directive {} ({}) argument '{name}' should have arrived as an integer, got {:?}",
-            d.id, d.typ, d.arguments.get(name)
-        ))
-    })
+    d.arguments
+        .get(name)
+        .and_then(Value::as_i64)
+        .ok_or_else(|| {
+            Fault::Model(format!(
+                "directive {} ({}) argument '{name}' should have arrived as an integer, got {:?}",
+                d.id,
+                d.typ,
+                d.arguments.get(name)
+            ))
+        })
 }
 
 fn arg_real(d: &Directive, name: &str) -> Result<f64, Fault> {
@@ -118,7 +123,9 @@ fn arg_real(d: &Directive, name: &str) -> Result<f64, Fault> {
         Some(v) if v.is_finite() => Ok(v),
         _ => Err(Fault::Model(format!(
             "directive {} ({}) argument '{name}' should have arrived as a finite number, got {:?}",
-            d.id, d.typ, d.arguments.get(name)
+            d.id,
+            d.typ,
+            d.arguments.get(name)
         ))),
     }
 }
@@ -131,7 +138,9 @@ fn arg_str(d: &Directive, name: &str) -> Result<String, Fault> {
         .ok_or_else(|| {
             Fault::Model(format!(
                 "directive {} ({}) argument '{name}' should have arrived as a string, got {:?}",
-                d.id, d.typ, d.arguments.get(name)
+                d.id,
+                d.typ,
+                d.arguments.get(name)
             ))
         })
 }
@@ -290,7 +299,11 @@ pub fn simulate(req: &Request) -> Result<Response, Fault> {
         });
     }
 
-    refuse_overlaps(&planned, decl::OBSERVE, "instrument points at one target at a time")?;
+    refuse_overlaps(
+        &planned,
+        decl::OBSERVE,
+        "instrument points at one target at a time",
+    )?;
     refuse_overlaps(&planned, decl::DOWNLINK, "there is one transmitter")?;
 
     if activity_events > decl::MAX_ACTIVITY_EVENTS {
@@ -414,8 +427,8 @@ pub fn simulate(req: &Request) -> Result<Response, Fault> {
     let recorded: Vec<RecorderRow> = simu.process_query(&recorder_history, ()).map_err(fail)?;
     if chattered {
         return caller(format!(
-            "the cryocooler switched more than {} times; raise 'deadbandKelvin' or lower the heat \
-             into the detector",
+            "the cryocooler switched more than {} times over this window; raise 'deadbandKelvin', \
+             lower the heat into the detector, or simulate a shorter plan",
             decl::MAX_COOLER_SWITCHES
         ));
     }
@@ -480,10 +493,10 @@ fn ramp_segments(times: &[i64], values: &[f64], sim_us: i64) -> Vec<(i64, f64, f
     // Close the window. The last row is at the last EVENT, which is generally not the end of the
     // plan, and merlin's ingest gate rejects a profile that does not cover the simulation. Held
     // flat: past the final row there is no data and a hold is the only statement that invents none.
-    if let (Some(&last_t), Some(&last_v)) = (times.last(), values.last()) {
-        if sim_us > last_t {
-            out.push((sim_us - last_t, last_v, 0.0));
-        }
+    if let (Some(&last_t), Some(&last_v)) = (times.last(), values.last())
+        && sim_us > last_t
+    {
+        out.push((sim_us - last_t, last_v, 0.0));
     }
     coalesce_real(out)
 }
@@ -496,10 +509,10 @@ fn held_segments(times: &[i64], values: &[f64], sim_us: i64) -> Vec<(i64, f64, f
     for i in 0..times.len().saturating_sub(1) {
         out.push((times[i + 1] - times[i], values[i], 0.0));
     }
-    if let (Some(&last_t), Some(&last_v)) = (times.last(), values.last()) {
-        if sim_us > last_t {
-            out.push((sim_us - last_t, last_v, 0.0));
-        }
+    if let (Some(&last_t), Some(&last_v)) = (times.last(), values.last())
+        && sim_us > last_t
+    {
+        out.push((sim_us - last_t, last_v, 0.0));
     }
     coalesce_real(out)
 }
@@ -555,18 +568,15 @@ fn discrete_profile(
     for i in 0..times.len().saturating_sub(1) {
         push(times[i + 1] - times[i], values[i].clone());
     }
-    if let (Some(&last_t), Some(last_v)) = (times.last(), values.last()) {
-        if sim_us > last_t {
-            push(sim_us - last_t, last_v.clone());
-        }
+    if let (Some(&last_t), Some(last_v)) = (times.last(), values.last())
+        && sim_us > last_t
+    {
+        push(sim_us - last_t, last_v.clone());
     }
     Ok(Profile { schema, segments })
 }
 
-fn real_profiles(
-    thermal: &[ThermalRow],
-    sim_us: i64,
-) -> Result<BTreeMap<String, Profile>, Fault> {
+fn real_profiles(thermal: &[ThermalRow], sim_us: i64) -> Result<BTreeMap<String, Profile>, Fault> {
     let times: Vec<i64> = thermal.iter().map(|r| r.at_us).collect();
     let kelvin: Vec<f64> = thermal.iter().map(|r| r.kelvin).collect();
     let load: Vec<f64> = thermal.iter().map(|r| r.load_w).collect();
@@ -597,7 +607,13 @@ fn discrete_profiles(
             &thermal_times,
             thermal
                 .iter()
-                .map(|r| json!(if r.cooling { decl::COOLER_ON } else { decl::COOLER_OFF }))
+                .map(|r| {
+                    json!(if r.cooling {
+                        decl::COOLER_ON
+                    } else {
+                        decl::COOLER_OFF
+                    })
+                })
                 .collect(),
             sim_us,
             json!({"type": "variant", "variants": [
@@ -689,7 +705,11 @@ fn peak_kelvin(rows: &[ThermalRow], from: i64, to: i64) -> f64 {
 }
 
 fn counter_at(rows: &[RecorderRow], t: i64, pick: fn(&RecorderRow) -> i64) -> i64 {
-    rows.iter().rev().find(|r| r.at_us <= t).map(pick).unwrap_or(0)
+    rows.iter()
+        .rev()
+        .find(|r| r.at_us <= t)
+        .map(pick)
+        .unwrap_or(0)
 }
 
 fn spans(
@@ -809,66 +829,69 @@ pub fn validate(subjects: &[crate::wire::ValidateSubject]) -> Value {
         let period = args.get("framePeriod").and_then(Value::as_i64);
         let watts = args.get("powerWatts").and_then(Value::as_f64);
 
-        if let Some(d) = duration {
-            if d < 0 {
-                note(&mut notices, &["duration"], format!("'duration' must be >= 0 (got {d})"));
-            }
+        if let Some(d) = duration
+            && d < 0
+        {
+            note(
+                &mut notices,
+                &["duration"],
+                format!("'duration' must be >= 0 (got {d})"),
+            );
         }
-        if let Some(p) = period {
-            if p <= 0 {
-                note(
-                    &mut notices,
-                    &["framePeriod"],
-                    format!("'framePeriod' must be > 0 us (got {p})"),
-                );
-            }
+        if let Some(p) = period
+            && p <= 0
+        {
+            note(
+                &mut notices,
+                &["framePeriod"],
+                format!("'framePeriod' must be > 0 us (got {p})"),
+            );
         }
-        if let Some(w) = watts {
-            if w < 0.0 {
-                note(
-                    &mut notices,
-                    &["powerWatts"],
-                    format!("'powerWatts' must be >= 0 (got {w})"),
-                );
-            }
+        if let Some(w) = watts
+            && w < 0.0
+        {
+            note(
+                &mut notices,
+                &["powerWatts"],
+                format!("'powerWatts' must be >= 0 (got {w})"),
+            );
         }
-        if let (Some(d), Some(p)) = (duration, period) {
-            if d >= 0 && p > 0 && d / p > decl::MAX_ACTIVITY_EVENTS {
-                note(
-                    &mut notices,
-                    &["duration", "framePeriod"],
-                    format!(
-                        "this would move {} frames, over the per-plan limit of {}; raise \
-                         'framePeriod'",
-                        d / p,
-                        decl::MAX_ACTIVITY_EVENTS
-                    ),
-                );
-            }
+        if let (Some(d), Some(p)) = (duration, period)
+            && d >= 0
+            && p > 0
+            && d / p > decl::MAX_ACTIVITY_EVENTS
+        {
+            note(
+                &mut notices,
+                &["duration", "framePeriod"],
+                format!(
+                    "this would move {} frames, over the per-plan limit of {}; raise \
+                     'framePeriod'",
+                    d / p,
+                    decl::MAX_ACTIVITY_EVENTS
+                ),
+            );
         }
-        if subject.typ == decl::OBSERVE {
-            if let Some(name) = args.get("targetName").and_then(Value::as_str) {
-                if name.trim().is_empty() {
-                    note(
-                        &mut notices,
-                        &["targetName"],
-                        "'targetName' is what the recorder stamps on every frame; it cannot be \
-                         blank"
-                            .to_string(),
-                    );
-                }
-            }
+        if subject.typ == decl::OBSERVE
+            && let Some(name) = args.get("targetName").and_then(Value::as_str)
+            && name.trim().is_empty()
+        {
+            note(
+                &mut notices,
+                &["targetName"],
+                "'targetName' is what the recorder stamps on every frame; it cannot be blank"
+                    .to_string(),
+            );
         }
-        if subject.typ == decl::SET_SETPOINT {
-            if let Some(k) = args.get("setpointKelvin").and_then(Value::as_f64) {
-                if k <= 0.0 {
-                    note(
-                        &mut notices,
-                        &["setpointKelvin"],
-                        format!("'setpointKelvin' must be > 0 K (got {k})"),
-                    );
-                }
-            }
+        if subject.typ == decl::SET_SETPOINT
+            && let Some(k) = args.get("setpointKelvin").and_then(Value::as_f64)
+            && k <= 0.0
+        {
+            note(
+                &mut notices,
+                &["setpointKelvin"],
+                format!("'setpointKelvin' must be > 0 K (got {k})"),
+            );
         }
         out.push(Value::Array(notices));
     }

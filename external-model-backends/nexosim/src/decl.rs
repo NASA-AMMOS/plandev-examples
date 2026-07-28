@@ -142,8 +142,14 @@ pub fn declaration() -> Value {
             {"name": "deadbandKelvin", "schema": real(), "default": 2.0},
             {"name": "thermalMassJPerK", "schema": real(), "default": 900.0},
             {"name": "parasiticWatts", "schema": real(), "default": 12.0},
-            {"name": "coolerLiftWatts", "schema": real(), "default": 40.0},
-            {"name": "coolerDrawWatts", "schema": real(), "default": 55.0},
+            // Sized so the cooler beats the parasitic leak comfortably and the PAYLOAD by a hair:
+            // 12 + 45 - 55 is +2 W, so the detector drifts up about 8 K over an hour-long
+            // observation and recovers in a few minutes afterwards. That is the operational
+            // constraint the model exists to express -- "how long can I integrate before the
+            // detector is out of spec" is a question about a resource, which is a question PlanDev
+            // can answer.
+            {"name": "coolerLiftWatts", "schema": real(), "default": 55.0},
+            {"name": "coolerDrawWatts", "schema": real(), "default": 70.0},
             {"name": "busLoadWatts", "schema": real(), "default": 20.0},
             {"name": "recorderCapacityFrames", "schema": int(), "default": 2000}
         ],
@@ -182,7 +188,10 @@ mod tests {
             .iter()
             .map(|p| p["name"].as_str().unwrap().to_string())
             .collect();
-        assert_eq!(names, ["duration", "targetName", "framePeriod", "powerWatts"]);
+        assert_eq!(
+            names,
+            ["duration", "targetName", "framePeriod", "powerWatts"]
+        );
     }
 
     #[test]
@@ -227,8 +236,9 @@ mod tests {
 
     #[test]
     fn every_resource_declares_a_schema_type_the_contract_knows() {
-        let known = ["real", "int", "duration", "boolean", "string", "path", "variant", "series",
-                     "struct"];
+        let known = [
+            "real", "int", "duration", "boolean", "string", "path", "variant", "series", "struct",
+        ];
         for r in declaration()["resourceTypes"].as_array().unwrap() {
             let t = r["schema"]["type"].as_str().unwrap();
             assert!(known.contains(&t), "{}: {t}", r["name"]);

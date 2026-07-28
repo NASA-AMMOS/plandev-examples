@@ -91,3 +91,31 @@ jobs:
       - name: bsk_service tests
         working-directory: external-model-backends/basilisk
         run: python3 test_bsk_service.py -v
+
+  # The Rust model. Separate from the hermetic job because it needs a Rust toolchain, and separate
+  # from the Basilisk job because they share nothing. `nx_service.py` is a shim over ExecBackend, so
+  # what is really under test here is that a model in ANOTHER LANGUAGE gets the whole contract --
+  # which is the claim the other three adapters cannot make.
+  nexosim-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust model tests
+        working-directory: external-model-backends/nexosim
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+
+      # The Python tests drive the RELEASE binary over the stdio protocol, so it has to exist first.
+      - name: Build the model binary
+        working-directory: external-model-backends/nexosim
+        run: cargo build --release
+
+      - name: nx_service tests
+        working-directory: external-model-backends/nexosim
+        run: python3 test_nx_service.py -v
