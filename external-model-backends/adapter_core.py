@@ -560,6 +560,23 @@ class Backend:
         """
         raise NotImplementedError
 
+    def import_plan(self, request):
+        """OPTIONAL. Convert a plan written in the framework's OWN format into a PlanDev plan.
+
+        `request` is `{format, content, planName?, planStart?, durationDays?}`. `content` is the
+        file's text, not a path -- the adapter must never read the caller's filesystem, and merlin
+        forwards bytes it was given rather than a location it would have to be trusted to open.
+
+        Return `{"plan": <PlanTransfer v2>, "notices": [...]}`. PlanTransfer is the format PlanDev's
+        existing "Import Plan" flow already accepts, which is the whole reason this endpoint returns
+        it: a backend that can produce one needs no new import machinery anywhere in PlanDev.
+
+        A backend that offers this MUST also declare the `planImport` capability, including the
+        format keys it accepts -- that is what the UI reads to know which files to offer, without
+        containing a branch that names a framework.
+        """
+        raise NotFound("this model does not support importing plans")
+
     def deep_validate(self, subjects):
         """OPTIONAL. Model-specific checks the generic layer cannot make.
 
@@ -830,6 +847,65 @@ def run_simulate(backend, req):
     return check_response(backend.simulate(declaration.normalize(req)))
 
 
+def run_import_plan(backend, req):
+    """POST /import-plan. Convert a plan in the framework's own format into a PlanDev plan.
+
+    The capability is checked FIRST, and against the declaration rather than against whether the
+    backend happens to implement the method. Those two can disagree, and when they do the
+    declaration is what PlanDev stored and what the UI offered the user -- so a model whose
+    capability says no must answer no even if the code behind it would have worked. The reverse
+    (declared yes, not implemented) falls through to `Backend.import_plan`'s own refusal.
+    """
+    declaration = backend.declaration()
+    capability = declaration.capabilities.get(PLAN_IMPORT) or {}
+    if not capability.get("supported"):
+        raise NotFound("model '%s' does not support importing plans%s"
+                       % (declaration.key,
+                          ": " + capability["reason"] if capability.get("reason") else ""))
+
+    formats = [f.get("key") for f in capability.get("formats") or []]
+    requested = req.get("format")
+    if formats and requested not in formats:
+        raise BadRequest("unknown plan format %r for model '%s'; it accepts %s"
+                         % (requested, declaration.key, ", ".join(repr(f) for f in formats)))
+    if not isinstance(req.get("content"), str):
+        raise BadRequest("`content` must be the plan file's text, got %s"
+                         % type(req.get("content")).__name__)
+
+    result = backend.import_plan(req)
+    plan = (result or {}).get("plan")
+    if not isinstance(plan, dict):
+        raise ModelError("plan import returned no `plan` object")
+    notices = list((result or {}).get("notices") or [])
+    return {"plan": plan, "notices": notices + _import_conformance(declaration, plan)}
+
+
+def _import_conformance(declaration, plan):
+    """Typecheck every imported activity against the model that will have to run it.
+
+    Not belt-and-braces. An importer converts values between two frameworks' encodings -- a
+    duration that is `"01:00:00"` on one side and `3600000000` on the other, a map that is a JSON
+    object on one side and a series of {key,value} structs on the other -- and every one of those
+    conversions can be wrong in a way that produces a perfectly well-formed plan. Without this the
+    first sign of trouble is a simulation failing, or worse, succeeding against a coerced value
+    nobody intended. Reported as notices rather than raised: a plan with one bad activity out of
+    four hundred should still import, with the four hundred and the problem both visible.
+    """
+    notices = []
+    for index, activity in enumerate(plan.get("activities") or []):
+        typ = activity.get("type")
+        where = "activity %d (%s)" % (index, typ)
+        if typ not in declaration:
+            notices.append({"severity": "error",
+                            "message": "%s: the model declares no such activity type" % where})
+            continue
+        result = declaration.validate_one(typ, activity.get("arguments") or {})
+        for notice in result["notices"]:
+            notices.append({"severity": "error", "message": "%s: %s" % (where, notice["message"]),
+                            "subjects": notice.get("subjects") or []})
+    return notices
+
+
 # ---------- registry -------------------------------------------------------------------------------
 class Registry:
     """The set of models one adapter serves, addressed by key."""
@@ -907,6 +983,8 @@ def make_handler(registry):
                     return run_validate(registry.resolve(self._key(req)), req)
                 if path.endswith("/simulate"):
                     return run_simulate(registry.resolve(self._key(req)), req)
+                if path.endswith("/import-plan"):
+                    return run_import_plan(registry.resolve(self._key(req)), req)
                 # Anything unmatched is a 404. An earlier adapter let unmatched POSTs fall through
                 # to simulate(), so POST /introspect answered with a 500 from the simulator.
                 raise NotFound("not found: %s" % path)

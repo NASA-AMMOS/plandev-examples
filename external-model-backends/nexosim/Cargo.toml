@@ -1,0 +1,20 @@
+[package]
+name = "nx-model"
+version = "1.0.0"
+edition = "2024"
+# NeXosim 1.0 itself requires 1.88; pinning the same floor here means a too-old toolchain fails on
+# this line instead of somewhere inside a dependency's macro expansion.
+rust-version = "1.88.0"
+
+[dependencies]
+nexosim = "1.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+# The final image is FROM scratch, so the binary carries everything: no dynamic loader, no libc to
+# fall back on. lto + one codegen unit + strip is what keeps it a few megabytes instead of tens.
+opt-level = 2
+lto = true
+codegen-units = 1
+strip = true

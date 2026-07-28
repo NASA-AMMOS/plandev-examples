@@ -906,6 +906,111 @@ class TestDiscreteSegments(unittest.TestCase):
         self.assertIs(segments[0]["dynamics"], False)
 
 
+# --- plan import ------------------------------------------------------------------------------------
+class ImportingBackend(ac.Backend):
+    """A backend that converts its framework's format into a PlanTransfer. `plan` is whatever the
+    test wants the conversion to have produced."""
+
+    def __init__(self, capabilities, plan=None):
+        self._capabilities = capabilities
+        self.plan = plan if plan is not None else {"version": "2", "activities": []}
+        self.seen = None
+
+    def declaration(self):
+        return ac.Declaration(
+            "m",
+            [ac.ActivityType("Burn", [ac.Parameter("duration", {"type": "duration"}),
+                                      ac.Parameter("thrust", {"type": "real"}, 1.0)])],
+            capabilities=self._capabilities)
+
+    def import_plan(self, request):
+        self.seen = request
+        return {"plan": self.plan, "notices": [{"severity": "info", "message": "converted"}]}
+
+
+FORMAT = ac.supported(formats=[{"key": "native", "label": "Native", "extensions": [".nat"]}])
+
+
+class TestRunImportPlan(unittest.TestCase):
+    def request(self, **over):
+        return dict({"format": "native", "content": "<the file's text>"}, **over)
+
+    def test_a_model_that_does_not_declare_the_capability_refuses(self):
+        backend = ImportingBackend({})
+        with self.assertRaises(ac.NotFound):
+            ac.run_import_plan(backend, self.request())
+        self.assertIsNone(backend.seen, "the backend must not be called at all")
+
+    def test_the_DECLARATION_decides_not_whether_the_method_exists(self):
+        # The declaration is what merlin stored and what the UI offered the user. When it and the code
+        # disagree, the stored answer has to win, or PlanDev's own record of what a model can do stops
+        # meaning anything.
+        backend = ImportingBackend({ac.PLAN_IMPORT: ac.unsupported("this deployment is read-only")})
+        with self.assertRaises(ac.NotFound) as caught:
+            ac.run_import_plan(backend, self.request())
+        self.assertIn("this deployment is read-only", str(caught.exception))
+        self.assertIsNone(backend.seen)
+
+    def test_an_undeclared_format_is_refused_and_lists_the_ones_that_work(self):
+        with self.assertRaises(ac.BadRequest) as caught:
+            ac.run_import_plan(ImportingBackend({ac.PLAN_IMPORT: FORMAT}), self.request(format="xml"))
+        self.assertIn("'native'", str(caught.exception))
+
+    def test_content_must_be_text_not_a_path(self):
+        # The adapter must never read the caller's filesystem: merlin forwards bytes it was given
+        # rather than a location the backend would be trusted to open.
+        with self.assertRaises(ac.BadRequest):
+            ac.run_import_plan(ImportingBackend({ac.PLAN_IMPORT: FORMAT}),
+                               self.request(content={"path": "/etc/passwd"}))
+
+    def test_a_converted_plan_comes_back_with_the_backend_notices(self):
+        backend = ImportingBackend({ac.PLAN_IMPORT: FORMAT})
+        out = ac.run_import_plan(backend, self.request())
+        self.assertEqual(out["plan"], backend.plan)
+        self.assertEqual(out["notices"][0]["message"], "converted")
+        self.assertEqual(backend.seen["content"], "<the file's text>")
+
+    def test_an_imported_activity_of_an_unknown_type_is_reported(self):
+        plan = {"version": "2", "activities": [{"type": "Nope", "arguments": {}}]}
+        notices = ac.run_import_plan(ImportingBackend({ac.PLAN_IMPORT: FORMAT}, plan),
+                                     self.request())["notices"]
+        self.assertTrue(any("no such activity type" in n["message"] for n in notices))
+
+    def test_imported_arguments_are_typechecked_against_the_model_that_will_run_them(self):
+        # The failure this prevents: an importer converts between two frameworks' encodings, and a
+        # wrong conversion produces a perfectly well-formed plan. Without this the first sign is a
+        # simulation failing -- or worse, succeeding against a value nobody intended.
+        plan = {"version": "2", "activities": [
+            {"type": "Burn", "arguments": {"duration": "01:00:00"}}]}   # Blackbird's encoding, not µs
+        notices = ac.run_import_plan(ImportingBackend({ac.PLAN_IMPORT: FORMAT}, plan),
+                                     self.request())["notices"]
+        errors = [n for n in notices if n["severity"] == "error"]
+        self.assertEqual(len(errors), 1)
+        self.assertIn("duration", errors[0]["message"])
+        self.assertEqual(errors[0]["subjects"], ["duration"])
+
+    def test_one_bad_activity_does_not_fail_the_whole_import(self):
+        # A plan with one bad activity out of four hundred should still import, with both the four
+        # hundred and the problem visible.
+        plan = {"version": "2", "activities": [
+            {"type": "Burn", "arguments": {"duration": 1}},
+            {"type": "Burn", "arguments": {"duration": "wrong"}},
+            {"type": "Burn", "arguments": {"duration": 3}}]}
+        out = ac.run_import_plan(ImportingBackend({ac.PLAN_IMPORT: FORMAT}, plan), self.request())
+        self.assertEqual(len(out["plan"]["activities"]), 3)
+        self.assertEqual(len([n for n in out["notices"] if n["severity"] == "error"]), 1)
+
+    def test_a_backend_returning_no_plan_is_a_model_error(self):
+        class Empty(ImportingBackend):
+            def import_plan(self, request):
+                return {"notices": []}
+        with self.assertRaises(ac.ModelError):
+            ac.run_import_plan(Empty({ac.PLAN_IMPORT: FORMAT}), self.request())
+
+    def test_the_default_backend_does_not_support_it(self):
+        self.assertRaises(ac.NotFound, ac.Backend().import_plan, {})
+
+
 # --- registry ----------------------------------------------------------------------------------------
 class TestRegistry(unittest.TestCase):
     def test_a_single_model_may_be_addressed_without_a_key(self):

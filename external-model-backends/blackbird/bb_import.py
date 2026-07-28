@@ -259,15 +259,24 @@ class ModelSchema:
         return effective_args(typ, provided, self.param_types, self.param_defaults)
 
     @classmethod
-    def from_classpath(cls, classpath, key=None):
-        m = load_model(key or "model", classpath)
-        self = cls("classpath %s" % classpath)
-        for typ, params in m["param_types"].items():
+    def from_model(cls, model, source="loaded model"):
+        """From an ALREADY-LOADED model dict -- what `bb_service.load_model` returns.
+
+        The path the adapter uses. Loading a Blackbird adaptation costs a JVM start, and the
+        adapter has one in hand; going back through `from_classpath` would pay for a second and,
+        worse, could read a different dictionary than the one this backend simulates with.
+        """
+        self = cls(source)
+        for typ, params in model["param_types"].items():
             self.param_order[typ] = [pn for pn, _ in params]
             self.param_schemas[typ] = {pn: bbtype_to_schema(bt) for pn, bt in params}
             self.param_types[typ] = list(params)
-            self.param_defaults[typ] = dict(m["param_defaults"].get(typ, {}))
+            self.param_defaults[typ] = dict(model["param_defaults"].get(typ, {}))
         return self
+
+    @classmethod
+    def from_classpath(cls, classpath, key=None):
+        return cls.from_model(load_model(key or "model", classpath), "classpath %s" % classpath)
 
     @classmethod
     def from_url(cls, base_url, key=None):

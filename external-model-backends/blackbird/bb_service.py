@@ -433,6 +433,14 @@ def build_declaration(key, model):
         # does -- editing directives, simulating, plotting resources, checking constraints -- works
         # normally, and the message says so, because "unavailable" with no scope reads as broken.
         capabilities={
+            # The other half of being Archetype B. Blackbird authors the plan, so the useful
+            # direction is bringing one INTO PlanDev -- which is exactly the capability a pure
+            # simulator has no use for and does not declare.
+            adapter_core.PLAN_IMPORT: adapter_core.supported(formats=[{
+                "key": "blackbird-plan-json",
+                "label": "Blackbird plan (.plan.json)",
+                "extensions": [".plan.json", ".json"],
+            }]),
             adapter_core.PLANDEV_SCHEDULING: adapter_core.unsupported(
                 "This model schedules its own activities: Blackbird's dispatcher places them during "
                 "the simulation, so the schedule is a result of running it rather than an input. "
@@ -617,6 +625,48 @@ class BlackbirdBackend(adapter_core.Backend):
 
     def declaration(self):
         return self._declaration
+
+    def import_plan(self, request):
+        """A Blackbird `.plan.json` -> a PlanDev plan.
+
+        The conversion is `bb_import`, unchanged and already tested offline against a real Blackbird
+        export -- this endpoint is the same code reached over HTTP instead of from a shell. That
+        matters more than convenience: the CLI needs an operator to read the model's dictionary out
+        of a running adapter and type the plan window into a dialog, while here the adaptation is
+        already loaded in this process, so the schema the arguments are re-encoded against is
+        necessarily the one this backend would simulate with. The two cannot drift.
+        """
+        import bb_import
+
+        try:
+            document = json.loads(request["content"])
+        except ValueError as e:
+            raise adapter_core.BadRequest("that is not a Blackbird .plan.json file: %s" % e)
+
+        plan_start = request.get("planStart")
+        try:
+            plan, report = bb_import.convert(
+                document,
+                bb_import.ModelSchema.from_model(self.model, "adapter model %s" % self.key),
+                plan_name=request.get("planName") or "%s import" % self.key,
+                plan_start=bb_import.iso_to_dt(plan_start) if plan_start else None,
+                duration_days=request.get("durationDays"))
+        except ValueError as e:
+            raise adapter_core.BadRequest(str(e))
+
+        # Blackbird's plan file has no header -- no start, no duration, no model -- so the window is
+        # DERIVED from the activities. Reported rather than silently applied: an operator importing a
+        # week of ops needs to know the window came from the file's contents, not from their intent.
+        notices = [{"severity": "info",
+                    "message": "plan window derived from the file: starts %s, %s long"
+                               % (report["planStart"], report["suggestedDuration"])}]
+        notices += [{"severity": "warning",
+                     "message": "activity %s (%s) was not imported: %s" % (d["id"], d["type"], d["reason"])}
+                    for d in report["dropped"]]
+        notices += [{"severity": "warning",
+                     "message": "activity %s (%s): %s" % (w["index"], w["type"], w["message"])}
+                    for w in report["warnings"]]
+        return {"plan": plan, "notices": notices}
 
     def simulate(self, request):
         plan_start = request.plan_start

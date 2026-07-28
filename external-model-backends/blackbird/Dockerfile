@@ -75,6 +75,9 @@ COPY --from=builder /out /opt/blackbird
 # Python adapter -- is reachable. Copied next to the service, where its sys.path shim looks first.
 COPY adapter_core.py /opt/adapter/adapter_core.py
 COPY blackbird/bb_service.py /opt/adapter/bb_service.py
+# bb_import began as an offline CLI and is now also reached over HTTP by POST /import-plan, so it
+# has to be in the image rather than only in the repo.
+COPY blackbird/bb_import.py /opt/adapter/bb_import.py
 
 ENV BLACKBIRD_MAIN="gov.nasa.jpl.Blackbird"
 # BB_MODELS maps each model key to a classpath = Blackbird core + its deps + one adaptation.
