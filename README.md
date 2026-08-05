@@ -39,19 +39,19 @@ cd plandev-examples
 Work through these **in order** — each step adds one new idea on top of the previous. Start
 at the tutorial.
 
-| Step | Directory | What You Build | Building Blocks Used |
-|------|-----------|---------------|----------------------|
-| 0 | `00-tutorial/` | Simple SSR data recorder | None (standalone) |
-| 1 | `examples/01-power-only/` | Power + battery model | `power` |
-| 2 | `examples/02-data-only/` | Data storage + downlink | `data` |
-| 3 | `examples/03-power-and-data/` | Combine two subsystems | `power` + `data` |
-| 4 | `examples/04-hopper/` | Lunar hopper — composition at small scale | `power` + `data` |
-| 5 | `examples/05-orbiter/` | Full Mars orbiter — the deep end | `power` + `data` + `geometry` |
+| Step | Directory                                 | What You Build | Building Blocks Used |
+|------|-------------------------------------------|---------------|----------------------|
+| 0 | `examples/00-tutorial/`                   | Simple SSR data recorder | None (standalone) |
+| 1 | `examples/01-power-only/`                 | Power + battery model | `power` |
+| 2 | `examples/02-data-only/`                  | Data storage + downlink | `data` |
+| 3 | `examples/03-power-and-data/`             | Combine two subsystems | `power` + `data` |
+| 4 | `examples/04-hopper/`                     | Lunar hopper — composition at small scale | `power` + `data` |
+| 5 | `examples/05-orbiter/`                    | Full Mars orbiter — the deep end | `power` + `data` + `geometry` |
 | 6 | `examples/06-constraints-and-scheduling/` | Constraints + scheduling goals | Procedures for the 03 model |
-| 7 | `examples/07-advanced-resources/` | Streamline resource types | None (standalone) |
-| 8 | `examples/08-activity-patterns/` | Common activity idioms | None (standalone) |
-| 9 | `examples/09-testing-patterns/` | Model testing strategies | None (self-contained model) |
-| 10 | `examples/10-external-events/` | Scheduling against external events | Procedures for the 03 model |
+| 7 | `examples/07-advanced-resources/`         | Streamline resource types | None (standalone) |
+| 8 | `examples/08-activity-patterns/`          | Common activity idioms | None (standalone) |
+| 9 | `examples/09-testing-patterns/`           | Model testing strategies | None (self-contained model) |
+| 10 | `examples/10-external-events/`            | Scheduling against external events | Procedures for the 03 model |
 
 **04-hopper** is the gentle first taste of composing the building blocks; **05-orbiter** is
 the realistic, full-complexity model that shows what those blocks look like at scale plus
@@ -73,15 +73,9 @@ comfortable with the core workflow.
 
 ```
 plandev-examples/
-├── 00-tutorial/                    # Start here! Basic SSR model
-├── libraries/                      # Reusable subsystem building blocks (Gradle subprojects)
-│   ├── power/                      # Power, battery, solar array, RTG
-│   ├── data/                       # Prioritized storage bins, downlink, deletion
-│   ├── geometry/                   # SPICE, orbital geometry, visibility, events
-│   ├── gnc/                        # Attitude, pointing, targets (in progress)
-│   └── telecom/                    # Link budgets, antennas, ground stations (experimental)
 ├── examples/                       # Mission-modeling learning path (depend on libraries)
-│   ├── 01-power-only/
+│   ├──00-tutorial/                 # Start here! Basic SSR model
+│   ├── 01-power-only/  
 │   ├── 02-data-only/
 │   ├── 03-power-and-data/
 │   ├── 04-hopper/                  # Lunar hopper (compose power + data)
@@ -93,6 +87,12 @@ plandev-examples/
 │   ├── 10-external-events/
 │   ├── actions/                    # Other surface: server-side automation (TypeScript)
 │   └── ui-plugins/                 # Other surface: Aerie UI customizations (TypeScript)
+├── libraries/                      # Reusable subsystem building blocks (Gradle subprojects)
+│   ├── power/                      # Power, battery, solar array, RTG
+│   ├── data/                       # Prioritized storage bins, downlink, deletion
+│   ├── geometry/                   # SPICE, orbital geometry, visibility, events
+│   ├── gnc/                        # Attitude, pointing, targets (in progress)
+│   └── telecom/                    # Link budgets, antennas, ground stations (experimental)
 ├── archive/lander/                 # Legacy reference (unmaintained)
 └── tools/                          # PEL generator (see tools/README.md)
 ```
