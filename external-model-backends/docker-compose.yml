@@ -68,6 +68,16 @@ services:
     restart: unless-stopped
     # ports: ["5031:5031"]
 
+  parakeet:
+    build:
+      context: .
+      dockerfile: parakeet/Dockerfile
+    image: plandev/parakeet-adapter
+    container_name: parakeet-adapter
+    networks: [plandev]
+    restart: unless-stopped
+    # ports: ["5041:5041"]
+
 networks:
   plandev:
     external: true

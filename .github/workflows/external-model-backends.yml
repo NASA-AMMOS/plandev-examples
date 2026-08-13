@@ -119,3 +119,38 @@ jobs:
       - name: nx_service tests
         working-directory: external-model-backends/nexosim
         run: python3 test_nx_service.py -v
+
+  # The Kotlin model. Parakeet has no published artifact, so this clones and PINS it -- a floating
+  # clone would let the identity hash change with someone else's push. Separate job because it needs
+  # a Gradle/JDK toolchain and a second repo, and because the tests skip cleanly without the binary,
+  # so a failure here means the ADAPTER broke rather than the toolchain being absent.
+  parakeet-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Clone Parakeet at the pinned commit
+        working-directory: external-model-backends/parakeet
+        run: |
+          PARAKEET_SHA=$(grep -oP 'ARG PARAKEET_SHA=\K\S+' Dockerfile)
+          git init parakeet-src
+          cd parakeet-src
+          git remote add origin https://github.com/DavidLegg/Parakeet.git
+          git fetch --depth 1 origin "$PARAKEET_SHA"
+          git checkout FETCH_HEAD
+
+      - name: Build the model binary
+        working-directory: external-model-backends/parakeet
+        run: gradle --no-daemon installDist
+
+      - name: pk_service tests
+        working-directory: external-model-backends/parakeet
+        run: python3 test_pk_service.py -v

@@ -869,7 +869,33 @@ def run_validate(backend, req):
 def run_simulate(backend, req):
     """POST /simulate. Normalize, run, then check the answer before it goes on the wire."""
     declaration = backend.declaration()
-    return check_response(backend.simulate(declaration.normalize(req)))
+    return check_response(_with_declared_schemas(declaration, backend.simulate(declaration.normalize(req))))
+
+
+def _with_declared_schemas(declaration, response):
+    """Fill in each profile's `schema` from the declaration when the model did not send one.
+
+    merlin requires a schema on every profile and dies with a NullPointerException deep in
+    `ValueSchemaJsonParser` when one is missing -- a stack trace naming neither the resource nor the
+    model. But a model restating the schema it already declared is a SECOND COPY of it, free to
+    drift from the first, and the drift would be invisible: PlanDev stores the declared schema at
+    registration and the profile's schema at ingest, so a mismatch means resources typed one way in
+    the editor and another in the results.
+
+    The declaration is the single source of truth. A model may still send a schema -- Blackbird and
+    the Python model both do, and theirs wins -- but it no longer has to.
+    """
+    declared = {r.name: r.schema for r in declaration.resource_types}
+    for kind in ("realProfiles", "discreteProfiles"):
+        for name, profile in (response.get(kind) or {}).items():
+            if isinstance(profile, dict) and profile.get("schema") is None:
+                schema = declared.get(name)
+                if schema is None:
+                    raise ModelError(
+                        "resource '%s' has no schema on its profile and is not declared by model "
+                        "'%s', so there is nothing to fall back to" % (name, declaration.key))
+                profile["schema"] = schema
+    return response
 
 
 def run_import_plan(backend, req):
@@ -1230,9 +1256,43 @@ class ExecBackend(Backend):
         if not isinstance(out, dict):
             raise ModelError("model '%s' answered `simulate` with %s, expected a JSON object"
                              % (self.key, type(out).__name__))
-        return {"realProfiles": out.get("realProfiles") or {},
-                "discreteProfiles": out.get("discreteProfiles") or {},
+        return {"realProfiles": self._profiles(out.get("realProfiles"), request.duration, True),
+                "discreteProfiles": self._profiles(out.get("discreteProfiles"), request.duration, False),
                 "spans": out.get("spans") or []}
+
+    def _profiles(self, profiles, sim_duration_us, real):
+        """Accept either `segments` or `samples` from the child.
+
+        A child that already thinks in segments sends them and they pass through. A child that
+        thinks in SAMPLES -- a value at a time, which is what a simulator naturally produces --
+        sends those instead and this converts them, because the conversion is generic and this
+        module already owns it.
+
+        That matters more than convenience. Getting it wrong is silent in both directions: the rate
+        has to be the secant between samples or the profile contradicts itself between segments,
+        and the last segment has to be extended or the profile stops short of the plan and merlin's
+        gate rejects it. The first out-of-process model had to reimplement all of that in Rust
+        because this hook did not exist -- a second language carrying a second copy of exactly the
+        code `adapter_core` was extracted to stop duplicating.
+        """
+        out = {}
+        for name, profile in (profiles or {}).items():
+            profile = profile or {}
+            if "samples" in profile:
+                samples = profile["samples"] or []
+                times = [s[0] for s in samples]
+                values = [s[1] for s in samples]
+                if not times:
+                    continue
+                segments = (real_segments(times, values, sim_duration_us) if real
+                            else discrete_segments(times, values, sim_duration_us))
+            else:
+                segments = profile.get("segments") or []
+            entry = {"segments": segments}
+            if profile.get("schema") is not None:
+                entry["schema"] = profile["schema"]
+            out[name] = entry
+        return out
 
 
     def deep_validate(self, subjects):
