@@ -11,12 +11,19 @@ subsystem building blocks (power, data, geometry) along the way.
 > path below — the examples are the runnable companions to the docs. See
 > [Concepts & docs](#concepts--docs).
 
+## Quick Start
+
+* Ensure you have Git, Git LFS, Java JDK 21 installed. 
+* Create a `.env` file based on `.env.template`, fill in your Github username and a "classic" Github Personal Access Token 
+
 ## Requirements
 
+- **Git** must be installed. 
+- To clone this repo, you need to [setup an SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) on your Github account if you haven't before.
 - **Java 21** (via Gradle toolchain — will auto-download if needed)
 - **Git LFS** for SPICE kernel files used by the orbiter and geometry library (~238 MB).
-  Install with `git lfs install` before cloning. If you already cloned without LFS, run
-  `git lfs pull` to fetch the kernel files.
+  Install with `brew install git-lfs` or by downloading the installer from [git-lfs.com](https://git-lfs.com/). 
+  Then run the command `git lfs install` before cloning this repo. If you already cloned without LFS, run `git lfs pull` to fetch the kernel files.
 - **GitHub credentials** for Aerie Maven packages:
   ```bash
   export GITHUB_USER=your-username
