@@ -1,18 +1,18 @@
 dependencies {
   // Procedural libraries (for test simulation utilities)
-  annotationProcessor "gov.nasa.ammos.aerie.procedural:processor:${aerieVersion}"
-  implementation "gov.nasa.ammos.aerie.procedural:scheduling:${aerieVersion}"
-  implementation "gov.nasa.ammos.aerie.procedural:timeline:${aerieVersion}"
-  implementation "gov.nasa.ammos.aerie.procedural:constraints:${aerieVersion}"
+  annotationProcessor "gov.nasa.ammos.plandev.procedural:processor:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev.procedural:scheduling:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev.procedural:timeline:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev.procedural:constraints:${plandevVersion}"
 
-  implementation "gov.nasa.jpl.aerie:merlin-driver:${aerieVersion}"
-  implementation "gov.nasa.jpl.aerie:parsing-utilities:${aerieVersion}"
-  implementation "gov.nasa.jpl.aerie:type-utils:${aerieVersion}"
+  implementation "gov.nasa.ammos.plandev:merlin-driver:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev:parsing-utilities:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev:type-utils:${plandevVersion}"
 
   // Stateless simulation utilities
-  implementation "gov.nasa.ammos.aerie.procedural:utils:${aerieVersion}"
-  implementation "gov.nasa.jpl.aerie:orchestration-utils:${aerieVersion}"
-  implementation "gov.nasa.jpl.aerie:permissions:${aerieVersion}"
+  implementation "gov.nasa.ammos.plandev.procedural:utils:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev:orchestration-utils:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev:permissions:${plandevVersion}"
 
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

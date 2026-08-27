@@ -1,14 +1,14 @@
 dependencies {
   // Procedural scheduling
-  annotationProcessor "gov.nasa.ammos.aerie.procedural:processor:${aerieVersion}"
-  implementation "gov.nasa.ammos.aerie.procedural:scheduling:${aerieVersion}"
-  implementation "gov.nasa.ammos.aerie.procedural:timeline:${aerieVersion}"
-  implementation "gov.nasa.ammos.aerie.procedural:constraints:${aerieVersion}"
+  annotationProcessor "gov.nasa.ammos.plandev.procedural:processor:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev.procedural:scheduling:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev.procedural:timeline:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev.procedural:constraints:${plandevVersion}"
 
   // Required for Duration, SerializedValue in scheduling goals
-  implementation "gov.nasa.jpl.aerie:merlin-framework:${aerieVersion}"
-  implementation "gov.nasa.jpl.aerie:contrib:${aerieVersion}"
-  implementation "gov.nasa.jpl.aerie:type-utils:${aerieVersion}"
+  implementation "gov.nasa.ammos.plandev:merlin-framework:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev:contrib:${plandevVersion}"
+  implementation "gov.nasa.ammos.plandev:type-utils:${plandevVersion}"
 }
 
 jar {

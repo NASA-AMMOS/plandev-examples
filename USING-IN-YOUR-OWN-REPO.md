@@ -56,18 +56,18 @@ include 'mission'
 
 ## 4. Root `build.gradle`
 
-This carries the shared Aerie dependencies for every Java subproject (Aerie **4.1.1** here —
+This carries the shared Aerie dependencies for every Java subproject (Aerie **4.4.0** here —
 match whatever Aerie version your instance runs):
 
 ```gradle
-ext.aerieVersion = '4.1.1'
+ext.plandevVersion = '4.4.0'
 
 allprojects {
   repositories {
     mavenCentral()
     maven {
       name = "GitHubPackages"
-      url  = "https://maven.pkg.github.com/nasa-ammos/aerie"
+      url  = "https://maven.pkg.github.com/nasa-ammos/plandev"
       credentials {
         username = System.getenv('GITHUB_USER')
         password = System.getenv('GITHUB_TOKEN')   // needs read:packages scope
@@ -83,13 +83,13 @@ subprojects {
   java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
   dependencies {
-    annotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${aerieVersion}"
-    implementation      "gov.nasa.jpl.aerie:contrib:${aerieVersion}"
-    implementation      "gov.nasa.jpl.aerie:merlin-framework:${aerieVersion}"
-    implementation      "gov.nasa.jpl.aerie:merlin-sdk:${aerieVersion}"
-    compileOnly         "gov.nasa.jpl.aerie:merlin-driver:${aerieVersion}"
+    annotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${plandevVersion}"
+    implementation      "gov.nasa.jpl.aerie:contrib:${plandevVersion}"
+    implementation      "gov.nasa.jpl.aerie:merlin-framework:${plandevVersion}"
+    implementation      "gov.nasa.jpl.aerie:merlin-sdk:${plandevVersion}"
+    compileOnly         "gov.nasa.jpl.aerie:merlin-driver:${plandevVersion}"
 
-    testImplementation  "gov.nasa.jpl.aerie:merlin-framework-junit:${aerieVersion}"
+    testImplementation  "gov.nasa.jpl.aerie:merlin-framework-junit:${plandevVersion}"
     testImplementation  'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly     'org.junit.platform:junit-platform-launcher'
   }
