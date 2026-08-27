@@ -19,7 +19,7 @@ A simple spacecraft with a Solid State Recorder (SSR) that:
 ## Building
 
 ```bash
-./gradlew :00-tutorial:build
+./gradlew :examples:00-tutorial:build
 ```
 
 ## Source
