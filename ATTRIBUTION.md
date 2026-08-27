@@ -1,6 +1,6 @@
 # Attribution
 
-This repository consolidates content from several NASA-AMMOS Aerie repositories. The table below records the upstream source each top-level directory was **initially derived from**. Once content lands here it continues to evolve independently — this file documents provenance, not current parity.
+This repository consolidates content from several NASA-AMMOS PlanDev repositories. The table below records the upstream source each top-level directory was **initially derived from**. Once content lands here it continues to evolve independently — this file documents provenance, not current parity.
 
 All upstream repos referenced are at https://github.com/NASA-AMMOS.
 
@@ -23,8 +23,8 @@ All upstream repos referenced are at https://github.com/NASA-AMMOS.
 | [`examples/08-activity-patterns/`](examples/08-activity-patterns/)                  | *(new in this repo)* | Common activity idioms (state machines, loops, conditional logic, …). |
 | [`examples/09-testing-patterns/`](examples/09-testing-patterns/)                    | *(new in this repo)* | Model testing recipes. |
 | [`examples/10-external-events/`](examples/10-external-events/)                      | *(new in this repo)* | External events + scheduling integration. |
-| [`examples/actions/`](examples/actions/)                                            | [`aerie-action-examples`](https://github.com/NASA-AMMOS/aerie-action-examples) | Node.js Aerie actions (`ascii-art`, `basic`, `fresh`). |
-| [`examples/ui-plugins/`](examples/ui-plugins/)                                      | [`aerie-ui-plugin-examples`](https://github.com/NASA-AMMOS/aerie-ui-plugin-examples) | Aerie UI plugin examples (TypeScript). |
+| [`examples/actions/`](examples/actions/)                                            | [`aerie-action-examples`](https://github.com/NASA-AMMOS/aerie-action-examples) | Node.js PlanDev actions (`ascii-art`, `basic`, `fresh`). |
+| [`examples/ui-plugins/`](examples/ui-plugins/)                                      | [`aerie-ui-plugin-examples`](https://github.com/NASA-AMMOS/aerie-ui-plugin-examples) | PlanDev UI plugin examples (TypeScript). |
 | [`archive/lander/`](archive/lander/)                                                | [`aerie-lander`](https://github.com/NASA-AMMOS/aerie-lander) | Unmaintained legacy InSight-derived reference. Kept for posterity only. |
 | [`tools/pel_java_generator.py`](tools/pel_java_generator.py)                        | [`aerie-simple-model-power`](https://github.com/NASA-AMMOS/aerie-simple-model-power) | Originally at `python/pel_generator.py` in the source repo. |
 

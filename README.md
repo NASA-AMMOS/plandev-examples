@@ -1,13 +1,16 @@
+**ALPHA RELEASE** - This repository is a work-in-progress and may significantly change before final public release
+with PlanDev v4.4.0
+
 # plandev-examples
 
 Progressive **mission-modeling examples** and reusable subsystem building blocks for
-[NASA-AMMOS Aerie](https://github.com/NASA-AMMOS/aerie).
+[NASA-AMMOS PlanDev & SeqDev](https://github.com/NASA-AMMOS/plandev).
 
-Learn to build Aerie mission models by working through a graded series of examples — from a
+Learn to build PlanDev mission models by working through a graded series of examples — from a
 simple data recorder, through a lunar hopper, up to a full Mars orbiter — reusing shared
 subsystem building blocks (power, data, geometry) along the way.
 
-> **New to Aerie mission modeling?** Read the concept docs first, then follow the learning
+> **New to PlanDev mission modeling?** Read the concept docs first, then follow the learning
 > path below — the examples are the runnable companions to the docs. See
 > [Concepts & docs](#concepts--docs).
 
@@ -24,7 +27,7 @@ subsystem building blocks (power, data, geometry) along the way.
 - **Git LFS** for SPICE kernel files used by the orbiter and geometry library (~238 MB).
   Install with `brew install git-lfs` or by downloading the installer from [git-lfs.com](https://git-lfs.com/). 
   Then run the command `git lfs install` before cloning this repo. If you already cloned without LFS, run `git lfs pull` to fetch the kernel files.
-- **GitHub credentials** for Aerie Maven packages:
+- **GitHub credentials** for PlanDev Maven packages:
   ```bash
   export GITHUB_USER=your-username
   export GITHUB_TOKEN=ghp_your-token  # needs read:packages scope
@@ -64,17 +67,17 @@ at the tutorial.
 the realistic, full-complexity model that shows what those blocks look like at scale plus
 mission-specific additions (radar, an equipment-level PEL, SPICE-driven orbital events).
 
-## Other Aerie surfaces (not the modeling path)
+## Other PlanDev surfaces (not the modeling path)
 
 Two example sets in this repo are **not** part of the mission-modeling learning path above.
-They demonstrate different parts of Aerie and use a different language/toolchain (TypeScript,
+They demonstrate different parts of PlanDev and use a different language/toolchain (TypeScript,
 not Java). You don't need them to learn mission modeling — explore them once you're
 comfortable with the core workflow.
 
 | Directory | What it is | Language |
 |-----------|-----------|----------|
 | `examples/actions/` | **Actions** — server-side automation that runs against a plan (validation, calling external services) *after* a model exists | TypeScript / Node |
-| `examples/ui-plugins/` | **UI plugins** — Aerie web-UI customizations (e.g. showing Mars LMST or a fixed timezone on the timeline) | TypeScript / JS |
+| `examples/ui-plugins/` | **UI plugins** — PlanDev web-UI customizations (e.g. showing Mars LMST or a fixed timezone on the timeline) | TypeScript / JS |
 
 ## Repository Structure
 
@@ -93,7 +96,7 @@ plandev-examples/
 │   ├── 09-testing-patterns/
 │   ├── 10-external-events/
 │   ├── actions/                    # Other surface: server-side automation (TypeScript)
-│   └── ui-plugins/                 # Other surface: Aerie UI customizations (TypeScript)
+│   └── ui-plugins/                 # Other surface: PlanDev UI customizations (TypeScript)
 ├── libraries/                      # Reusable subsystem building blocks (Gradle subprojects)
 │   ├── power/                      # Power, battery, solar array, RTG
 │   ├── data/                       # Prioritized storage bins, downlink, deletion
@@ -138,7 +141,7 @@ Each subproject builds independently:
 ./gradlew test
 ```
 
-Each example produces a standalone JAR that can be uploaded directly to an Aerie instance.
+Each example produces a standalone JAR that can be uploaded directly to a PlanDev instance.
 
 ## Using these in your own mission
 
@@ -171,19 +174,19 @@ To take an example out of this repo and stand it up on its own, see
 
 ## Concepts & docs
 
-This repo is **runnable code, not a textbook.** For how Aerie mission models work — the
+This repo is **runnable code, not a textbook.** For how PlanDev mission models work — the
 `@MissionModel` class, activities, resource types, constraints, and scheduling goals — see the
-Aerie / PlanDev documentation; the examples here are the worked companions to it:
+PlanDev documentation; the examples here are the worked companions to it:
 
 - Mission modeling tutorial, resources, and activities
 - Constraints (procedural + declarative) and scheduling goals
 - Uploading a model and running a simulation
 
-Docs: <https://nasa-ammos.github.io/aerie-docs/>
+Docs: <https://nasa-ammos.github.io/plandev-docs/>
 
-## Aerie Version
+## PlanDev Version
 
-All projects target **Aerie v4.1.1** (`merlin-framework`, `merlin-sdk`, `contrib`).
+All projects target **PlanDev v4.4.0**.
 
 ## Contributing
 
