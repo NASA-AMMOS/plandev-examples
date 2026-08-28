@@ -7,7 +7,7 @@ The streamline library defines **five dynamics types** — `discrete`, `polynomi
 `linear`, `clocks`, and `black_box`. This example exercises four of them (plus *derived*
 resources, which are a way of building resources rather than a dynamics type). The fifth,
 `black_box`, is out of scope here — see
-[libraries/power `RtgPowerProduction`](../../libraries/power/src/main/java/gov/nasa/jpl/aerie/power/RtgPowerProduction.java)
+[libraries/power `RtgPowerProduction`](../../libraries/power/src/main/java/gov/nasa/ammos/plandev/power/RtgPowerProduction.java)
 for a `black_box` (`Approximation`) example.
 
 ## Resource types demonstrated

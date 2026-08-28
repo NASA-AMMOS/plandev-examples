@@ -37,7 +37,7 @@ plandev-examples/
 
 - **Gradle multi-project build** with Java 21
 - Root `settings.gradle` includes all subprojects
-- Root `build.gradle` defines shared PlanDev dependencies (merlin-framework, merlin-sdk, contrib v4.1.1)
+- Root `build.gradle` defines shared PlanDev dependencies (merlin-framework, merlin-sdk, contrib v4.4.0)
 - Libraries publish as Maven artifacts; examples depend on libraries via `implementation project(':libraries:power')`
 - Each example produces a standalone JAR uploadable to PlanDev
 
@@ -53,7 +53,7 @@ All packages follow `gov.nasa.ammos.plandev.<subsystem>` for libraries, `example
 | GNC | `gov.nasa.ammos.plandev.gnc` |
 | Telecom | `gov.nasa.ammos.plandev.telecom` |
 
-**Do NOT use the old package names** (`demosystem`, `generic`, `missionmodel`, `gov.nasa.ammos.plandev_data`, `gov.nasa.ammos.aerie.simplemodels.*`).
+**Do NOT use the old package names** (`demosystem`, `generic`, `missionmodel`, `gov.nasa.jpl.aerie_data`, `gov.nasa.ammos.aerie.simplemodels.*`).
 
 ## Migration Rules
 

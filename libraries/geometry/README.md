@@ -44,7 +44,7 @@ To point the model at the right spacecraft, set its NAIF ID — for the orbiter 
 
 ## SPICE kernels
 
-Kernels are not bundled inside this library. The library reads them from `SPICE_DIRECTORY` (env var) or falls back to a relative `spice-kernels` path — see [SpiceConstants.java](src/main/java/gov/nasa/jpl/aerie/geometry/spice/SpiceConstants.java).
+Kernels are not bundled inside this library. The library reads them from `SPICE_DIRECTORY` (env var) or falls back to a relative `spice-kernels` path — see [SpiceConstants.java](src/main/java/gov/nasa/ammos/plandev/geometry/spice/SpiceConstants.java).
 
 In this repo, the canonical kernel location is the top-level shared [spice-kernels/](../../spice-kernels/) directory (an 8-kernel set covering MRO, Mars, Earth, and Sun, ~238 MB total). When deploying to PlanDev, mount that directory into the merlin/scheduler workers and set `SPICE_DIRECTORY` accordingly — see [examples/05-orbiter/README.md](../../examples/05-orbiter/README.md).
 
@@ -75,8 +75,8 @@ See [examples/05-orbiter/src/main/java/examples/orbiter/Mission.java](../../exam
 
 `libraries/geometry/src/test/java/` covers the **direct SPICE layer**:
 
-- [SpiceDirectTimeDependentStateCalculatorTest](src/test/java/gov/nasa/jpl/aerie/geometry/SpiceDirectTimeDependentStateCalculatorTest.java) — 14 sub-tests, MATLAB reference values for state / range / speed / altitude / Sun-Earth-spacecraft angles / sub-point / illumination / beta / half-angle / RA-Dec / LST.
-- [SpiceDirectEventGeneratorTest](src/test/java/gov/nasa/jpl/aerie/geometry/SpiceDirectEventGeneratorTest.java) — occultations, periapses, apoapses, conjunctions against MATLAB reference.
+- [SpiceDirectTimeDependentStateCalculatorTest](src/test/java/gov/nasa/ammos/plandev/geometry/SpiceDirectTimeDependentStateCalculatorTest.java) — 14 sub-tests, MATLAB reference values for state / range / speed / altitude / Sun-Earth-spacecraft angles / sub-point / illumination / beta / half-angle / RA-Dec / LST.
+- [SpiceDirectEventGeneratorTest](src/test/java/gov/nasa/ammos/plandev/geometry/SpiceDirectEventGeneratorTest.java) — occultations, periapses, apoapses, conjunctions against MATLAB reference.
 
 **TODO — resource layer + spawner activities are not yet covered here.** The upstream `aerie-multimission-models-bb` had three more tests that depend on a `Mission` class with `default_geometry_config.json` and a full `@MissionModel` package-info:
 

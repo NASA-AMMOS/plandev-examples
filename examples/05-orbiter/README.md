@@ -46,7 +46,7 @@ The kernels are already in place — just build and the model will find them.
 When uploading the JAR to PlanDev, the SPICE kernels must be volume-mounted into the merlin worker container:
 
 ```yaml
-# In your docker-compose.yml, add to the aerie_merlin service:
+# In your docker-compose.yml, add to the plandev_merlin service:
 volumes:
   - ./spice-kernels:/spice/kernels
 environment:

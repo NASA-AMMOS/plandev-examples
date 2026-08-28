@@ -22,7 +22,7 @@ All kernel files are tracked via Git LFS (`*.bsp`, `*.tls`, `*.tpc`, `*.tf`, `*.
 
 ## Usage
 
-Code that needs these kernels reads `SPICE_DIRECTORY` (env var) or falls back to `spice-kernels` relative to the JVM working directory. Both [libraries/geometry/.../SpiceConstants.java](../libraries/geometry/src/main/java/gov/nasa/jpl/aerie/geometry/spice/SpiceConstants.java) and [examples/05-orbiter/.../Mission.java](../examples/05-orbiter/src/main/java/examples/orbiter/Mission.java) follow this convention.
+Code that needs these kernels reads `SPICE_DIRECTORY` (env var) or falls back to `spice-kernels` relative to the JVM working directory. Both [libraries/geometry/.../SpiceConstants.java](../libraries/geometry/src/main/java/gov/nasa/ammos/plandev/geometry/spice/SpiceConstants.java) and [examples/05-orbiter/.../Mission.java](../examples/05-orbiter/src/main/java/examples/orbiter/Mission.java) follow this convention.
 
 ## Copy-pasting libraries/geometry/ out of this repo
 

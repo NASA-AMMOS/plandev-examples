@@ -56,7 +56,7 @@ Rotation and vector math relies on Apache `commons-math3` (already a transitive 
 
 ## Status
 
-Marked **in work** in the upstream [aerie-multimission-models-bb](https://github.com/NASA-AMMOS/aerie-multimission-models-bb) README. Treat the more exotic target/observer combinations as a starting point — well-trodden cases (body-center pointing, single primary target) are solid; the long tail is less exercised. Tests cover the rotation and pointing-angle core (see [GncTest.java](src/test/java/gov/nasa/jpl/aerie/gnc/GncTest.java)).
+Marked **in work** in the upstream [aerie-multimission-models-bb](https://github.com/NASA-AMMOS/aerie-multimission-models-bb) README. Treat the more exotic target/observer combinations as a starting point — well-trodden cases (body-center pointing, single primary target) are solid; the long tail is less exercised. Tests cover the rotation and pointing-angle core (see [GncTest.java](src/test/java/gov/nasa/ammos/plandev/gnc/GncTest.java)).
 
 ## Source
 
