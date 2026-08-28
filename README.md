@@ -186,7 +186,7 @@ Docs: <https://nasa-ammos.github.io/plandev-docs/>
 
 ## PlanDev Version
 
-All projects target **PlanDev v4.4.0**.
+All projects currently target a development snapshot of the upcoming PlanDev v4.4.0 release. The exact version is configured in the root `build.gradle` and will be changed to `4.4.0` when the release packages are published.
 
 ## Contributing
 
