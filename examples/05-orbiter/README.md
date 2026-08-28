@@ -37,23 +37,41 @@ The kernel directory is configurable via the `SPICE_DIRECTORY` environment varia
 
 > **Valid plan window: 2024-01-01 → 2024-05-06.** The MRO spacecraft ephemeris kernel (`mro_psp.bsp`, body `-74`) only covers this ~4-month interval; every other kernel spans decades, so this one is the limiting factor. Plans must stay inside this window — simulating outside it makes SPICE geometry lookups fail with insufficient-ephemeris errors. This is why the demo plans all start at `2024-01-02`. To plan in a different period, swap `mro_psp.bsp` for an MRO SPK covering your target dates (from the [NAIF MRO archive](https://naif.jpl.nasa.gov/pub/naif/pds/data/mro-m-spice-6-v1.0/mrosp_1000/data/spk/)), or point `spiceSpacecraftId` at a different spacecraft with its own SPK.
 
-### Running locally
+### Running local build & tests
 
-The kernels are already in place — just build and the model will find them.
+Download the SPICE kernels through Git LFS, then build from the repository root:
+
+```bash
+git lfs pull
+./gradlew build
+```
+
+The geometry test task automatically sets SPICE_DIRECTORY to the repository’s spice-kernels directory.
 
 ### Deploying to PlanDev (Docker)
 
-When uploading the JAR to PlanDev, the SPICE kernels must be volume-mounted into the merlin worker container:
+PlanDev simulations execute inside Merlin workers. Scheduler workers also execute simulations when running 
+scheduling goals, so every Merlin and Scheduler worker replica must have access to the kernels.
 
-```yaml
-# In your docker-compose.yml, add to the plandev_merlin service:
-volumes:
-  - ./spice-kernels:/spice/kernels
-environment:
-  SPICE_DIRECTORY: /spice/kernels
+Set SPICE_KERNELS_PATH in your PlanDev deployment's .env file to the absolute path of **this repository’s** 
+kernel directory:
+
+```bash
+SPICE_KERNELS_PATH=/absolute/path/to/plandev-examples/spice-kernels
 ```
 
-Or point `SPICE_DIRECTORY` at wherever you mount the kernels.
+Then add the following entries to every `plandev_merlin_worker_*` and `plandev_scheduler_worker_*` service in your 
+`docker-compose` file:
+
+```
+environment:
+  SPICE_DIRECTORY:/spice/kernels
+volumes:
+  - ${SPICE_KERNELS_PATH}:/spice/kernels:ro
+```
+
+Use an absolute path because relative bind-mount paths are resolved from the PlanDev Compose project, not this 
+repository. After updating the Compose file, recreate the affected workers with `docker compose up -d`.
 
 ## Scheduling goals
 
