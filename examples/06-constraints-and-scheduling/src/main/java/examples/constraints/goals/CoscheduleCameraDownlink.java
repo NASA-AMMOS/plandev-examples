@@ -33,7 +33,11 @@ public record CoscheduleCameraDownlink(Duration delayAfterPicture) implements Go
 
     for (var picture : pictures) {
       // Estimate picture end time (start + durationSeconds parameter)
-      var pictureDuration = Duration.of(60, Duration.SECONDS); // default
+      var durationArgument = picture.inner.arguments.get("durationSeconds");
+      var durationSeconds = durationArgument == null
+              ? 60L
+              : durationArgument.asInt().orElse(60L);
+      var pictureDuration = Duration.of(durationSeconds, Duration.SECONDS);
       var pictureEnd = picture.getStartTime().plus(pictureDuration);
       var downlinkStart = pictureEnd.plus(delayAfterPicture);
 

@@ -10,9 +10,8 @@ import gov.nasa.ammos.plandev.procedural.timeline.plan.SimulationResults;
 /**
  * Constraint: Power generation must meet demand.
  *
- * Flags violations when battery net current (generation - consumption)
- * is negative for extended periods, indicating the spacecraft is
- * drawing down the battery faster than it can recharge.
+ * Flags violations when periods when power demand
+ * exceeds generation, causing the battery to discharge.
  */
 @ConstraintProcedure
 public record PowerBalance() implements Constraint {
