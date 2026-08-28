@@ -1,5 +1,5 @@
 {
-  "name": "aerie-ascii-art-action",
+  "name": "plandev-ascii-art-action",
   "version": "1.0.0",
   "main": "index.ts",
   "type": "module",
