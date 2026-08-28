@@ -21,7 +21,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Demonstrates how to set up simulation-based tests for Aerie mission models.
+ * Demonstrates how to set up simulation-based tests for PlanDev mission models.
  *
  * Pattern:
  * 1. Create a SimulationUtility and instantiate the mission model.

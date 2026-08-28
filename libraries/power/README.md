@@ -29,7 +29,7 @@ dependencies {
 Then instantiate the power components in your Mission class:
 
 ```java
-import gov.nasa.jpl.aerie.power.*;
+import gov.nasa.ammos.plandev.power.*;
 
 // Create a solar array power source
 PowerSource powerSource = new GenericSolarArray(

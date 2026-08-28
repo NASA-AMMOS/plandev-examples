@@ -20,7 +20,7 @@ To point the model at the right spacecraft, set its NAIF ID — for the orbiter 
 
 ## Package
 
-`gov.nasa.jpl.aerie.geometry`
+`gov.nasa.ammos.plandev.geometry`
 
 ## Key classes
 
@@ -59,8 +59,8 @@ dependencies {
 Configure your bodies and instantiate the calculator from your `Mission` class:
 
 ```java
-import gov.nasa.jpl.aerie.geometry.spiceinterpolation.*;
-import gov.nasa.jpl.aerie.geometry.resources.GenericGeometryResources;
+import gov.nasa.ammos.plandev.geometry.spiceinterpolation.*;
+import gov.nasa.ammos.plandev.geometry.resources.GenericGeometryResources;
 
 Bodies bodies = new Bodies(Mission.class);
 GenericGeometryResources geometryResources = new GenericGeometryResources(bodies);
@@ -84,7 +84,7 @@ See [examples/05-orbiter/src/main/java/examples/orbiter/Mission.java](../../exam
 2. `GenericGeometryCalculatorTest` — PlanDev resource values match direct SPICE calls within ±0.01°.
 3. `GeometrySpawnersTest` — spawner activities (`AddSpacecraftEclipses`, `AddOccultations`, `AddPeriapsis`, `AddApoapsis`) produce the right event counts over a sim window.
 
-To port these, build a minimal test mission model inside `libraries/geometry/src/test/java/.../testmodel/`: a `TestMission`, `TestConfiguration`, `package-info.java` with `@MissionModel` + the ~10 activity registrations, plus `default_geometry_config.json` copied from [examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json](../../examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json) into `src/test/resources/`. Enable `testAnnotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${aerieVersion}"` in `build.gradle`. ~150–200 lines of scaffold; same shape as the upstream tests.
+To port these, build a minimal test mission model inside `libraries/geometry/src/test/java/.../testmodel/`: a `TestMission`, `TestConfiguration`, `package-info.java` with `@MissionModel` + the ~10 activity registrations, plus `default_geometry_config.json` copied from [examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json](../../examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json) into `src/test/resources/`. Enable `testAnnotationProcessor "gov.nasa.ammos.plandev:merlin-framework-processor:${plandevVersion}"` in `build.gradle`. ~150–200 lines of scaffold; same shape as the upstream tests.
 
 ## Building
 

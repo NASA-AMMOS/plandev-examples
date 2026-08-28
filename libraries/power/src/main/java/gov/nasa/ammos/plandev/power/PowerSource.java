@@ -16,8 +16,8 @@ public abstract class PowerSource {
     }
 
     /**
-     * Method for Aerie to register the resources in this model
-     * @param registrar how Aerie knows what the resources are
+     * Method for PlanDev to register the resources in this model
+     * @param registrar how PlanDev knows what the resources are
      */
     public abstract void registerStates( Registrar registrar);
 

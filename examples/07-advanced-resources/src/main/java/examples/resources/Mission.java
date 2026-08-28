@@ -119,7 +119,7 @@ public class Mission {
         // Derived boolean: battery low when SOC < 20%
         this.batteryLow = PolynomialResources.lessThan(this.batterySOC, 20.0);
 
-        // ========== Register all resources for the Aerie UI ==========
+        // ========== Register all resources for the PlanDev UI ==========
         registerResources(errorRegistrar, config);
     }
 

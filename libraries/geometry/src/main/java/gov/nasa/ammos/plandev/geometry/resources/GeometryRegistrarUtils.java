@@ -11,7 +11,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.monads.DiscreteResourceMonad.map;
 
 /**
- * Utility methods for registering Vector3D and Rotation resources with an Aerie Registrar.
+ * Utility methods for registering Vector3D and Rotation resources with an PlanDev Registrar.
  * Extracted from the original GenericGeometryResources class for reuse by GNC and other subsystems.
  */
 public class GeometryRegistrarUtils {

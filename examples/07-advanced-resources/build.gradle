@@ -5,7 +5,7 @@ dependencies {
   implementation 'gov.nasa.ammos.plandev:merlin-driver:' + plandevVersion
 }
 
-// Fat JAR for uploading to Aerie
+// Fat JAR for uploading to PlanDev
 jar {
   dependsOn configurations.runtimeClasspath
   from {

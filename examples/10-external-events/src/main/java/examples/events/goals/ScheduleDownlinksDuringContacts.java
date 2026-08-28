@@ -20,7 +20,7 @@ import java.util.Map;
  * whether a Downlink already exists within one hour of each contact.
  *
  * Usage:
- * 1. Upload DSN contact events as an external event source in Aerie
+ * 1. Upload DSN contact events as an external event source in PlanDev
  *    (event type: "DSNContact")
  * 2. Run this scheduling goal -- it will create Downlink activities
  *    aligned to the contact windows

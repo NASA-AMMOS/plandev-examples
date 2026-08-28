@@ -14,7 +14,7 @@ GNC composes with the geometry library: pointing computations need spacecraft an
 
 ## Package
 
-`gov.nasa.jpl.aerie.gnc`
+`gov.nasa.ammos.plandev.gnc`
 
 ## Key classes
 
@@ -38,8 +38,8 @@ dependencies {
 In your `Mission` class:
 
 ```java
-import gov.nasa.jpl.aerie.gnc.GncDataModel;
-import gov.nasa.jpl.aerie.gnc.primary.BodyCenterPrimaryTarget;
+import gov.nasa.ammos.plandev.gnc.GncDataModel;
+import gov.nasa.ammos.plandev.gnc.primary.BodyCenterPrimaryTarget;
 
 GncDataModel gnc = new GncDataModel();
 gnc.registerStates(registrar);

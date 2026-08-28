@@ -15,7 +15,7 @@ dependencies {
   implementation 'org.apache.commons:commons-math3:+'
 }
 
-// Include library sources so the Aerie annotation processor can generate value mappers for the
+// Include library sources so the PlanDev annotation processor can generate value mappers for the
 // @AutoValueMapper.Record types and activity types defined in the libraries (same pattern as
 // examples/04-hopper). The orbiter composes these directly rather than carrying its own copies.
 sourceSets {
@@ -27,7 +27,7 @@ sourceSets {
   }
 }
 
-// Fat JAR for uploading to Aerie
+// Fat JAR for uploading to PlanDev
 jar {
   dependsOn configurations.runtimeClasspath
   from {

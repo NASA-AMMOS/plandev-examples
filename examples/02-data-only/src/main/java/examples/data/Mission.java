@@ -12,7 +12,7 @@ import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discre
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.*;
 
 /**
- * Mission is the Aerie mission model that is instantiated at the start of simulation.  This is where
+ * Mission is the PlanDev mission model that is instantiated at the start of simulation.  This is where
  * resources are created and registered to be included in the simulation results.
  * <p/>
  * The DataMissionModel interface enables activities to access the Data object with the bins and resources.

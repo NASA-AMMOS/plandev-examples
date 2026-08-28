@@ -26,12 +26,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * which referenced {@code volume_ub[i-1]} twice. Because streamline derived resources are not
  * memoized across references, evaluating the deepest bin's dynamics fanned out as
  * {@code O(2^binCount)} — so simply <em>constructing</em> this model (which samples rate
- * dynamics in {@code finishInit}) pegged a CPU for minutes and hung Aerie model instantiation
+ * dynamics in {@code finishInit}) pegged a CPU for minutes and hung PlanDev model instantiation
  * (resource-type extraction). With each bin bounded directly by the shared parent capacity the
  * graph is {@code O(n)}, so construction below returns effectively instantly.
  *
  * <p>If the cascade is ever reintroduced without caching, this test will hang rather than
- * complete — surfacing the regression instead of letting it reach Aerie.
+ * complete — surfacing the regression instead of letting it reach PlanDev.
  */
 @ExtendWith(MerlinExtension.class)
 @TestInstance(Lifecycle.PER_CLASS)

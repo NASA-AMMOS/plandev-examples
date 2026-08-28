@@ -1,7 +1,7 @@
 {
   "name": "aerie-action-examples",
   "version": "0.1.0",
-  "description": "Reference examples for developing Aerie Actions",
+  "description": "Reference examples for developing PlanDev Actions",
   "main": "index.js",
   "workspaces": [
     "*-action"
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NASA-AMMOS/aerie-action-template.git"
+    "url": "git+https://github.com/NASA-AMMOS/aerie-action-examples.git"
   },
   "keywords": ["aerie"],
   "contributors": [
@@ -20,8 +20,8 @@
     "Cody Hansen <cody.m.hansen@jpl.nasa.gov>"
   ],
   "license": "MIT",
-  "bugs": "https://github.com/NASA-AMMOS/aerie/issues",
-  "homepage": "https://github.com/NASA-AMMOS/aerie-action-template#readme",
+  "bugs": "https://github.com/NASA-AMMOS/plandev/issues",
+  "homepage": "https://github.com/NASA-AMMOS/aerie-action-examples#readme",
   "engines": {
     "node": ">=18"
   }

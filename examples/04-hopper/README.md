@@ -68,6 +68,6 @@ turns the bin's receive rate on, accumulates data for the duration, then turns i
 ```
 
 The model composes `libraries/power` and `libraries/data` — it imports their classes directly
-(`gov.nasa.jpl.aerie.power.*`, `gov.nasa.jpl.aerie.data.*`) and adds the hopper-specific
+(`gov.nasa.ammos.plandev.power.*`, `gov.nasa.ammos.plandev.data.*`) and adds the hopper-specific
 `SimplePEL` and activities on top. This is the pattern to copy for your own model; see
 [USING-IN-YOUR-OWN-REPO.md](../../USING-IN-YOUR-OWN-REPO.md).

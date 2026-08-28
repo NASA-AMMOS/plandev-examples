@@ -152,7 +152,7 @@ public class Data {
   }
 
   /**
-   * Register bin and other resources with Aerie to record them in the simulation results and see them in the UI.
+   * Register bin and other resources with PlanDev to record them in the simulation results and see them in the UI.
    * @param registrar the built-in Registrar object used to register resources
    */
   public void registerStates(Registrar registrar) {

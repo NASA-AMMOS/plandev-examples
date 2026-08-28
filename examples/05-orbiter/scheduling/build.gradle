@@ -21,7 +21,7 @@ dependencies {
   implementation "gov.nasa.ammos.plandev.procedural:timeline:${plandevVersion}"
   implementation "gov.nasa.ammos.plandev.procedural:constraints:${plandevVersion}"
 
-  // Standard Aerie deps
+  // Standard PlanDev deps
   implementation "gov.nasa.ammos.plandev:merlin-framework:${plandevVersion}"
   implementation "gov.nasa.ammos.plandev:contrib:${plandevVersion}"
   implementation "gov.nasa.ammos.plandev:type-utils:${plandevVersion}"

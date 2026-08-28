@@ -16,7 +16,7 @@ dependencies {
   testImplementation 'com.google.guava:guava-testlib:29.0-jre'
 }
 
-// Include library sources so the Aerie annotation processor can generate value mappers
+// Include library sources so the PlanDev annotation processor can generate value mappers
 // for @AutoValueMapper.Record types defined in the library
 sourceSets {
   main {
@@ -26,7 +26,7 @@ sourceSets {
   }
 }
 
-// Fat JAR for uploading to Aerie
+// Fat JAR for uploading to PlanDev
 jar {
   dependsOn configurations.runtimeClasspath
   from {

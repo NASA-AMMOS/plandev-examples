@@ -143,7 +143,7 @@ public class BatteryModel {
 //    }
 
     /**
-     * Method for Aerie to register the resources in this model so they can be viewed in the UI
+     * Method for PlanDev to register the resources in this model so they can be viewed in the UI
      * @param registrar common object for which to register resources across models
      */
     public void registerStates(Registrar registrar) {

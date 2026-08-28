@@ -1,6 +1,6 @@
 // Standalone patterns example - no library dependencies
 
-// Fat JAR for uploading to Aerie
+// Fat JAR for uploading to PlanDev
 jar {
   dependsOn configurations.runtimeClasspath
   from {

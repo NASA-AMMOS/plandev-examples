@@ -15,7 +15,7 @@ Downlink rate is allocated across bins in priority order (the highest-priority n
 
 ## Package
 
-`gov.nasa.jpl.aerie.data`
+`gov.nasa.ammos.plandev.data`
 
 ## Key classes
 
@@ -62,7 +62,7 @@ The activities carry PlanDev metadata annotations:
   activities your `@MissionModel` package-info must declare the metadata annotation**, or
   value-mapper generation fails:
   ```java
-  @WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class)
+  @WithMetadata(name = "unit", annotation = gov.nasa.ammos.plandev.contrib.metadata.Unit.class)
   ```
   (Resource units — bucket volumes/rates — are attached at registration and need no such
   declaration.)

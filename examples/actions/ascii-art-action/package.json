@@ -11,7 +11,7 @@
   },
   "author": "Dan Delany <delany@jpl.nasa.gov>",
   "license": "MIT",
-  "description": "Example Aerie Action for generating ASCII art with figlet",
+  "description": "Example PlanDev Action for generating ASCII art with figlet",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.0",
