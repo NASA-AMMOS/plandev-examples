@@ -4,7 +4,7 @@ import {
   ActionParameters,
   ActionSettingDefinitions,
   ActionSettings,
-} from "@nasa-jpl/aerie-actions";
+} from "@nasa-jpl/plandev-actions";
 import figlet from "figlet";
 
 // register inline figlet fonts to be included in the bundle
@@ -39,8 +39,7 @@ export async function main(actionParameters: MyActionParameters, settings: MyAct
   if (!actionParameters.inputFile) {
     throw new Error("Input file is required");
   }
-  const inputSequence = await actions.readSequence(actionParameters.inputFile);
-  const inputStr = inputSequence.definition || "";
+  const inputStr = await actions.readFile(actionParameters.inputFile);
 
   console.log(`Generating art for "${inputStr}"...`);
   let artStr: string;
@@ -54,7 +53,7 @@ export async function main(actionParameters: MyActionParameters, settings: MyAct
 
   // write the ascii art string to the output file
   if (settings.writeFile) {
-    await actions.writeSequence(outFileName, artStr);
+    await actions.writeFile(outFileName, artStr);
   }
 
   return {

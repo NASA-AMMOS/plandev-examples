@@ -4,7 +4,7 @@ import type {
   ActionSettingDefinitions,
   ActionParameters,
   ActionSettings,
-} from "@nasa-jpl/aerie-actions";
+} from "@nasa-jpl/plandev-actions";
 
 // Define schemas for your action's settings and parameters
 export const parameterDefinitions = {
@@ -51,21 +51,21 @@ export async function main(parameters: MyActionParameters, settings: MyActionSet
   }
 
   // read/write files using the actions helpers
-  const files = await actionsAPI.listSequences();
+  const files = await actionsAPI.listFiles("");
   console.log(`sequence files: ${JSON.stringify(files)}`);
 
   const readFileName = "my_file";
   // note: only wrap in try/catch to handle *non-fatal errors*! Fatal errors should be thrown to properly report action run as failure
   try {
-    const myFile = await actionsAPI.readSequence(readFileName);
-    console.log(`${readFileName}: ${JSON.stringify(myFile)}`);
+    const myFile = await actionsAPI.readFile(readFileName);
+    console.log(`${readFileName}: ${myFile}`);
   } catch (e) {
     console.warn(`Could not find file named ${readFileName}`);
   }
 
   //
   const jsonStr = JSON.stringify(resultData, null, 2);
-  const writeResult = await actionsAPI.writeSequence("action-template-output", jsonStr);
+  const writeResult = await actionsAPI.writeFile("action-template-output", jsonStr);
   console.log(`writeResult: ${JSON.stringify(writeResult)}`);
 
   return {

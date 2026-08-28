@@ -1,4 +1,4 @@
-# aerie-fresh-action
+# plandev-fresh-action
 
 This is an example action that performs flight rule checking on a sequence by making requests to an external FRESH service.
 

@@ -12,16 +12,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NASA-AMMOS/plandev-action-examples.git"
+    "url": "git+https://github.com/NASA-AMMOS/plandev-examples.git"
   },
-  "keywords": ["plandev"],
+  "keywords": [
+    "plandev"
+  ],
   "contributors": [
     "Dan Delany <delany@jpl.nasa.gov>",
     "Cody Hansen <cody.m.hansen@jpl.nasa.gov>"
   ],
   "license": "MIT",
-  "bugs": "https://github.com/NASA-AMMOS/plandev/issues",
-  "homepage": "https://github.com/NASA-AMMOS/plandev-action-examples#readme",
+  "bugs": "https://github.com/NASA-AMMOS/plandev-examples/issues",
+  "homepage": "https://github.com/NASA-AMMOS/plandev-examples/tree/main/examples/actions",
   "engines": {
     "node": ">=18"
   }

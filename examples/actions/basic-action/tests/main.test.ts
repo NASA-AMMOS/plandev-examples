@@ -2,7 +2,7 @@ import { main } from "../src/index";
 
 import assert from 'node:assert';
 import { test, mock } from "node:test";
-import type {ActionsAPI, ReadSequenceResult} from "@nasa-jpl/aerie-actions";
+import type {ActionsAPI} from "@nasa-jpl/plandev-actions";
 
 // The basic-action example makes a `fetch` call to an external URL when it runs.
 // This test avoids relying on making an actual call to an external URL by "mocking"
@@ -33,25 +33,20 @@ function createMock<T extends object>(overrides: Partial<{ [K in keyof T]: T[K] 
 }
 
 // create a partial mock of the actions API, so we can test it without making real database calls
-// TODO: extract createMockActionsAPI into aerie-actions TestUtils package
+// TODO: extract createMockActionsAPI into plandev-actions TestUtils package
 const mockActionsAPI = createMock<ActionsAPI>({
-  listSequences: async () => {
-    return [];
-  },
-  readSequence: async () => {
-    console.log("called readSequence");
-    return { id: 1, definition: "test" } as ReadSequenceResult;
-  },
-  writeSequence: async () => {},
+  listFiles: async () => "[]",
+  readFile: async () => "test",
+  writeFile: async () => ({ success: true }),
 });
 
-test("aerie basic example action", async (t) => {
+test("plandev basic example action", async (t) => {
   t.mock.method(globalThis, 'fetch', mockFetch);
 
   await t.test("runs main", async () => {
     await main(
       {
-        urlPath: "repos/NASA-AMMOS/aerie",
+        urlPath: "repos/NASA-AMMOS/plandev",
         myBool: false,
         sleepMs: 0,
       },
