@@ -35,7 +35,7 @@ This example simulates a spacecraft with:
 ./gradlew :examples:01-power-only:build
 ```
 
-The fat JAR is output to `build/libs/power-example.jar` and can be uploaded directly to PlanDev.
+The JAR is output to `build/libs/power-example.jar` and can be uploaded directly to PlanDev.
 
 ## Included Files
 

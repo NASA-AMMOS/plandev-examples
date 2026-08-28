@@ -4,7 +4,8 @@ A standalone PlanDev mission model demonstrating the data management library. Mi
 
 ## What it models
 
-A spacecraft with two prioritized onboard data bins and configurable storage limits and playback data rates. The default configuration provides 10 Gb of storage and 10 Kbps playback rate.
+A spacecraft with two prioritized onboard data bins and configurable storage limits and playback data rates. 
+The default configuration provides 10 Gb of storage and 10 Kbps playback rate.
 
 ## Activities
 

@@ -31,10 +31,12 @@ Demonstrates how to compose multiple subsystem libraries into a single mission m
 ./gradlew :examples:03-power-and-data:build
 ```
 
-The fat JAR at `build/libs/power-and-data-example.jar` can be uploaded directly to PlanDev.
+The JAR at `build/libs/power-and-data-example.jar` can be uploaded directly to PlanDev.
 
 ## Key takeaway
 
-The `Mission` class composes library models by instantiating them and wiring their resources together. Activities can then interact with multiple subsystems — `TakePicture` draws power via the PEL while simultaneously writing data to the storage model. This is the pattern used by more complex examples like the orbiter.
+The `Mission` class composes library models by instantiating them and wiring their resources together. 
+Activities can then interact with multiple subsystems — `TakePicture` draws power via the PEL while 
+simultaneously writing data to the storage model. This is the pattern used by more complex examples like the orbiter.
 
 This model also serves as the base mission model for examples [06-constraints-and-scheduling](../06-constraints-and-scheduling/) and [10-external-events](../10-external-events/), which add procedural constraints and scheduling goals on top of this model without duplicating its code.

@@ -3,9 +3,9 @@
 The examples here depend on the shared building blocks in `libraries/` via Gradle
 (`implementation project(':libraries:power')`), so copying a single example directory on its
 own won't compile. This guide shows how to lift an example **plus the `libraries/*` it uses**
-into a fresh repo and stand up a build that produces an PlanDev-uploadable JAR.
+into a fresh repo and stand up a build that produces an PlanDev-uploadable mission model JAR.
 
-> The building blocks are **not published** to Maven — there are no coordinates to depend on.
+> The building blocks are **not published** to Maven.
 > You copy the source and link it as a Gradle subproject (what this repo does), exactly as
 > below.
 
