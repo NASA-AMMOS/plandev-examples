@@ -1,6 +1,6 @@
 # 08 - Activity Patterns
 
-A cookbook of common activity patterns in Aerie. Each activity demonstrates a specific idiom that modelers frequently need.
+A cookbook of common activity patterns in PlanDev. Each activity demonstrates a specific idiom that modelers frequently need.
 
 ## Patterns
 

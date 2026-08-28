@@ -1,6 +1,6 @@
 # Power Library
 
-Reusable spacecraft power subsystem models for Aerie mission models.
+Reusable spacecraft power subsystem models for PlanDev mission models.
 
 ## What It Models
 

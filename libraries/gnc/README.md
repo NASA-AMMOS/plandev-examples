@@ -1,6 +1,6 @@
 # GNC Library
 
-Reusable Guidance, Navigation, and Control (GNC) subsystem code for Aerie mission models. Provides attitude state, pointing-target abstractions, and rotation/observer machinery.
+Reusable Guidance, Navigation, and Control (GNC) subsystem code for PlanDev mission models. Provides attitude state, pointing-target abstractions, and rotation/observer machinery.
 
 ## What it models
 
@@ -46,7 +46,7 @@ gnc.registerStates(registrar);
 // Wire targets/observers to your geometry calculator's outputs.
 ```
 
-Rotation and vector math relies on Apache `commons-math3` (already a transitive dependency via Aerie's contrib library).
+Rotation and vector math relies on Apache `commons-math3` (already a transitive dependency via PlanDev's contrib library).
 
 ## Building
 
@@ -64,4 +64,4 @@ Initially derived from [NASA-AMMOS/aerie-multimission-models-bb](https://github.
 
 ## Acknowledgements
 
-Thanks to **Chris Lawler** and **Flora Ridenhour**, the original developers of the Blackbird planner, who graciously provided the Blackbird multi-mission models to the Aerie team as a starting point for this code.
+Thanks to **Chris Lawler** and **Flora Ridenhour**, the original developers of the Blackbird planner, who graciously provided the Blackbird multi-mission models to the PlanDev team as a starting point for this code.

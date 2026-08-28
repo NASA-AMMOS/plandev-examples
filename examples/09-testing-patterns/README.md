@@ -1,6 +1,6 @@
 # 09 - Testing Patterns
 
-Demonstrates how to write automated tests for Aerie mission models using stateless simulation.
+Demonstrates how to write automated tests for PlanDev mission models using stateless simulation.
 
 ## What's in this example
 
@@ -16,7 +16,7 @@ Demonstrates how to write automated tests for Aerie mission models using statele
 
 ## Key testing pattern
 
-Tests use Aerie's stateless simulation utilities to run a simulation in-process without needing a running Aerie server:
+Tests use PlanDev's stateless simulation utilities to run a simulation in-process without needing a running PlanDev server:
 
 1. Build a `MissionModel` instance from your generated plugin
 2. Create activity directives with parameters and start times

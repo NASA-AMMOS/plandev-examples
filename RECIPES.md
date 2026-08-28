@@ -1,4 +1,4 @@
-# Aerie Activity Recipes
+# PlanDev Activity Recipes
 
 Copy-paste patterns for common mission modeling tasks. Each recipe shows the minimal code needed — adapt to your mission.
 

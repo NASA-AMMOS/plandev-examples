@@ -1,6 +1,6 @@
 # 06 - Constraints and Scheduling
 
-Demonstrates Aerie's procedural constraints and scheduling goals — the features that separate Aerie from a simple simulator.
+Demonstrates PlanDev's procedural constraints and scheduling goals — the features that separate PlanDev from a simple simulator.
 
 ## What's in this example
 
@@ -25,7 +25,7 @@ Demonstrates Aerie's procedural constraints and scheduling goals — the feature
 
 ## How to use
 
-1. Upload the `03-power-and-data` model JAR to Aerie and create a plan
+1. Upload the `03-power-and-data` model JAR to PlanDev and create a plan
 2. Add some TakePicture activities to the plan
 3. Upload this example's procedure JAR and run the scheduling goals
 4. Run the constraints to check for battery, data, and power violations

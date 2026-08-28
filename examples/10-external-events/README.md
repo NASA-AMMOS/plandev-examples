@@ -20,7 +20,7 @@ Demonstrates how to schedule activities in response to external events — a key
 
 ## How to use
 
-1. Upload the `03-power-and-data` model JAR to Aerie and create a plan
+1. Upload the `03-power-and-data` model JAR to PlanDev and create a plan
 2. Upload the DSN contact data as external events (event type: `DSNContact`)
 3. Upload this example's procedure JAR and run the `ScheduleDownlinksDuringContacts` goal
 4. The goal automatically places Downlink activities during each DSN pass

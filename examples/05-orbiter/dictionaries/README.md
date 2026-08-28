@@ -36,7 +36,7 @@ Commands and channels are derived from the orbiter mission model in [../src/main
 
 ## Validation
 
-Both files round-trip cleanly through the canonical Aerie parser, [`@nasa-jpl/aerie-ampcs`](https://github.com/NASA-AMMOS/aerie-ampcs):
+Both files round-trip cleanly through the canonical PlanDev parser, [`@nasa-jpl/aerie-ampcs`](https://github.com/NASA-AMMOS/aerie-ampcs):
 
 ```js
 import { parse, parseChannelDictionary } from '@nasa-jpl/aerie-ampcs';

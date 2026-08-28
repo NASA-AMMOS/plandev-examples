@@ -1,6 +1,6 @@
 # 00-tutorial: Simple SSR Data Recorder
 
-Start here! This is the basic Aerie mission model from the [modeling tutorial](https://nasa-ammos.github.io/aerie-docs/tutorials/mission-modeling/introduction/).
+Start here! This is the basic PlanDev mission model from the [modeling tutorial](https://nasa-ammos.github.io/aerie-docs/tutorials/mission-modeling/introduction/).
 
 ## What It Models
 

@@ -16,7 +16,7 @@ Migrated from [aerie-orbiter-model](https://github.com/NASA-AMMOS/aerie-orbiter-
 | **Telecom** | A simple downlink-rate stub: a `Downlink` activity sets the playback data rate from a parameter. The full Friis link-budget model lives in `libraries/telecom` (experimental — not yet wired in here). |
 | **Radar** | Radar instrument with observation modes (low/med/hi-res) and data collection |
 
-Every activity is tagged with Aerie's `@Subsystem(...)` annotation (geometry / power / data / telecom / radar), and the model declares them via `@WithSubsystem(...)` in `package-info.java`, so Aerie can group activities by subsystem in the UI. The data activities carry their `@Subsystem("data")` tag in `libraries/data`; the rest are tagged on the orbiter's own activity classes.
+Every activity is tagged with PlanDev's `@Subsystem(...)` annotation (geometry / power / data / telecom / radar), and the model declares them via `@WithSubsystem(...)` in `package-info.java`, so PlanDev can group activities by subsystem in the UI. The data activities carry their `@Subsystem("data")` tag in `libraries/data`; the rest are tagged on the orbiter's own activity classes.
 
 ## Activities
 
@@ -41,9 +41,9 @@ The kernel directory is configurable via the `SPICE_DIRECTORY` environment varia
 
 The kernels are already in place — just build and the model will find them.
 
-### Deploying to Aerie (Docker)
+### Deploying to PlanDev (Docker)
 
-When uploading the JAR to Aerie, the SPICE kernels must be volume-mounted into the merlin worker container:
+When uploading the JAR to PlanDev, the SPICE kernels must be volume-mounted into the merlin worker container:
 
 ```yaml
 # In your docker-compose.yml, add to the aerie_merlin service:
@@ -110,7 +110,7 @@ Sample plans, views, and external events are in `demo/`:
 ./gradlew :examples:05-orbiter:constraints:buildAllConstraintProcedureJars
 ```
 
-The fat JAR at `build/libs/orbiter-example.jar` can be uploaded to Aerie (after mounting SPICE kernels). Scheduling and constraint procedure JARs are built individually in their respective `build/libs/` directories.
+The fat JAR at `build/libs/orbiter-example.jar` can be uploaded to PlanDev (after mounting SPICE kernels). Scheduling and constraint procedure JARs are built individually in their respective `build/libs/` directories.
 
 ## Configuration
 

@@ -1,6 +1,6 @@
 # Data Library
 
-Reusable data management subsystem model for Aerie mission models. Migrated from [aerie-simple-model-data](https://github.com/NASA-AMMOS/aerie-simple-model-data) (model module).
+Reusable data management subsystem model for PlanDev mission models. Migrated from [aerie-simple-model-data](https://github.com/NASA-AMMOS/aerie-simple-model-data) (model module).
 
 ## What it models
 
@@ -56,7 +56,7 @@ dependencies {
 
 ## Activity metadata (units & subsystem)
 
-The activities carry Aerie metadata annotations:
+The activities carry PlanDev metadata annotations:
 
 - **Units** — numeric parameters are annotated with `@Unit` (`bit`, `bit/s`). **To use these
   activities your `@MissionModel` package-info must declare the metadata annotation**, or

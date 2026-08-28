@@ -1,6 +1,6 @@
 # Telecom Library
 
-Reusable telecom (downlink) subsystem code for Aerie mission models — Friis link-equation model, DSN ground-station configs, and per-link bit-rate resources.
+Reusable telecom (downlink) subsystem code for PlanDev mission models — Friis link-equation model, DSN ground-station configs, and per-link bit-rate resources.
 
 ## Status: experimental, not currently consumed
 

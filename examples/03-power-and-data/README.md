@@ -31,7 +31,7 @@ Demonstrates how to compose multiple subsystem libraries into a single mission m
 ./gradlew :examples:03-power-and-data:build
 ```
 
-The fat JAR at `build/libs/power-and-data-example.jar` can be uploaded directly to Aerie.
+The fat JAR at `build/libs/power-and-data-example.jar` can be uploaded directly to PlanDev.
 
 ## Key takeaway
 

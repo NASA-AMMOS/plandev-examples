@@ -54,10 +54,10 @@ generated code as a starting point — the maintained PELs in `examples/01-power
 
 ## `generate_external_events.py` — scale-test external events
 
-Generates large, varied [Aerie external-event](../examples/10-external-events/) datasets for
-hopper/orbiter scale testing. Stdlib only. Emits two files in Aerie's canonical ingest format:
+Generates large, varied [PlanDev external-event](../examples/10-external-events/) datasets for
+hopper/orbiter scale testing. Stdlib only. Emits two files in PlanDev's canonical ingest format:
 
-- `<prefix>_schema.json` — event-type + source-type definitions (upload to Aerie **first**)
+- `<prefix>_schema.json` — event-type + source-type definitions (upload to PlanDev **first**)
 - `<prefix>_source.json` — one external source with N events spanning a mission window
 
 Eight hopper/orbiter-relevant event types, each with its own attribute schema: `DSNContact`
@@ -79,5 +79,5 @@ python3 tools/generate_external_events.py --contact-type DSS_Pass --out-dir /tmp
 
 The default `DSNContact` comms type lines up with example 10's `ScheduleDownlinksDuringContacts`
 goal (which queries that type). Output JSON is generated on demand and **not committed** —
-thousands of events is a multi-MB source file; size `--count` to your ingest budget (Aerie
+thousands of events is a multi-MB source file; size `--count` to your ingest budget (PlanDev
 ingests external events at roughly hundreds/sec).

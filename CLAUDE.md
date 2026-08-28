@@ -1,6 +1,6 @@
 # plandev-examples
 
-Consolidation of ~10 NASA-AMMOS Aerie mission model repos into one composable monorepo with progressive examples.
+Consolidation of ~10 NASA-AMMOS PlanDev mission model repos into one composable monorepo with progressive examples.
 
 Full consolidation plan: `/Users/aplave/Documents/aerie-repo-consolidation-plan.md` (~960 lines, 10 sections + appendices)
 
@@ -37,23 +37,23 @@ plandev-examples/
 
 - **Gradle multi-project build** with Java 21
 - Root `settings.gradle` includes all subprojects
-- Root `build.gradle` defines shared Aerie dependencies (merlin-framework, merlin-sdk, contrib v4.1.1)
+- Root `build.gradle` defines shared PlanDev dependencies (merlin-framework, merlin-sdk, contrib v4.1.1)
 - Libraries publish as Maven artifacts; examples depend on libraries via `implementation project(':libraries:power')`
-- Each example produces a standalone JAR uploadable to Aerie
+- Each example produces a standalone JAR uploadable to PlanDev
 
 ## Java Package Naming Convention
 
-All packages follow `gov.nasa.jpl.aerie.<subsystem>` for libraries, `examples.<name>` for examples, `tutorial` for 00-tutorial.
+All packages follow `gov.nasa.ammos.plandev.<subsystem>` for libraries, `examples.<name>` for examples, `tutorial` for 00-tutorial.
 
 | Subsystem | Package |
 |-----------|---------|
-| Power | `gov.nasa.jpl.aerie.power` |
-| Data | `gov.nasa.jpl.aerie.data` |
-| Geometry | `gov.nasa.jpl.aerie.geometry` |
-| GNC | `gov.nasa.jpl.aerie.gnc` |
-| Telecom | `gov.nasa.jpl.aerie.telecom` |
+| Power | `gov.nasa.ammos.plandev.power` |
+| Data | `gov.nasa.ammos.plandev.data` |
+| Geometry | `gov.nasa.ammos.plandev.geometry` |
+| GNC | `gov.nasa.ammos.plandev.gnc` |
+| Telecom | `gov.nasa.ammos.plandev.telecom` |
 
-**Do NOT use the old package names** (`demosystem`, `generic`, `missionmodel`, `gov.nasa.jpl.aerie_data`, `gov.nasa.ammos.aerie.simplemodels.*`).
+**Do NOT use the old package names** (`demosystem`, `generic`, `missionmodel`, `gov.nasa.ammos.plandev_data`, `gov.nasa.ammos.aerie.simplemodels.*`).
 
 ## Migration Rules
 
@@ -62,7 +62,7 @@ All packages follow `gov.nasa.jpl.aerie.<subsystem>` for libraries, `examples.<n
 3. **The `demosystem` package collides** between simple-model-power and simple-model-telecom — must rename before both exist in this build.
 4. **Git LFS for SPICE kernels** — set up LFS tracking for `*.bsp`, `*.tls`, `*.tpc`, `*.tf`, `*.ck` before committing any kernels.
 5. **Each library must build independently** — `./gradlew :libraries:power:build` must work.
-6. **Each example must produce a JAR** — uploadable to Aerie without modification.
+6. **Each example must produce a JAR** — uploadable to PlanDev without modification.
 
 ## Source Repos
 
@@ -83,7 +83,7 @@ Clone from `NASA-AMMOS` GitHub org as needed. Private repos are already cloned l
 
 ## Coding Style
 
-- Follow existing Aerie Java conventions from source repos
+- Follow existing PlanDev Java conventions from source repos
 - Every library and example gets a `README.md` explaining what it does and how to use it
 - Prefer composition over inheritance for model integration
 - The user doesn't know Java well — explain Java-specific concepts when they come up

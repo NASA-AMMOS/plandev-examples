@@ -1,6 +1,6 @@
 # 02 - Data Only Example
 
-A standalone Aerie mission model demonstrating the data management library. Migrated from [aerie-simple-model-data](https://github.com/NASA-AMMOS/aerie-simple-model-data) (demo module).
+A standalone PlanDev mission model demonstrating the data management library. Migrated from [aerie-simple-model-data](https://github.com/NASA-AMMOS/aerie-simple-model-data) (demo module).
 
 ## What it models
 
@@ -29,7 +29,7 @@ Demo-specific:
 ## Resources
 
 Includes sample JSON files:
-- `DataModelBasicView.json` - Aerie UI view definition showing data volumes, rates, and downlink tracking
+- `DataModelBasicView.json` - PlanDev UI view definition showing data volumes, rates, and downlink tracking
 - `sample-plan.json` - Example plan with activities demonstrating all data operations
 
 ## Building
@@ -38,4 +38,4 @@ Includes sample JSON files:
 ./gradlew :examples:02-data-only:build
 ```
 
-The output JAR at `build/libs/02-data-only.jar` can be uploaded directly to Aerie.
+The output JAR at `build/libs/02-data-only.jar` can be uploaded directly to PlanDev.
