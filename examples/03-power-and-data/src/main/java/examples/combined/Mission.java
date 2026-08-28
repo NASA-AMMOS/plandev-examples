@@ -52,7 +52,7 @@ public class Mission implements DataMissionModel {
 
     this.powerSource = new GenericSolarArray(
         config.powerConfig().powerSourceConfig(), solarDistance, arrayAngle, eclipseFactor);
-    this.battery = new BatteryModel("main", config.powerConfig().batteryConfig(),
+    this.battery = new BatteryModel("mainbattery", config.powerConfig().batteryConfig(),
         pel.totalLoad, powerSource.getPowerProduction());
 
     pel.registerStates(reg);

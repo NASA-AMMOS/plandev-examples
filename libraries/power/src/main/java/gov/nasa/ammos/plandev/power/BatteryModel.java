@@ -143,22 +143,29 @@ public class BatteryModel {
 //    }
 
     /**
+     * generate the global registrar name to use for this resource
+     */
+    private String resourceName(String resource) {
+        return name.isBlank()
+            ? "battery." + resource
+            : name + "." + resource;
+    }
+    /**
      * Method for PlanDev to register the resources in this model so they can be viewed in the UI
      * @param registrar common object for which to register resources across models
      */
     public void registerStates(Registrar registrar) {
-        registrar.real(name + "battery.batteryCurrent",
+        registrar.real(resourceName("batteryCurrent"),
                 ResourceMonad.map(this.batteryCurrent, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "A");
-        registrar.real(name + "battery.batteryCurrentUnclamped",
+        registrar.real(resourceName("batteryCurrentUnclamped"),
                 ResourceMonad.map(this.batteryCurrentUnclamped, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "A");
-        registrar.discrete(name + "battery.batteryFull", batteryFull, new BooleanValueMapper());
-        registrar.discrete(name + "battery.batteryEmpty", batteryEmpty, new BooleanValueMapper());
-        registrar.real(name + "battery.batterySOC",
+        registrar.discrete(resourceName("batteryFull"), batteryFull, new BooleanValueMapper());
+        registrar.discrete(resourceName("batteryEmpty"), batteryEmpty, new BooleanValueMapper());
+        registrar.real(resourceName("batterySOC"),
                 ResourceMonad.map(this.batterySOC, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "%");
-        registrar.real(name + "battery.batteryCharge",
+        registrar.real(resourceName("batteryCharge"),
                 ResourceMonad.map(this.batteryCharge, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "Ah");
-        registrar.real(name + "battery.batteryChargeSec",
+        registrar.real(resourceName("batteryChargeSec"),
                 ResourceMonad.map(this.batteryChargeSec, p -> Linear.linear( p.extract(), p.getCoefficient(1) )), "A-s");
     }
-
 }

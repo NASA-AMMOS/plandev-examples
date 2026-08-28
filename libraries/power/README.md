@@ -38,7 +38,7 @@ PowerSource powerSource = new GenericSolarArray(
 
 // Create a battery connected to the power source and load
 BatteryModel battery = new BatteryModel(
-    "main", config.powerConfig().batteryConfig(),
+    "mainbattery", config.powerConfig().batteryConfig(),
     totalLoadResource, powerSource.getPowerProduction());
 ```
 

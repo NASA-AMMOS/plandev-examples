@@ -23,8 +23,8 @@ This example simulates a spacecraft with:
 
 ### Key Resources
 
-- `battery.batterySOC` - Battery state of charge (%)
-- `battery.batteryCurrent` - Net current into/out of battery (A)
+- `cbebattery.batterySOC` - Battery state of charge (%)
+- `cbebattery.batteryCurrent` - Net current into/out of battery (A)
 - `array.powerProduction` - Solar array power output (W)
 - `spacecraft.cbeLoad` / `spacecraft.mevLoad` - Total CBE/MEV power loads (W)
 - Component states: `gncState`, `telecomState`, `cameraState`, `avionicsState`
