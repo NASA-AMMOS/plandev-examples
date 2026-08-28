@@ -22,7 +22,6 @@ import examples.orbiter.power.pel.PELModel;
 import examples.orbiter.spice.Spice;
 import examples.orbiter.telecom.TelecomModel;
 import examples.orbiter.radar.RadarModel;
-import spice.basic.SpiceErrorException;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -104,12 +103,7 @@ public final class Mission implements DataMissionModel {
     this.errorRegistrar = new Registrar(registrar, Registrar.ErrorBehavior.Log);
     this.absoluteClock = new AbsoluteClock(planStart);
 
-    try {
-      Spice.initialize(NAIF_META_KERNEL_PATH);
-    }
-    catch (SpiceErrorException e) {
-      System.out.println(e.getMessage());
-    }
+    Spice.initialize(NAIF_META_KERNEL_PATH);
 
     //
     // Initialize Geometry Model

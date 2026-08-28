@@ -65,7 +65,7 @@ Then add the following entries to every `plandev_merlin_worker_*` and `plandev_s
 
 ```
 environment:
-  SPICE_DIRECTORY:/spice/kernels
+  SPICE_DIRECTORY: /spice/kernels
 volumes:
   - ${SPICE_KERNELS_PATH}:/spice/kernels:ro
 ```

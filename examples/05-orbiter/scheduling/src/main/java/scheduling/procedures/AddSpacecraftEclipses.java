@@ -52,11 +52,7 @@ public record AddSpacecraftEclipses(
     public void run(EditablePlan plan) {
 
       // Instantiate Spice
-      try {
-        Spice.initialize(NAIF_META_KERNEL_PATH);
-      } catch (SpiceErrorException e) {
-        System.out.println(e.getMessage());
-      }
+      Spice.initialize(NAIF_META_KERNEL_PATH);
 
       // Initialize Geometry Bodies and Generator
       Bodies bodiesObj = new Bodies(Mission.class);

@@ -7,17 +7,15 @@ import gov.nasa.ammos.plandev.procedural.scheduling.plan.EditablePlan;
 import gov.nasa.ammos.plandev.procedural.scheduling.plan.NewDirective;
 import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.AnyDirective;
 import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.DirectiveStart;
-import gov.nasa.ammos.plandev.merlin.framework.annotations.Export;
 import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 import gov.nasa.ammos.plandev.merlin.protocol.types.SerializedValue;
 import gov.nasa.jpl.time.Time;
 import gov.nasa.ammos.plandev.geometry.globals.JPLTimeConvertUtility;
-import examples.orbiter.geometry.activities.atomic.Apoapsis;
 import gov.nasa.ammos.plandev.geometry.directspicecalls.SpiceDirectEventGenerator;
 import gov.nasa.ammos.plandev.geometry.interfaces.GeometryInformationNotAvailableException;
 import gov.nasa.ammos.plandev.geometry.spiceinterpolation.Bodies;
-import examples.orbiter.Mission;import examples.orbiter.spice.Spice;
-import spice.basic.SpiceErrorException;
+import examples.orbiter.Mission;
+import examples.orbiter.spice.Spice;
 
 import java.nio.file.Path;
 import java.time.Instant;
@@ -51,11 +49,7 @@ public record AddApoapses(
     public void run(EditablePlan plan) {
 
       // Instantiate Spice
-      try {
-        Spice.initialize(NAIF_META_KERNEL_PATH);
-      } catch (SpiceErrorException e) {
-        System.out.println(e.getMessage());
-      }
+      Spice.initialize(NAIF_META_KERNEL_PATH);
 
       // Initialize Geometry Bodies
       Bodies bodiesObj = new Bodies(Mission.class);

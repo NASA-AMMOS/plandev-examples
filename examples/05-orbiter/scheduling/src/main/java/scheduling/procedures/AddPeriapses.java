@@ -20,7 +20,6 @@ import gov.nasa.ammos.plandev.geometry.spiceinterpolation.Bodies;
 import examples.orbiter.Mission;import examples.orbiter.spice.Spice;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import spice.basic.SpiceErrorException;
 
 import gov.nasa.jpl.time.Time;
 
@@ -62,11 +61,7 @@ public record AddPeriapses(
     public void run(EditablePlan plan) {
 
       // Instantiate Spice
-      try {
-        Spice.initialize(NAIF_META_KERNEL_PATH);
-      } catch (SpiceErrorException e) {
-        System.out.println(e.getMessage());
-      }
+      Spice.initialize(NAIF_META_KERNEL_PATH);
 
       // Initialize Geometry Bodies
       Bodies bodiesObj = new Bodies(Mission.class);
