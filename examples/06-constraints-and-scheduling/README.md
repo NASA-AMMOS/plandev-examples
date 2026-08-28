@@ -25,11 +25,13 @@ Demonstrates PlanDev's procedural constraints and scheduling goals — the featu
 
 ## How to use
 
-1. Upload the `03-power-and-data` model JAR to PlanDev and create a plan
-2. Add some TakePicture activities to the plan
-3. Upload this example's procedure JAR and run the scheduling goals
-4. Run the constraints to check for battery, data, and power violations
-5. Simulate and observe the constraint violations on the timeline
+1. Build and upload the `03-power-and-data` mission model JAR to PlanDev, then create a plan.
+2. Add some `TakePicture` activities to the plan.
+3. Build and upload this example’s scheduling procedure JAR.
+4. Run the `RecurrentCalibration` scheduling procedure to add `Calibrate` activities at the configured interval.
+5. Run `CoscheduleCameraDownlink` to add a one-hour Downlink after each TakePicture.
+6. Simulate the updated plan so the generated activities are included in the resource profiles.
+7. Run the constraint procedures and observe battery, data, power, duration, or activity-overlap violations on the timeline.
 
 ## Build
 
