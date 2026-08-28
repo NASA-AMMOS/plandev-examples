@@ -1,5 +1,5 @@
 {
-  "name": "aerie-ascii-art-action",
+  "name": "plandev-ascii-art-action",
   "version": "1.0.0",
   "main": "index.ts",
   "type": "module",
@@ -11,7 +11,7 @@
   },
   "author": "Dan Delany <delany@jpl.nasa.gov>",
   "license": "MIT",
-  "description": "Example Aerie Action for generating ASCII art with figlet",
+  "description": "Example PlanDev Action for generating ASCII art with figlet",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.0",
@@ -26,7 +26,7 @@
     "typescript": "5.7.3"
   },
   "dependencies": {
-    "@nasa-jpl/aerie-actions": "0.1.7",
+    "@nasa-jpl/plandev-actions": "1.3.0",
     "@types/node": "^22.13.10",
     "figlet": "^1.8.0"
   }

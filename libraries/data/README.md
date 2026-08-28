@@ -1,6 +1,6 @@
 # Data Library
 
-Reusable data management subsystem model for Aerie mission models. Migrated from [aerie-simple-model-data](https://github.com/NASA-AMMOS/aerie-simple-model-data) (model module).
+Reusable data management subsystem model for PlanDev mission models. Migrated from [aerie-simple-model-data](https://github.com/NASA-AMMOS/aerie-simple-model-data) (model module).
 
 ## What it models
 
@@ -15,7 +15,7 @@ Downlink rate is allocated across bins in priority order (the highest-priority n
 
 ## Package
 
-`gov.nasa.jpl.aerie.data`
+`gov.nasa.ammos.plandev.data`
 
 ## Key classes
 
@@ -56,13 +56,13 @@ dependencies {
 
 ## Activity metadata (units & subsystem)
 
-The activities carry Aerie metadata annotations:
+The activities carry PlanDev metadata annotations:
 
 - **Units** — numeric parameters are annotated with `@Unit` (`bit`, `bit/s`). **To use these
   activities your `@MissionModel` package-info must declare the metadata annotation**, or
   value-mapper generation fails:
   ```java
-  @WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class)
+  @WithMetadata(name = "unit", annotation = gov.nasa.ammos.plandev.contrib.metadata.Unit.class)
   ```
   (Resource units — bucket volumes/rates — are attached at registration and need no such
   declaration.)

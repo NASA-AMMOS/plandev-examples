@@ -1,8 +1,8 @@
 package examples.orbiter.data;
 
-import gov.nasa.jpl.aerie.merlin.framework.annotations.AutoValueMapper;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.AutoValueMapper;
 
-import static gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Template;
+import static gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Template;
 
 @AutoValueMapper.Record
 public record DataModelSimConfig(double initialMaxVolume,

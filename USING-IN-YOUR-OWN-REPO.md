@@ -3,9 +3,9 @@
 The examples here depend on the shared building blocks in `libraries/` via Gradle
 (`implementation project(':libraries:power')`), so copying a single example directory on its
 own won't compile. This guide shows how to lift an example **plus the `libraries/*` it uses**
-into a fresh repo and stand up a build that produces an Aerie-uploadable JAR.
+into a fresh repo and stand up a build that produces an PlanDev-uploadable mission model JAR.
 
-> The building blocks are **not published** to Maven — there are no coordinates to depend on.
+> The building blocks are **not published** to Maven.
 > You copy the source and link it as a Gradle subproject (what this repo does), exactly as
 > below.
 
@@ -56,18 +56,18 @@ include 'mission'
 
 ## 4. Root `build.gradle`
 
-This carries the shared Aerie dependencies for every Java subproject (Aerie **4.1.1** here —
-match whatever Aerie version your instance runs):
+This carries the shared PlanDev dependencies for every Java subproject (PlanDev **4.4.0** here —
+match whatever PlanDev version your instance runs):
 
 ```gradle
-ext.aerieVersion = '4.1.1'
+ext.plandevVersion = '4.4.0'
 
 allprojects {
   repositories {
     mavenCentral()
     maven {
       name = "GitHubPackages"
-      url  = "https://maven.pkg.github.com/nasa-ammos/aerie"
+      url  = "https://maven.pkg.github.com/nasa-ammos/plandev"
       credentials {
         username = System.getenv('GITHUB_USER')
         password = System.getenv('GITHUB_TOKEN')   // needs read:packages scope
@@ -83,13 +83,13 @@ subprojects {
   java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
   dependencies {
-    annotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${aerieVersion}"
-    implementation      "gov.nasa.jpl.aerie:contrib:${aerieVersion}"
-    implementation      "gov.nasa.jpl.aerie:merlin-framework:${aerieVersion}"
-    implementation      "gov.nasa.jpl.aerie:merlin-sdk:${aerieVersion}"
-    compileOnly         "gov.nasa.jpl.aerie:merlin-driver:${aerieVersion}"
+    annotationProcessor "gov.nasa.ammos.plandev:merlin-framework-processor:${plandevVersion}"
+    implementation      "gov.nasa.ammos.plandev:contrib:${plandevVersion}"
+    implementation      "gov.nasa.ammos.plandev:merlin-framework:${plandevVersion}"
+    implementation      "gov.nasa.ammos.plandev:merlin-sdk:${plandevVersion}"
+    compileOnly         "gov.nasa.ammos.plandev:merlin-driver:${plandevVersion}"
 
-    testImplementation  "gov.nasa.jpl.aerie:merlin-framework-junit:${aerieVersion}"
+    testImplementation  "gov.nasa.ammos.plandev:merlin-framework-junit:${plandevVersion}"
     testImplementation  'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly     'org.junit.platform:junit-platform-launcher'
   }
@@ -105,7 +105,7 @@ dependencies {
   implementation project(':libraries:data')
 }
 
-// IMPORTANT: include the building-block *sources* so Aerie's annotation processor can
+// IMPORTANT: include the building-block *sources* so PlanDev's annotation processor can
 // generate value mappers for the @AutoValueMapper.Record types defined in the libraries.
 // (This is the same pattern the examples use — it's required, not a workaround.)
 sourceSets {
@@ -117,7 +117,7 @@ sourceSets {
   }
 }
 
-// Fat JAR for uploading to Aerie
+// Fat JAR for uploading to PlanDev
 jar {
   dependsOn configurations.runtimeClasspath
   from {
@@ -148,7 +148,7 @@ The geometry block (and the orbiter) need two extra things:
 
 ## 7. Credentials
 
-The Aerie packages live in GitHub Packages, so you need a token with `read:packages`:
+The PlanDev packages live in GitHub Packages, so you need a token with `read:packages`:
 
 ```bash
 export GITHUB_USER=your-username
@@ -161,6 +161,6 @@ export GITHUB_TOKEN=ghp_your-token
 ./gradlew :mission:build      # produces mission/build/libs/my-mission.jar
 ```
 
-Upload that JAR to your Aerie instance as a mission model. Done — you now have a standalone
+Upload that JAR to your PlanDev instance as a mission model. Done — you now have a standalone
 repo that still tracks the building blocks you copied (re-copy from `plandev-examples` to pick
 up improvements).

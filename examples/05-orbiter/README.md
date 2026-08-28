@@ -16,7 +16,7 @@ Migrated from [aerie-orbiter-model](https://github.com/NASA-AMMOS/aerie-orbiter-
 | **Telecom** | A simple downlink-rate stub: a `Downlink` activity sets the playback data rate from a parameter. The full Friis link-budget model lives in `libraries/telecom` (experimental — not yet wired in here). |
 | **Radar** | Radar instrument with observation modes (low/med/hi-res) and data collection |
 
-Every activity is tagged with Aerie's `@Subsystem(...)` annotation (geometry / power / data / telecom / radar), and the model declares them via `@WithSubsystem(...)` in `package-info.java`, so Aerie can group activities by subsystem in the UI. The data activities carry their `@Subsystem("data")` tag in `libraries/data`; the rest are tagged on the orbiter's own activity classes.
+Every activity is tagged with PlanDev's `@Subsystem(...)` annotation (geometry / power / data / telecom / radar), and the model declares them via `@WithSubsystem(...)` in `package-info.java`, so PlanDev can group activities by subsystem in the UI. The data activities carry their `@Subsystem("data")` tag in `libraries/data`; the rest are tagged on the orbiter's own activity classes.
 
 ## Activities
 
@@ -37,23 +37,41 @@ The kernel directory is configurable via the `SPICE_DIRECTORY` environment varia
 
 > **Valid plan window: 2024-01-01 → 2024-05-06.** The MRO spacecraft ephemeris kernel (`mro_psp.bsp`, body `-74`) only covers this ~4-month interval; every other kernel spans decades, so this one is the limiting factor. Plans must stay inside this window — simulating outside it makes SPICE geometry lookups fail with insufficient-ephemeris errors. This is why the demo plans all start at `2024-01-02`. To plan in a different period, swap `mro_psp.bsp` for an MRO SPK covering your target dates (from the [NAIF MRO archive](https://naif.jpl.nasa.gov/pub/naif/pds/data/mro-m-spice-6-v1.0/mrosp_1000/data/spk/)), or point `spiceSpacecraftId` at a different spacecraft with its own SPK.
 
-### Running locally
+### Running local build & tests
 
-The kernels are already in place — just build and the model will find them.
+Download the SPICE kernels through Git LFS, then build from the repository root:
 
-### Deploying to Aerie (Docker)
-
-When uploading the JAR to Aerie, the SPICE kernels must be volume-mounted into the merlin worker container:
-
-```yaml
-# In your docker-compose.yml, add to the aerie_merlin service:
-volumes:
-  - ./spice-kernels:/spice/kernels
-environment:
-  SPICE_DIRECTORY: /spice/kernels
+```bash
+git lfs pull
+./gradlew build
 ```
 
-Or point `SPICE_DIRECTORY` at wherever you mount the kernels.
+The geometry test task automatically sets SPICE_DIRECTORY to the repository’s spice-kernels directory.
+
+### Deploying to PlanDev (Docker)
+
+PlanDev simulations execute inside Merlin workers. Scheduler workers also execute simulations when running 
+scheduling goals, so every Merlin and Scheduler worker replica must have access to the kernels.
+
+Set SPICE_KERNELS_PATH in your PlanDev deployment's .env file to the absolute path of **this repository’s** 
+kernel directory:
+
+```bash
+SPICE_KERNELS_PATH=/absolute/path/to/plandev-examples/spice-kernels
+```
+
+Then add the following entries to every `plandev_merlin_worker_*` and `plandev_scheduler_worker_*` service in your 
+`docker-compose` file:
+
+```
+environment:
+  SPICE_DIRECTORY: /spice/kernels
+volumes:
+  - ${SPICE_KERNELS_PATH}:/spice/kernels:ro
+```
+
+Use an absolute path because relative bind-mount paths are resolved from the PlanDev Compose project, not this 
+repository. After updating the Compose file, recreate the affected workers with `docker compose up -d`.
 
 ## Scheduling goals
 
@@ -110,7 +128,7 @@ Sample plans, views, and external events are in `demo/`:
 ./gradlew :examples:05-orbiter:constraints:buildAllConstraintProcedureJars
 ```
 
-The fat JAR at `build/libs/orbiter-example.jar` can be uploaded to Aerie (after mounting SPICE kernels). Scheduling and constraint procedure JARs are built individually in their respective `build/libs/` directories.
+The fat JAR at `build/libs/orbiter-example.jar` can be uploaded to PlanDev (after mounting SPICE kernels). Scheduling and constraint procedure JARs are built individually in their respective `build/libs/` directories.
 
 ## Configuration
 

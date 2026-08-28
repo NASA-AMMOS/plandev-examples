@@ -1,19 +1,15 @@
 import { describe, it, test, mock } from "node:test";
-import { ActionsAPI } from "@nasa-jpl/aerie-actions";
+import { ActionsAPI } from "@nasa-jpl/plandev-actions";
 
 import { main } from "../src/index.js";
 
 const mockActionsAPI = {
   workspaceId: 1,
-  listSequences: async () => {},
-  readSequence: async () => {
-    console.log("got mocked");
-    return { definition: "test" };
-  },
-  writeSequence: async () => {},
+  readFile: async () => "test",
+  writeFile: async () => ({ success: true as const }),
 } as unknown as ActionsAPI;
 
-test("aerie figlet action", async (t) => {
+test("plandev figlet action", async (t) => {
   await t.test("runs main", async () => {
     await main(
       {

@@ -1,6 +1,6 @@
 package examples.testing;
 
-import static gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Template;
+import static gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Template;
 
 public record Configuration(double initialSOC, int initialDataVolume) {
 

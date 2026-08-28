@@ -1,6 +1,6 @@
 # Geometry Library
 
-Reusable spacecraft geometry subsystem models for Aerie mission models. Provides SPICE-backed orbital mechanics, event generation, and reusable resource registrations.
+Reusable spacecraft geometry subsystem models for PlanDev mission models. Provides SPICE-backed orbital mechanics, event generation, and reusable resource registrations.
 
 This library lets a mission compute geometric quantities from SPICE kernel data along its spacecraft's trajectory — spacecraft-to-body distance and speed, sub-spacecraft and illumination angles, Sun–body–spacecraft angle, orbit period and inclination, body half-angle size, and more. It also **detects** discrete orbital events (spacecraft eclipses, occultations, periapses, apoapses); the "spawner" activities that turn those detections into timeline activities live in the orbiter example, not this library (see below).
 
@@ -20,7 +20,7 @@ To point the model at the right spacecraft, set its NAIF ID — for the orbiter 
 
 ## Package
 
-`gov.nasa.jpl.aerie.geometry`
+`gov.nasa.ammos.plandev.geometry`
 
 ## Key classes
 
@@ -44,9 +44,9 @@ To point the model at the right spacecraft, set its NAIF ID — for the orbiter 
 
 ## SPICE kernels
 
-Kernels are not bundled inside this library. The library reads them from `SPICE_DIRECTORY` (env var) or falls back to a relative `spice-kernels` path — see [SpiceConstants.java](src/main/java/gov/nasa/jpl/aerie/geometry/spice/SpiceConstants.java).
+Kernels are not bundled inside this library. The library reads them from `SPICE_DIRECTORY` (env var) or falls back to a relative `spice-kernels` path — see [SpiceConstants.java](src/main/java/gov/nasa/ammos/plandev/geometry/spice/SpiceConstants.java).
 
-In this repo, the canonical kernel location is the top-level shared [spice-kernels/](../../spice-kernels/) directory (an 8-kernel set covering MRO, Mars, Earth, and Sun, ~238 MB total). When deploying to Aerie, mount that directory into the merlin/scheduler workers and set `SPICE_DIRECTORY` accordingly — see [examples/05-orbiter/README.md](../../examples/05-orbiter/README.md).
+In this repo, the canonical kernel location is the top-level shared [spice-kernels/](../../spice-kernels/) directory (an 8-kernel set covering MRO, Mars, Earth, and Sun, ~238 MB total). When deploying to PlanDev, mount that directory into the merlin/scheduler workers and set `SPICE_DIRECTORY` accordingly — see [examples/05-orbiter/README.md](../../examples/05-orbiter/README.md).
 
 ## Usage
 
@@ -59,8 +59,8 @@ dependencies {
 Configure your bodies and instantiate the calculator from your `Mission` class:
 
 ```java
-import gov.nasa.jpl.aerie.geometry.spiceinterpolation.*;
-import gov.nasa.jpl.aerie.geometry.resources.GenericGeometryResources;
+import gov.nasa.ammos.plandev.geometry.spiceinterpolation.*;
+import gov.nasa.ammos.plandev.geometry.resources.GenericGeometryResources;
 
 Bodies bodies = new Bodies(Mission.class);
 GenericGeometryResources geometryResources = new GenericGeometryResources(bodies);
@@ -75,16 +75,16 @@ See [examples/05-orbiter/src/main/java/examples/orbiter/Mission.java](../../exam
 
 `libraries/geometry/src/test/java/` covers the **direct SPICE layer**:
 
-- [SpiceDirectTimeDependentStateCalculatorTest](src/test/java/gov/nasa/jpl/aerie/geometry/SpiceDirectTimeDependentStateCalculatorTest.java) — 14 sub-tests, MATLAB reference values for state / range / speed / altitude / Sun-Earth-spacecraft angles / sub-point / illumination / beta / half-angle / RA-Dec / LST.
-- [SpiceDirectEventGeneratorTest](src/test/java/gov/nasa/jpl/aerie/geometry/SpiceDirectEventGeneratorTest.java) — occultations, periapses, apoapses, conjunctions against MATLAB reference.
+- [SpiceDirectTimeDependentStateCalculatorTest](src/test/java/gov/nasa/ammos/plandev/geometry/SpiceDirectTimeDependentStateCalculatorTest.java) — 14 sub-tests, MATLAB reference values for state / range / speed / altitude / Sun-Earth-spacecraft angles / sub-point / illumination / beta / half-angle / RA-Dec / LST.
+- [SpiceDirectEventGeneratorTest](src/test/java/gov/nasa/ammos/plandev/geometry/SpiceDirectEventGeneratorTest.java) — occultations, periapses, apoapses, conjunctions against MATLAB reference.
 
 **TODO — resource layer + spawner activities are not yet covered here.** The upstream `aerie-multimission-models-bb` had three more tests that depend on a `Mission` class with `default_geometry_config.json` and a full `@MissionModel` package-info:
 
 1. `SpiceResourcePopulaterTest` — config parsing + data-gap window splitting.
-2. `GenericGeometryCalculatorTest` — Aerie resource values match direct SPICE calls within ±0.01°.
+2. `GenericGeometryCalculatorTest` — PlanDev resource values match direct SPICE calls within ±0.01°.
 3. `GeometrySpawnersTest` — spawner activities (`AddSpacecraftEclipses`, `AddOccultations`, `AddPeriapsis`, `AddApoapsis`) produce the right event counts over a sim window.
 
-To port these, build a minimal test mission model inside `libraries/geometry/src/test/java/.../testmodel/`: a `TestMission`, `TestConfiguration`, `package-info.java` with `@MissionModel` + the ~10 activity registrations, plus `default_geometry_config.json` copied from [examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json](../../examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json) into `src/test/resources/`. Enable `testAnnotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${aerieVersion}"` in `build.gradle`. ~150–200 lines of scaffold; same shape as the upstream tests.
+To port these, build a minimal test mission model inside `libraries/geometry/src/test/java/.../testmodel/`: a `TestMission`, `TestConfiguration`, `package-info.java` with `@MissionModel` + the ~10 activity registrations, plus `default_geometry_config.json` copied from [examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json](../../examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json) into `src/test/resources/`. Enable `testAnnotationProcessor "gov.nasa.ammos.plandev:merlin-framework-processor:${plandevVersion}"` in `build.gradle`. ~150–200 lines of scaffold; same shape as the upstream tests.
 
 ## Building
 
@@ -98,4 +98,4 @@ Initially derived from [NASA-AMMOS/aerie-multimission-models-bb](https://github.
 
 ## Acknowledgements
 
-Thanks to **Chris Lawler** and **Flora Ridenhour**, the original developers of the Blackbird planner, who graciously provided the Blackbird multi-mission models to the Aerie team as a starting point for this code.
+Thanks to **Chris Lawler** and **Flora Ridenhour**, the original developers of the Blackbird planner, who graciously provided the Blackbird multi-mission models to the PlanDev team as a starting point for this code.

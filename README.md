@@ -79,34 +79,6 @@ comfortable with the core workflow.
 | `examples/actions/` | **Actions** — server-side automation that runs against a plan (validation, calling external services) *after* a model exists | TypeScript / Node |
 | `examples/ui-plugins/` | **UI plugins** — PlanDev web-UI customizations (e.g. showing Mars LMST or a fixed timezone on the timeline) | TypeScript / JS |
 
-## Repository Structure
-
-```
-plandev-examples/
-├── examples/                       # Mission-modeling learning path (depend on libraries)
-│   ├──00-tutorial/                 # Start here! Basic SSR model
-│   ├── 01-power-only/  
-│   ├── 02-data-only/
-│   ├── 03-power-and-data/
-│   ├── 04-hopper/                  # Lunar hopper (compose power + data)
-│   ├── 05-orbiter/                 # Full Mars orbiter
-│   ├── 06-constraints-and-scheduling/
-│   ├── 07-advanced-resources/
-│   ├── 08-activity-patterns/
-│   ├── 09-testing-patterns/
-│   ├── 10-external-events/
-│   ├── actions/                    # Other surface: server-side automation (TypeScript)
-│   └── ui-plugins/                 # Other surface: PlanDev UI customizations (TypeScript)
-├── libraries/                      # Reusable subsystem building blocks (Gradle subprojects)
-│   ├── power/                      # Power, battery, solar array, RTG
-│   ├── data/                       # Prioritized storage bins, downlink, deletion
-│   ├── geometry/                   # SPICE, orbital geometry, visibility, events
-│   ├── gnc/                        # Attitude, pointing, targets (in progress)
-│   └── telecom/                    # Link budgets, antennas, ground stations (experimental)
-├── archive/lander/                 # Legacy reference (unmaintained)
-└── tools/                          # PEL generator (see tools/README.md)
-```
-
 ## The subsystem building blocks (`libraries/`)
 
 `libraries/` holds reusable subsystem models that the examples compose. **They are not a
@@ -186,7 +158,7 @@ Docs: <https://nasa-ammos.github.io/plandev-docs/>
 
 ## PlanDev Version
 
-All projects target **PlanDev v4.4.0**.
+All projects currently target a development snapshot of the upcoming PlanDev v4.4.0 release. The exact version is configured in the root `build.gradle` and will be changed to `4.4.0` when the release packages are published.
 
 ## Contributing
 

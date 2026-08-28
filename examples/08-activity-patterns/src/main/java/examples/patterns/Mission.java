@@ -1,16 +1,16 @@
 package examples.patterns;
 
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.DoubleValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.EnumValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.IntegerValueMapper;
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.DoubleValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.IntegerValueMapper;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
 
 import java.time.Instant;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.resource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete.discrete;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.resource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete.discrete;
 
 public class Mission {
 
@@ -18,7 +18,7 @@ public class Mission {
     public final MutableResource<Discrete<Double>> powerDraw;
     public final MutableResource<Discrete<Integer>> operationCount;
 
-    public Mission(final gov.nasa.jpl.aerie.merlin.framework.Registrar registrar,
+    public Mission(final gov.nasa.ammos.plandev.merlin.framework.Registrar registrar,
                    final Instant planStart,
                    final Configuration config) {
 

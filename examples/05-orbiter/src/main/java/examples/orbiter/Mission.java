@@ -1,44 +1,43 @@
 package examples.orbiter;
 
-// import gov.nasa.jpl.aerie.contrib.serialization.mappers.DoubleValueMapper;
-// import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.DoubleValueMapper;
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources;
-import gov.nasa.jpl.aerie.geometry.globals.AbsoluteClock;
-import gov.nasa.jpl.aerie.geometry.globals.Window;
+// import gov.nasa.ammos.plandev.contrib.serialization.mappers.DoubleValueMapper;
+// import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.DoubleValueMapper;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.core.Resource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteResources;
+import gov.nasa.ammos.plandev.geometry.globals.AbsoluteClock;
+import gov.nasa.ammos.plandev.geometry.globals.Window;
 import gov.nasa.jpl.time.Duration;
-import gov.nasa.jpl.aerie.data.Data;
-import gov.nasa.jpl.aerie.data.DataMissionModel;
-import gov.nasa.jpl.aerie.geometry.resources.GenericGeometryResources;
-import gov.nasa.jpl.aerie.geometry.spiceinterpolation.GenericGeometryCalculator;
-import gov.nasa.jpl.aerie.geometry.spiceinterpolation.SpiceResourcePopulater;
-import gov.nasa.jpl.aerie.power.BatteryModel;
-import gov.nasa.jpl.aerie.power.GenericSolarArray;
+import gov.nasa.ammos.plandev.data.Data;
+import gov.nasa.ammos.plandev.data.DataMissionModel;
+import gov.nasa.ammos.plandev.geometry.resources.GenericGeometryResources;
+import gov.nasa.ammos.plandev.geometry.spiceinterpolation.GenericGeometryCalculator;
+import gov.nasa.ammos.plandev.geometry.spiceinterpolation.SpiceResourcePopulater;
+import gov.nasa.ammos.plandev.power.BatteryModel;
+import gov.nasa.ammos.plandev.power.GenericSolarArray;
 import examples.orbiter.power.pel.PELModel;
 import examples.orbiter.spice.Spice;
 import examples.orbiter.telecom.TelecomModel;
 import examples.orbiter.radar.RadarModel;
-import spice.basic.SpiceErrorException;
 
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Random;
 
-import static gov.nasa.jpl.aerie.contrib.metadata.UnitRegistrar.withUnit;
-import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.resource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete.discrete;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources.divide;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.asPolynomial;
-// import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
+import static gov.nasa.ammos.plandev.contrib.metadata.UnitRegistrar.withUnit;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.resource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete.discrete;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteResources.divide;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.asPolynomial;
+// import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
 
-// import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.resource;
-// import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete.discrete;
+// import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.resource;
+// import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete.discrete;
 
 /**
  * Top-level Mission Model Class
@@ -99,17 +98,12 @@ public final class Mission implements DataMissionModel {
   // Radar Member Variables
   public final RadarModel radarModel;
 
-  public Mission(final gov.nasa.jpl.aerie.merlin.framework.Registrar registrar, final Instant planStart, final Configuration config) {
-    //gov.nasa.jpl.aerie.contrib.streamline.debugging.Logging.LOGGER = null;
+  public Mission(final gov.nasa.ammos.plandev.merlin.framework.Registrar registrar, final Instant planStart, final Configuration config) {
+    //gov.nasa.ammos.plandev.contrib.streamline.debugging.Logging.LOGGER = null;
     this.errorRegistrar = new Registrar(registrar, Registrar.ErrorBehavior.Log);
     this.absoluteClock = new AbsoluteClock(planStart);
 
-    try {
-      Spice.initialize(NAIF_META_KERNEL_PATH);
-    }
-    catch (SpiceErrorException e) {
-      System.out.println(e.getMessage());
-    }
+    Spice.initialize(NAIF_META_KERNEL_PATH);
 
     //
     // Initialize Geometry Model

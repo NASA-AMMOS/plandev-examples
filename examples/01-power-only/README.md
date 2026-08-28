@@ -1,6 +1,6 @@
 # 01 - Power Only Example
 
-A complete Aerie mission model demonstrating the power library with a Power Equipment List (PEL) and solar array.
+A complete PlanDev mission model demonstrating the power library with a Power Equipment List (PEL) and solar array.
 
 ## What It Models
 
@@ -35,12 +35,12 @@ This example simulates a spacecraft with:
 ./gradlew :examples:01-power-only:build
 ```
 
-The fat JAR is output to `build/libs/power-example.jar` and can be uploaded directly to Aerie.
+The JAR is output to `build/libs/power-example.jar` and can be uploaded directly to PlanDev.
 
 ## Included Files
 
 - `pel.json` - PEL definition used by the `pel_java_generator.py` script to generate the PEL model Java code
-- `PowerModelBasicView.json` - An Aerie UI view definition for visualizing power model resources
+- `PowerModelBasicView.json` - An PlanDev UI view definition for visualizing power model resources
 
 ## Source
 

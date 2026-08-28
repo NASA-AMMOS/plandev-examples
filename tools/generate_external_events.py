@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate large, varied Aerie external-event datasets for hopper/orbiter scale testing.
+"""Generate large, varied PlanDev external-event datasets for hopper/orbiter scale testing.
 
-Emits two files in Aerie's canonical external-event ingest format:
+Emits two files in PlanDev's canonical external-event ingest format:
 
   <prefix>_schema.json  — event-type + source-type definitions (upload first)
   <prefix>_source.json  — one external source with N events across the event types
@@ -21,7 +21,7 @@ Usage:
   python3 tools/generate_external_events.py --start 2028-100 --end 2028-200 \
       --out-dir /tmp/ev --prefix mars_events
 
-Stdlib only (json, random, argparse, datetime). Aerie ingests events at roughly
+Stdlib only (json, random, argparse, datetime). PlanDev ingests events at roughly
 hundreds/sec, so tens of thousands is fine; size the count for your ingest budget.
 """
 
@@ -32,7 +32,7 @@ import json
 import random
 from datetime import datetime, timedelta, timezone
 
-# --- time helpers (Aerie uses DOY timestamps "YYYY-DDDThh:mm:ssZ" and "HH:MM:SS" durations) ---
+# --- time helpers (PlanDev uses DOY timestamps "YYYY-DDDThh:mm:ssZ" and "HH:MM:SS" durations) ---
 
 def parse_doy(s: str) -> datetime:
     """Parse 'YYYY-DDD' or full 'YYYY-DDDThh:mm:ss[Z]' into a UTC datetime."""
@@ -260,7 +260,7 @@ def generate(count, start, end, seed, contact_type):
         made = 0
         i = 0
         while t < end and made < n * 2:  # *2 cap guards against pathological tiny gaps
-            # Aerie requires each event's whole [start, start+duration] to fit within the
+            # PlanDev requires each event's whole [start, start+duration] to fit within the
             # source period, so clamp the duration to what's left before the window end.
             remaining = (end - t).total_seconds()
             if remaining < 2:
@@ -349,7 +349,7 @@ def main():
         print(f"  {name:<22} ~{actual}")
     print(f"Schema: {schema_path}")
     print(f"Source: {source_path}")
-    print(f"\nUpload to Aerie: the schema first (event/source types), then the source.")
+    print(f"\nUpload to PlanDev: the schema first (event/source types), then the source.")
 
 
 if __name__ == "__main__":

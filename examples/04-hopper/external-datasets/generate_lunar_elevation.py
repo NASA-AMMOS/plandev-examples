@@ -36,7 +36,7 @@ No new kernels are needed. Override the directory with SPICE_DIRECTORY.
 
 Output: lunar_elevation_dataset.json (real-typed profiles, {initial, rate}
 linear segments at --step-minutes resolution). Keep the row count modest:
-Aerie ingests external-dataset segments at only ~hundreds of rows/sec, so
+PlanDev ingests external-dataset segments at only ~hundreds of rows/sec, so
 hourly over a year (~8.7k seg/profile) ingests in ~1 min, whereas sub-10-minute
 resolution over a year (~60k) takes several minutes. Elevation is smooth, so
 hourly is visually indistinguishable from finer sampling.
@@ -66,14 +66,14 @@ BODY_FRAME = "IAU_MOON"  # libration-bearing body-fixed frame (from pck00011.tpc
 
 # --- Plan/time defaults -----------------------------------------------------
 
-DEFAULT_PLAN_ID = 1            # MUST match the Aerie plan you upload to
+DEFAULT_PLAN_ID = 1            # MUST match the PlanDev plan you upload to
 DEFAULT_START = "2028-01-01"   # year chosen to line up with the reference chart
 DEFAULT_DAYS = 365             # full year (matches the reference chart's full-year view)
 DEFAULT_STEP_MINUTES = 60      # hourly. Elevation varies slowly, so linear segments at this
                                # resolution stay smooth while keeping the row count -- and
-                               # therefore Aerie's per-segment ingest time -- low. There is
+                               # therefore PlanDev's per-segment ingest time -- low. There is
                                # NO minimum segment count; more segments just ingest slower
-                               # (Aerie inserts ~hundreds of profile_segment rows/sec).
+                               # (PlanDev inserts ~hundreds of profile_segment rows/sec).
 
 
 def repo_spice_dir() -> Path:
@@ -156,7 +156,7 @@ REAL_PROFILE_SCHEMA = {
 
 
 def doy_string(dt: datetime) -> str:
-    """Aerie DOY datasetStart format, e.g. 2028-001T00:00:00."""
+    """PlanDev DOY datasetStart format, e.g. 2028-001T00:00:00."""
     return f"{dt.year}-{dt.timetuple().tm_yday:03d}T{dt:%H:%M:%S}"
 
 
@@ -244,7 +244,7 @@ def main():
     ap.add_argument("--start", default=DEFAULT_START, help="UTC start date YYYY-MM-DD")
     ap.add_argument("--days", type=float, default=DEFAULT_DAYS, help="span in days")
     ap.add_argument("--step-minutes", type=float, default=DEFAULT_STEP_MINUTES, help="segment resolution in minutes (larger = fewer rows = faster ingest)")
-    ap.add_argument("--plan-id", type=int, default=DEFAULT_PLAN_ID, help="Aerie plan id to attach to")
+    ap.add_argument("--plan-id", type=int, default=DEFAULT_PLAN_ID, help="PlanDev plan id to attach to")
     ap.add_argument("--out", default=None, help="output JSON path")
     ap.add_argument("--fidelity", action="store_true", help="run offline azlcpo cross-check")
     ap.add_argument("--horizons", action="store_true", help="also emit JPL Horizons reference profiles + report deviation (network)")

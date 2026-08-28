@@ -1,9 +1,9 @@
 package examples.data.activities;
 
 import examples.data.Mission;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects.set;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Export;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects.set;
 
 @ActivityType("SetPlaybackDataRate")
 public class SetPlaybackDataRate {

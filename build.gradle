@@ -1,7 +1,8 @@
 plugins {
   id("co.uzzu.dotenv.gradle") version "4.0.0"
 }
-ext.aerieVersion = '4.1.1'
+// todo: update this to 4.4.0 after release
+ext.plandevVersion = '4.3.0-SNAPSHOT-2110331'
 
 allprojects {
   repositories {
@@ -9,7 +10,7 @@ allprojects {
     mavenCentral()
     maven {
       name = "GitHubPackages"
-      url = "https://maven.pkg.github.com/nasa-ammos/aerie"
+      url = "https://maven.pkg.github.com/nasa-ammos/plandev"
       credentials {
         username = env.GITHUB_USER.value
         password = env.GITHUB_TOKEN.value
@@ -31,13 +32,13 @@ subprojects {
   }
 
   dependencies {
-    annotationProcessor "gov.nasa.jpl.aerie:merlin-framework-processor:${aerieVersion}"
-    implementation "gov.nasa.jpl.aerie:contrib:${aerieVersion}"
-    implementation "gov.nasa.jpl.aerie:merlin-framework:${aerieVersion}"
-    implementation "gov.nasa.jpl.aerie:merlin-sdk:${aerieVersion}"
-    compileOnly "gov.nasa.jpl.aerie:merlin-driver:${aerieVersion}"
+    annotationProcessor "gov.nasa.ammos.plandev:merlin-framework-processor:${plandevVersion}"
+    implementation "gov.nasa.ammos.plandev:contrib:${plandevVersion}"
+    implementation "gov.nasa.ammos.plandev:merlin-framework:${plandevVersion}"
+    implementation "gov.nasa.ammos.plandev:merlin-sdk:${plandevVersion}"
+    compileOnly "gov.nasa.ammos.plandev:merlin-driver:${plandevVersion}"
 
-    testImplementation "gov.nasa.jpl.aerie:merlin-framework-junit:${aerieVersion}"
+    testImplementation "gov.nasa.ammos.plandev:merlin-framework-junit:${plandevVersion}"
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
   }

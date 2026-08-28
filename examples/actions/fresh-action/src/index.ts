@@ -1,4 +1,4 @@
-import { ActionsAPI, ActionParameterDefinitions, ActionSettingDefinitions, ActionParameters, ActionSettings } from "@nasa-jpl/aerie-actions";
+import { ActionsAPI, ActionParameterDefinitions, ActionSettingDefinitions, ActionParameters, ActionSettings } from "@nasa-jpl/plandev-actions";
 import { RefreshResponse } from './models/refresh.js';
 
 export const parameterDefinitions = {
@@ -20,20 +20,28 @@ export async function main(parameters: MyActionParameters, settings: MyActionSet
     throw new Error(sequenceNameError);
   }
 
-  const sequence = await actionsAPI.readSequence(parameters.sequenceName);
+  let sequenceJson: unknown;
 
-  if (sequence.seq_json === undefined || sequence.seq_json === null) {
-    throw new Error(`Sequence: ${sequence.name} does not have any generated seqjson.`)
+  try {
+    const sequenceContents = await actionsAPI.readFile(parameters.sequenceName);
+    sequenceJson = JSON.parse(sequenceContents);
+  } catch (error) {
+    throw new Error(
+        `Sequence file "${parameters.sequenceName}" does not contain valid SeqJSON.`,
+        { cause: error },
+    );
   }
 
-  const parcel = await actionsAPI.readParcel(sequence.parcel_id);
+  const parcel = await actionsAPI.readParcel();
+
+
   const commandDictionary = await actionsAPI.readCommandDictionary(parcel.command_dictionary_id);
   const commandDictionaryFile = await actionsAPI.readDictionaryFile(commandDictionary.dictionary_file_path);
 
   const result = await fetch(settings.refreshUrl, {
     body: JSON.stringify({
-      'sequence': sequence.seq_json,
-      'command_dictionary': commandDictionaryFile
+      sequence: sequenceJson,
+      command_dictionary: commandDictionaryFile,
     }),
     method: 'post',
     headers: {

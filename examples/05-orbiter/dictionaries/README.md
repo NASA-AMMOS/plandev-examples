@@ -36,10 +36,10 @@ Commands and channels are derived from the orbiter mission model in [../src/main
 
 ## Validation
 
-Both files round-trip cleanly through the canonical Aerie parser, [`@nasa-jpl/aerie-ampcs`](https://github.com/NASA-AMMOS/aerie-ampcs):
+Both files round-trip cleanly through the canonical PlanDev parser, [`@nasa-jpl/plandev-ampcs`](https://github.com/NASA-AMMOS/plandev-ampcs):
 
 ```js
-import { parse, parseChannelDictionary } from '@nasa-jpl/aerie-ampcs';
+import { parse, parseChannelDictionary } from '@nasa-jpl/plandev-ampcs';
 const cmd = parse(fs.readFileSync('command_dictionary.xml','utf8'));
 // → 20 fswCommands, 4 enums
 const tlm = parseChannelDictionary(fs.readFileSync('channel_dictionary.xml','utf8'));

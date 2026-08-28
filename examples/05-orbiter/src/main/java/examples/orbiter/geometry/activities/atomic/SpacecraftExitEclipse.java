@@ -1,14 +1,14 @@
 package examples.orbiter.geometry.activities.atomic;
 
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Subsystem;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Export;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 import examples.orbiter.Mission;
-import gov.nasa.jpl.aerie.geometry.resources.EclipseTypes;
+import gov.nasa.ammos.plandev.geometry.resources.EclipseTypes;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects.set;
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects.set;
+import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
 import static examples.orbiter.geometry.activities.atomic.SpacecraftEnterEclipse.getWorstEclipseFromAllBodies;
 
 @ActivityType("SpacecraftExitEclipse")

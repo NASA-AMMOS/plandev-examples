@@ -1,6 +1,6 @@
 # GNC Library
 
-Reusable Guidance, Navigation, and Control (GNC) subsystem code for Aerie mission models. Provides attitude state, pointing-target abstractions, and rotation/observer machinery.
+Reusable Guidance, Navigation, and Control (GNC) subsystem code for PlanDev mission models. Provides attitude state, pointing-target abstractions, and rotation/observer machinery.
 
 ## What it models
 
@@ -14,7 +14,7 @@ GNC composes with the geometry library: pointing computations need spacecraft an
 
 ## Package
 
-`gov.nasa.jpl.aerie.gnc`
+`gov.nasa.ammos.plandev.gnc`
 
 ## Key classes
 
@@ -38,15 +38,15 @@ dependencies {
 In your `Mission` class:
 
 ```java
-import gov.nasa.jpl.aerie.gnc.GncDataModel;
-import gov.nasa.jpl.aerie.gnc.primary.BodyCenterPrimaryTarget;
+import gov.nasa.ammos.plandev.gnc.GncDataModel;
+import gov.nasa.ammos.plandev.gnc.primary.BodyCenterPrimaryTarget;
 
 GncDataModel gnc = new GncDataModel();
 gnc.registerStates(registrar);
 // Wire targets/observers to your geometry calculator's outputs.
 ```
 
-Rotation and vector math relies on Apache `commons-math3` (already a transitive dependency via Aerie's contrib library).
+Rotation and vector math relies on Apache `commons-math3` (already a transitive dependency via PlanDev's contrib library).
 
 ## Building
 
@@ -56,7 +56,7 @@ Rotation and vector math relies on Apache `commons-math3` (already a transitive 
 
 ## Status
 
-Marked **in work** in the upstream [aerie-multimission-models-bb](https://github.com/NASA-AMMOS/aerie-multimission-models-bb) README. Treat the more exotic target/observer combinations as a starting point — well-trodden cases (body-center pointing, single primary target) are solid; the long tail is less exercised. Tests cover the rotation and pointing-angle core (see [GncTest.java](src/test/java/gov/nasa/jpl/aerie/gnc/GncTest.java)).
+Marked **in work** in the upstream [aerie-multimission-models-bb](https://github.com/NASA-AMMOS/aerie-multimission-models-bb) README. Treat the more exotic target/observer combinations as a starting point — well-trodden cases (body-center pointing, single primary target) are solid; the long tail is less exercised. Tests cover the rotation and pointing-angle core (see [GncTest.java](src/test/java/gov/nasa/ammos/plandev/gnc/GncTest.java)).
 
 ## Source
 
@@ -64,4 +64,4 @@ Initially derived from [NASA-AMMOS/aerie-multimission-models-bb](https://github.
 
 ## Acknowledgements
 
-Thanks to **Chris Lawler** and **Flora Ridenhour**, the original developers of the Blackbird planner, who graciously provided the Blackbird multi-mission models to the Aerie team as a starting point for this code.
+Thanks to **Chris Lawler** and **Flora Ridenhour**, the original developers of the Blackbird planner, who graciously provided the Blackbird multi-mission models to the PlanDev team as a starting point for this code.

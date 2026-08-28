@@ -1,15 +1,15 @@
 package scheduling.procedures;
 
-import gov.nasa.ammos.aerie.procedural.scheduling.Goal;
-import gov.nasa.ammos.aerie.procedural.scheduling.annotations.SchedulingProcedure;
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.EditablePlan;
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.NewDirective;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.AnyDirective;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.DirectiveStart;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.DurationValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.EnumValueMapper;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
-import gov.nasa.jpl.aerie.merlin.protocol.types.SerializedValue;
+import gov.nasa.ammos.plandev.procedural.scheduling.Goal;
+import gov.nasa.ammos.plandev.procedural.scheduling.annotations.SchedulingProcedure;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.EditablePlan;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.NewDirective;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.AnyDirective;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.DirectiveStart;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.DurationValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.merlin.protocol.types.SerializedValue;
 import examples.orbiter.radar.RadarDataCollectionMode;
 import org.apache.commons.lang3.tuple.Pair;
 

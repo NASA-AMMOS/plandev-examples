@@ -1,11 +1,10 @@
 # 04 - Hopper (Lunar Hopper)
 
 A small, complete **lunar hopper** mission model that composes the `power` and `data`
-building blocks. This is the gentle next step after [03-power-and-data](../03-power-and-data/):
+building blocks. This is the next step after [03-power-and-data](../03-power-and-data/):
 where 03 shows the bare composition pattern, hopper is a realistic little model — with its own
 activities, constraints, external events, and an external dataset — that you can read end to
-end and imitate for your own mission. The much larger [05-orbiter](../05-orbiter/) is the deep
-end.
+end and imitate for your own mission. 
 
 ## What it models
 
@@ -22,8 +21,7 @@ ground contacts:
   | `telecomState` | 0 W | 25 W |
 
   Geometry is intentionally simplified (constant 1 AU from the Sun, array Sun-facing, no
-  eclipse) — hopper is about *composition*, not orbital mechanics. The orbiter adds real SPICE
-  geometry.
+  eclipse). The orbiter (next example) adds real SPICE geometry.
 
 - **Data** — two prioritized onboard storage bins (library `Data`), a 10 Gb default storage
   limit, and a 10 Kbps default playback rate (both `Configuration` parameters).
@@ -60,7 +58,7 @@ turns the bin's receive rate on, accumulates data for the duration, then turns i
 ## Build
 
 ```bash
-# Mission model JAR (uploadable to Aerie)
+# Mission model JAR (uploadable to PlanDev)
 ./gradlew :examples:04-hopper:build        # produces hopper.jar
 
 # Constraint procedure JAR
@@ -68,6 +66,6 @@ turns the bin's receive rate on, accumulates data for the duration, then turns i
 ```
 
 The model composes `libraries/power` and `libraries/data` — it imports their classes directly
-(`gov.nasa.jpl.aerie.power.*`, `gov.nasa.jpl.aerie.data.*`) and adds the hopper-specific
+(`gov.nasa.ammos.plandev.power.*`, `gov.nasa.ammos.plandev.data.*`) and adds the hopper-specific
 `SimplePEL` and activities on top. This is the pattern to copy for your own model; see
 [USING-IN-YOUR-OWN-REPO.md](../../USING-IN-YOUR-OWN-REPO.md).

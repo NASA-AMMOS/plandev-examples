@@ -1,22 +1,22 @@
 package examples.resources;
 
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.clocks.VariableClock;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.clocks.VariableClockResources;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.BooleanValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.EnumValueMapper;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.core.Resource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.VariableClock;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.VariableClockResources;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Polynomial;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.BooleanValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
 import java.time.Instant;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.resource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.*;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.resource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.*;
 
 /**
  * Mission model demonstrating four of the streamline library's five dynamics types,
@@ -62,7 +62,7 @@ public class Mission {
     public final Resource<Polynomial> batterySOC;
     public final Resource<Discrete<Boolean>> batteryLow;
 
-    public Mission(final gov.nasa.jpl.aerie.merlin.framework.Registrar registrar,
+    public Mission(final gov.nasa.ammos.plandev.merlin.framework.Registrar registrar,
                    final Instant planStart,
                    final Configuration config) {
 
@@ -127,7 +127,7 @@ public class Mission {
         // Derived boolean: battery low when SOC < 20%
         this.batteryLow = PolynomialResources.lessThan(this.batterySOC, 20.0);
 
-        // ========== Register all resources for the Aerie UI ==========
+        // ========== Register all resources for the PlanDev UI ==========
         registerResources(errorRegistrar, config);
     }
 

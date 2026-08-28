@@ -1,20 +1,20 @@
 package tutorial;
 
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.EditablePlan;
-import gov.nasa.ammos.aerie.procedural.scheduling.utils.DefaultEditablePlanDriver;
-import gov.nasa.ammos.aerie.procedural.timeline.collections.profiles.Real;
-import gov.nasa.ammos.aerie.procedural.timeline.collections.profiles.Strings;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.DirectiveStart;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.SimulationResults;
-import gov.nasa.ammos.aerie.procedural.utils.TypeUtilsEditablePlanAdapter;
-import gov.nasa.ammos.aerie.procedural.utils.TypeUtilsPlanAdapter;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.DurationValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.EnumValueMapper;
-import gov.nasa.jpl.aerie.merlin.driver.MissionModel;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
-import gov.nasa.jpl.aerie.orchestration.simulation.SimulationUtility;
-import gov.nasa.jpl.aerie.types.Plan;
-import gov.nasa.jpl.aerie.types.Timestamp;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.EditablePlan;
+import gov.nasa.ammos.plandev.procedural.scheduling.utils.DefaultEditablePlanDriver;
+import gov.nasa.ammos.plandev.procedural.timeline.collections.profiles.Real;
+import gov.nasa.ammos.plandev.procedural.timeline.collections.profiles.Strings;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.DirectiveStart;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.SimulationResults;
+import gov.nasa.ammos.plandev.procedural.utils.TypeUtilsEditablePlanAdapter;
+import gov.nasa.ammos.plandev.procedural.utils.TypeUtilsPlanAdapter;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.DurationValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
+import gov.nasa.ammos.plandev.merlin.driver.MissionModel;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.orchestration.simulation.SimulationUtility;
+import gov.nasa.ammos.plandev.types.Plan;
+import gov.nasa.ammos.plandev.types.Timestamp;
 import tutorial.generated.GeneratedModelType;
 import org.junit.jupiter.api.*;
 

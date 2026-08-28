@@ -1,22 +1,22 @@
 package examples.orbiter.geometry.activities.spawner;
 
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Subsystem;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Export;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 import gov.nasa.jpl.time.Time;
-import gov.nasa.jpl.aerie.geometry.globals.JPLTimeConvertUtility;
+import gov.nasa.ammos.plandev.geometry.globals.JPLTimeConvertUtility;
 import examples.orbiter.Mission;
-import gov.nasa.jpl.aerie.geometry.globals.Window;
+import gov.nasa.ammos.plandev.geometry.globals.Window;
 import examples.orbiter.geometry.activities.atomic.EnterOccultation;
 import examples.orbiter.geometry.activities.atomic.ExitOccultation;
-import gov.nasa.jpl.aerie.geometry.directspicecalls.SpiceDirectEventGenerator;
-import gov.nasa.jpl.aerie.geometry.interfaces.GeometryInformationNotAvailableException;
+import gov.nasa.ammos.plandev.geometry.directspicecalls.SpiceDirectEventGenerator;
+import gov.nasa.ammos.plandev.geometry.interfaces.GeometryInformationNotAvailableException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
+import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
 import static examples.orbiter.generated.ActivityActions.spawn;
 
 @ActivityType("AddOccultations")
@@ -24,7 +24,7 @@ import static examples.orbiter.generated.ActivityActions.spawn;
 public class AddOccultations {
 
   @Export.Parameter
-  public gov.nasa.jpl.aerie.merlin.protocol.types.Duration searchDuration;
+  public gov.nasa.ammos.plandev.merlin.protocol.types.Duration searchDuration;
 
   @Export.Parameter
   public String observer;
@@ -33,7 +33,7 @@ public class AddOccultations {
   @Export.Parameter
   public String occultingBody;
   @Export.Parameter
-  public gov.nasa.jpl.aerie.merlin.protocol.types.Duration stepSize;
+  public gov.nasa.ammos.plandev.merlin.protocol.types.Duration stepSize;
   @Export.Parameter
   public Boolean useDSK;
 

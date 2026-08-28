@@ -1,9 +1,9 @@
 package examples.power;
 
-import gov.nasa.jpl.aerie.merlin.framework.Result;
-import gov.nasa.jpl.aerie.merlin.framework.ValueMapper;
-import gov.nasa.jpl.aerie.merlin.protocol.types.SerializedValue;
-import gov.nasa.jpl.aerie.merlin.protocol.types.ValueSchema;
+import gov.nasa.ammos.plandev.merlin.framework.Result;
+import gov.nasa.ammos.plandev.merlin.framework.ValueMapper;
+import gov.nasa.ammos.plandev.merlin.protocol.types.SerializedValue;
+import gov.nasa.ammos.plandev.merlin.protocol.types.ValueSchema;
 
 import java.time.Instant;
 import java.time.format.DateTimeParseException;

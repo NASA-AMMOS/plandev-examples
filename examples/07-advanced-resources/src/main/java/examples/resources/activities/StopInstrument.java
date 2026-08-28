@@ -2,13 +2,13 @@ package examples.resources.activities;
 
 import examples.resources.InstrumentState;
 import examples.resources.Mission;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.clocks.VariableClockEffects;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.VariableClockEffects;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Polynomial;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType.EffectModel;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.set;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.set;
 
 /**
  * Turns an instrument off immediately.

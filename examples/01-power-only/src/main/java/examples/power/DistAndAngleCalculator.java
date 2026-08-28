@@ -1,10 +1,10 @@
 package examples.power;
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
-import gov.nasa.jpl.aerie.merlin.framework.ModelActions;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects;
+import gov.nasa.ammos.plandev.merlin.framework.ModelActions;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
+import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
 
 
 /**

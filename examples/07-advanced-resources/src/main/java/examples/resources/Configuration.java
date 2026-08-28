@@ -1,6 +1,6 @@
 package examples.resources;
 
-import static gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Template;
+import static gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Template;
 
 /**
  * Mission model configuration.

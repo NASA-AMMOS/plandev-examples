@@ -1,6 +1,6 @@
 # Telecom Library
 
-Reusable telecom (downlink) subsystem code for Aerie mission models — Friis link-equation model, DSN ground-station configs, and per-link bit-rate resources.
+Reusable telecom (downlink) subsystem code for PlanDev mission models — Friis link-equation model, DSN ground-station configs, and per-link bit-rate resources.
 
 ## Status: experimental, not currently consumed
 
@@ -21,7 +21,7 @@ What does **not** work, and would need to be filled in before this library is us
 - **Pointing-loss function / beam pattern** — none (TODO in `TelecomValueMappers.java`).
 - **Degradation loss is hardcoded to 1.0** (per the upstream `docs/ModelBehaviorDescription.md`).
 
-Inline `TODO` block from [TelecomModel.java](src/main/java/gov/nasa/jpl/aerie/telecom/TelecomModel.java):
+Inline `TODO` block from [TelecomModel.java](src/main/java/gov/nasa/ammos/plandev/telecom/TelecomModel.java):
 
 ```
 TODO:
@@ -42,14 +42,14 @@ It's a starting point. The link-equation core, the DSN station table, and the fr
 
 ## Follow-up: real geometry integration
 
-The library defines its own [`GeometryModel`](src/main/java/gov/nasa/jpl/aerie/telecom/GeometryModel.java) interface (`isVisible`, `getDistanceBetween`, `getViewPeriods`), but ships **no implementation** — the upstream `aerie-simple-model-telecom` had a mocked `GeometryModelImpl` in a separate `geometry/` subproject that we deliberately skipped because [libraries/geometry/](../geometry/) already provides real SPICE-backed geometry from a different upstream.
+The library defines its own [`GeometryModel`](src/main/java/gov/nasa/ammos/plandev/telecom/GeometryModel.java) interface (`isVisible`, `getDistanceBetween`, `getViewPeriods`), but ships **no implementation** — the upstream `aerie-simple-model-telecom` had a mocked `GeometryModelImpl` in a separate `geometry/` subproject that we deliberately skipped because [libraries/geometry/](../geometry/) already provides real SPICE-backed geometry from a different upstream.
 
 The gap that remains: **nothing currently bridges `libraries/geometry`'s SPICE outputs into telecom's `GeometryModel` interface.** Until that adapter exists, `TelecomModel.daemon()` will NPE on any non-null but actual deployment. Two follow-up tasks worth tracking:
 
 1. **Build a `SpiceBackedGeometryModel`** that implements telecom's `GeometryModel<String>` by delegating to `libraries/geometry`'s `GenericGeometryCalculator` / `SpiceDirectTimeDependentStateCalculator`. This is the "real" integration that closes the README's "geometry is mocked" caveat.
 2. **Make `TelecomModel` defensive against null geometry** — a tiny null guard in `daemon()` would let the library be instantiated for resource-registration-only use cases without crashing.
 
-The test ([src/test/java/.../TelecomModelTest.java](src/test/java/gov/nasa/jpl/aerie/telecom/TelecomModelTest.java)) uses a tiny inline `FixedDistanceGeometry` stub so the daemon's geometry lookups don't NPE — sufficient to pin the Friis arithmetic, insufficient to validate any visibility / view-period logic.
+The test ([src/test/java/.../TelecomModelTest.java](src/test/java/gov/nasa/ammos/plandev/telecom/TelecomModelTest.java)) uses a tiny inline `FixedDistanceGeometry` stub so the daemon's geometry lookups don't NPE — sufficient to pin the Friis arithmetic, insufficient to validate any visibility / view-period logic.
 
 ## Source
 

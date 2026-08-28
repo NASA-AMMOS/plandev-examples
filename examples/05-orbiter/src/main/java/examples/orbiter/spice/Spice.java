@@ -1,6 +1,6 @@
 package examples.orbiter.spice;
 
-import gov.nasa.jpl.aerie.geometry.spice.SpiceUtils;
+import gov.nasa.ammos.plandev.geometry.spice.SpiceUtils;
 import spice.basic.SpiceErrorException;
 
 import java.nio.file.Path;
@@ -11,9 +11,18 @@ import java.nio.file.Path;
  */
 public class Spice {
 
-  public static void initialize(String metaKernelPath) throws SpiceErrorException {
-    Path kernelDir = Path.of(metaKernelPath).getParent();
-    SpiceUtils.initialize(kernelDir);
+  public static void initialize(String metaKernelPath) {
+    final Path kernelDir = Path.of(metaKernelPath).getParent();
+
+    try {
+      SpiceUtils.initialize(kernelDir);
+    } catch (SpiceErrorException e) {
+      throw new IllegalStateException(
+              "Failed to initialize SPICE from "
+                      + kernelDir.toAbsolutePath()
+                      + ". Ensure SPICE_DIRECTORY points to a mounted kernel directory.",
+              e);
+    }
   }
 
 }

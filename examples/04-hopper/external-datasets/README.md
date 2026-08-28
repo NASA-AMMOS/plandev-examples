@@ -28,7 +28,7 @@ Default: 2028, 365 days, **hourly** (`--step-minutes 60`) → 8,760 seg/profile,
 ~35k rows total, ~2.7 MiB. Elevation is smooth, so hourly is visually
 indistinguishable from finer sampling.
 
-> **Keep the row count modest.** Aerie ingests external-dataset segments at only
+> **Keep the row count modest.** PlanDev ingests external-dataset segments at only
 > ~hundreds of `profile_segment` rows/sec, so size for *ingest time*, not detail:
 > hourly-over-a-year (~35k rows) ingests in ~1 min; sub-10-minute resolution
 > (~240k rows) took ~7 min. There is **no** minimum segment count. Use a coarser
@@ -73,8 +73,8 @@ Useful flags: `--lat/--lon` (site), `--start YYYY-MM-DD`, `--days`, `--segments`
 
 ## Upload to a plan
 
-External datasets attach to a specific Aerie plan, so set `--plan-id` to your
+External datasets attach to a specific PlanDev plan, so set `--plan-id` to your
 plan's id (the JSON's `planId` must match) and POST `lunar_elevation_dataset.json`
-to Aerie's external-dataset endpoint (UI: plan → External Datasets → upload; or
+to PlanDev's external-dataset endpoint (UI: plan → External Datasets → upload; or
 the merlin API `addExternalDataset`). The profiles then render on the plan
 timeline alongside the model's resources.

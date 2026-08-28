@@ -1,6 +1,6 @@
 package examples.data;
 
-import static gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Template;
+import static gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Template;
 
 public record Configuration(double initialMaxVolume, double initialDatarate) {
   public static @Template Configuration defaultConfiguration() {

@@ -1,20 +1,20 @@
 package examples.orbiter.radar;
 
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Subsystem;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.WithDefaults;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Polynomial;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Subsystem;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Export;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Export.WithDefaults;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 import examples.orbiter.Mission;
-import gov.nasa.jpl.aerie.data.Data;
+import gov.nasa.ammos.plandev.data.Data;
 import examples.orbiter.power.pel.Radar_State;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.set;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial.polynomial;
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.set;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Polynomial.polynomial;
+import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
 
 @ActivityType("TakeRadarObservation")
 @Subsystem("radar")
