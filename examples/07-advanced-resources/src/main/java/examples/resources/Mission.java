@@ -2,16 +2,13 @@ package examples.resources;
 
 import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
 import gov.nasa.ammos.plandev.contrib.streamline.core.Resource;
-import gov.nasa.ammos.plandev.contrib.streamline.core.monads.ResourceMonad;
 import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
-import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.Clock;
-import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.ClockResources;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.VariableClock;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.VariableClockResources;
 import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
-import gov.nasa.ammos.plandev.contrib.streamline.modeling.linear.Linear;
 import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Polynomial;
 import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources;
 import gov.nasa.ammos.plandev.contrib.serialization.mappers.BooleanValueMapper;
-import gov.nasa.ammos.plandev.contrib.serialization.mappers.DoubleValueMapper;
 import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
 import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
@@ -22,13 +19,21 @@ import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discre
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.*;
 
 /**
- * Mission model demonstrating all 5 Streamline resource types:
+ * Mission model demonstrating four of the streamline library's five dynamics types,
+ * plus derived resources:
  *
  * 1. Discrete    - instrumentState (ON/OFF enum)
- * 2. Polynomial  - instrumentPowerDraw (continuous power as polynomial)
- * 3. Linear      - dataVolume (accumulates at constant rate while ON)
- * 4. Clock       - instrumentUptime (elapsed time since last power-on)
- * 5. Derived     - totalPower, batterySOC (computed from other resources)
+ * 2. Polynomial  - instrumentPowerDraw (continuous power as a polynomial in time)
+ * 3. Clock       - instrumentUptime, a VariableClock stopwatch (runs while ON, pauses while OFF)
+ * 4. Linear      - only at registration: the polynomials above are registered via
+ *                  assumeLinear / approximateAsLinear, since PlanDev's `real` registrar
+ *                  takes linear profiles. We model in Polynomial and convert to Linear only
+ *                  to register, which is the pattern the streamline guide recommends.
+ * 5. Derived     - totalPower, batterySOC, batteryLow (computed from other resources)
+ *
+ * The fifth dynamics type, black_box (for opaque/complex dynamics such as SPICE or an
+ * exponential), is out of scope here; see libraries/power RtgPowerProduction for a
+ * black_box (Approximation) example.
  */
 public class Mission {
 
@@ -44,8 +49,9 @@ public class Mission {
     public final MutableResource<Polynomial> dataRate;
     public final Resource<Polynomial> dataVolume;
 
-    // --- Clock resource: instrument uptime ---
-    public final MutableResource<Clock> instrumentUptime;
+    // --- Clock resource: instrument uptime (a VariableClock stopwatch) ---
+    // Runs while the instrument is ON, pauses while OFF, so it measures accumulated on-time.
+    public final MutableResource<VariableClock> instrumentUptime;
 
     // --- Derived resources ---
     // Baseline (quiescent) spacecraft power
@@ -88,10 +94,12 @@ public class Mission {
                 0.0);
         this.dataVolume = clampedData.integral();
 
-        // ========== 4. Clock: Instrument Uptime ==========
-        // Tracks elapsed time since last power-on.
-        // Clock automatically advances with simulation time.
-        this.instrumentUptime = resource(Clock.clock(Duration.ZERO));
+        // ========== 4. Clock: Instrument Uptime (VariableClock stopwatch) ==========
+        // A VariableClock advances at an integer multiple of simulation time: 1x (running)
+        // or 0x (paused). Used here as a stopwatch measuring how long the instrument has
+        // been on: activities restart it on power-on and pause it on power-off. Unlike a
+        // plain Clock (which always advances with sim time), this counts only while ON.
+        this.instrumentUptime = resource(VariableClock.pausedStopwatch());
 
         // ========== 5. Derived: Total Power and Battery SOC ==========
         // Base spacecraft power: constant 50 W for avionics, heaters, etc.
@@ -139,9 +147,9 @@ public class Mission {
         registrar.real("dataVolume",
                 approximateAsLinear(dataVolume));
 
-        // Clock -> Linear conversion using asLinear with a unit
+        // VariableClock -> Linear conversion using asLinear with a unit
         registrar.real("instrumentUptime_seconds",
-                ClockResources.asLinear(instrumentUptime, Duration.SECOND));
+                VariableClockResources.asLinear(instrumentUptime, Duration.SECOND));
 
         // Derived resources
         registrar.real("totalPower",

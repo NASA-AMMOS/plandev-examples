@@ -2,7 +2,7 @@ package examples.resources.activities;
 
 import examples.resources.InstrumentState;
 import examples.resources.Mission;
-import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.ClockEffects;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.VariableClockEffects;
 import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects;
 import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Polynomial;
 import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
@@ -18,7 +18,7 @@ import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
  * - Discrete effect: set instrument state to ON
  * - Polynomial effect: set power draw as a polynomial (constant + warmup rate)
  * - Polynomial effect: set data collection rate
- * - Clock effect: restart the uptime timer
+ * - VariableClock effect: restart the uptime stopwatch (runs while on), pause it on shutoff
  *
  * The instrument stays on for the specified duration, then shuts off.
  * Use StopInstrument to turn it off earlier, or omit duration for indefinite operation.
@@ -50,8 +50,8 @@ public class StartInstrument {
         // Polynomial: set data rate (constant rate in Mb/s)
         set(model.dataRate, Polynomial.polynomial(dataRateMbps));
 
-        // Clock: restart uptime timer from zero
-        ClockEffects.restart(model.instrumentUptime);
+        // VariableClock: restart uptime stopwatch from zero and start it running
+        VariableClockEffects.restart(model.instrumentUptime);
 
         // Hold for specified duration
         delay(Duration.of(durationHours, Duration.HOURS));
@@ -60,5 +60,7 @@ public class StartInstrument {
         DiscreteEffects.set(model.instrumentState, InstrumentState.OFF);
         set(model.instrumentPowerDraw, Polynomial.polynomial(0.0));
         set(model.dataRate, Polynomial.polynomial(0.0));
+        // VariableClock: pause the stopwatch so uptime freezes at the on-duration
+        VariableClockEffects.pause(model.instrumentUptime);
     }
 }
