@@ -1,6 +1,6 @@
 package examples.orbiter.spice;
 
-import gov.nasa.jpl.aerie.geometry.spice.SpiceUtils;
+import gov.nasa.ammos.plandev.geometry.spice.SpiceUtils;
 import spice.basic.SpiceErrorException;
 
 import java.nio.file.Path;

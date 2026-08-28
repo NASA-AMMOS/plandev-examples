@@ -2,7 +2,7 @@
 @MissionModel.WithMappers(CommonValueMappers.class)
 @MissionModel.WithMappers(BasicValueMappers.class)
 @MissionModel.WithConfiguration(Configuration.class)
-@MissionModel.WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class)
+@MissionModel.WithMetadata(name = "unit", annotation = gov.nasa.ammos.plandev.contrib.metadata.Unit.class)
 
 @MissionModel.WithActivityType(TakePicture.class)
 @MissionModel.WithActivityType(Downlink.class)
@@ -24,11 +24,11 @@ import examples.combined.activities.Downlink;
 import examples.combined.activities.StressResourceProfile;
 import examples.combined.activities.TakePicture;
 import examples.combined.activities.ThrowDuringSim;
-import gov.nasa.jpl.aerie.contrib.serialization.rulesets.BasicValueMappers;
-import gov.nasa.jpl.aerie.data.activities.ChangeDataGenerationRate;
-import gov.nasa.jpl.aerie.data.activities.DeleteData;
-import gov.nasa.jpl.aerie.data.activities.GenerateData;
-import gov.nasa.jpl.aerie.data.activities.PlaybackData;
-import gov.nasa.jpl.aerie.data.activities.ReprioritizeData;
-import gov.nasa.jpl.aerie.data.mappers.CommonValueMappers;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel;
+import gov.nasa.ammos.plandev.contrib.serialization.rulesets.BasicValueMappers;
+import gov.nasa.ammos.plandev.data.activities.ChangeDataGenerationRate;
+import gov.nasa.ammos.plandev.data.activities.DeleteData;
+import gov.nasa.ammos.plandev.data.activities.GenerateData;
+import gov.nasa.ammos.plandev.data.activities.PlaybackData;
+import gov.nasa.ammos.plandev.data.activities.ReprioritizeData;
+import gov.nasa.ammos.plandev.data.mappers.CommonValueMappers;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel;

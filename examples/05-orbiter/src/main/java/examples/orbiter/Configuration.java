@@ -1,16 +1,16 @@
 package examples.orbiter;
 
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Export;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Export;
 import examples.orbiter.data.DataModelSimConfig;
-import gov.nasa.jpl.aerie.power.ArrayDeploymentStates;
-import gov.nasa.jpl.aerie.power.BatterySimConfig;
-import gov.nasa.jpl.aerie.power.PowerModelSimConfig;
-import gov.nasa.jpl.aerie.power.SolarArraySimConfig;
+import gov.nasa.ammos.plandev.power.ArrayDeploymentStates;
+import gov.nasa.ammos.plandev.power.BatterySimConfig;
+import gov.nasa.ammos.plandev.power.PowerModelSimConfig;
+import gov.nasa.ammos.plandev.power.SolarArraySimConfig;
 
 import java.nio.file.Path;
 import java.util.Map;
 
-import static gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Template;
+import static gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Template;
 
 public record Configuration(Integer spiceSpacecraftId,
                             PowerModelSimConfig powerConfig,

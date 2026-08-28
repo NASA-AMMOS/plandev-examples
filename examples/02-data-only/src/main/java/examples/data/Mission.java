@@ -1,15 +1,15 @@
 package examples.data;
 
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
-import gov.nasa.jpl.aerie.data.Data;
-import gov.nasa.jpl.aerie.data.DataMissionModel;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.data.Data;
+import gov.nasa.ammos.plandev.data.DataMissionModel;
 
 import java.util.Optional;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.*;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.*;
 
 /**
  * Mission is the Aerie mission model that is instantiated at the start of simulation.  This is where
@@ -34,7 +34,7 @@ public class Mission implements DataMissionModel {
    */
   public Data data;
 
-  public Mission(gov.nasa.jpl.aerie.merlin.framework.Registrar registrar, Configuration config) {
+  public Mission(gov.nasa.ammos.plandev.merlin.framework.Registrar registrar, Configuration config) {
     Registrar newRegistrar = new Registrar(registrar, Registrar.ErrorBehavior.Throw);
 
     this.dataRate = discreteResource(config.initialDatarate()); // bps

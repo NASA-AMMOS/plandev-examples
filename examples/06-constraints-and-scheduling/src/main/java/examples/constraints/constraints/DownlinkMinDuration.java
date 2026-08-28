@@ -1,11 +1,11 @@
 package examples.constraints.constraints;
 
-import gov.nasa.ammos.aerie.procedural.constraints.Constraint;
-import gov.nasa.ammos.aerie.procedural.constraints.Violations;
-import gov.nasa.ammos.aerie.procedural.constraints.annotations.ConstraintProcedure;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.Plan;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.SimulationResults;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.procedural.constraints.Constraint;
+import gov.nasa.ammos.plandev.procedural.constraints.Violations;
+import gov.nasa.ammos.plandev.procedural.constraints.annotations.ConstraintProcedure;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.Plan;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.SimulationResults;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
 /**
  * Constraint: Downlink activities must meet a minimum duration.

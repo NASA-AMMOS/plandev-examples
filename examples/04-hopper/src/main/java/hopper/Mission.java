@@ -1,19 +1,19 @@
 package hopper;
 
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
-import gov.nasa.jpl.aerie.data.Data;
-import gov.nasa.jpl.aerie.data.DataMissionModel;
-import gov.nasa.jpl.aerie.power.BatteryModel;
-import gov.nasa.jpl.aerie.power.GenericSolarArray;
-import gov.nasa.jpl.aerie.power.PowerSource;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.data.Data;
+import gov.nasa.ammos.plandev.data.DataMissionModel;
+import gov.nasa.ammos.plandev.power.BatteryModel;
+import gov.nasa.ammos.plandev.power.GenericSolarArray;
+import gov.nasa.ammos.plandev.power.PowerSource;
 
 import java.time.Instant;
 import java.util.Optional;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.asPolynomial;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.asPolynomial;
 
 /**
  * Combined mission model demonstrating how to compose the power and data libraries.
@@ -37,7 +37,7 @@ public class Mission implements DataMissionModel {
   public final MutableResource<Discrete<Double>> maxVolume;
   public final Data data;
 
-  public Mission(final gov.nasa.jpl.aerie.merlin.framework.Registrar registrar,
+  public Mission(final gov.nasa.ammos.plandev.merlin.framework.Registrar registrar,
                  final Instant planStart,
                  final Configuration config) {
     final var reg = new Registrar(registrar, Registrar.ErrorBehavior.Log);

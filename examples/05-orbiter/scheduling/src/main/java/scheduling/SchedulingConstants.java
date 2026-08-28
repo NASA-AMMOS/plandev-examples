@@ -1,6 +1,6 @@
 package scheduling;
 
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
 public class SchedulingConstants {
   public static final Integer NUM_SCI_ORBITS = 9;

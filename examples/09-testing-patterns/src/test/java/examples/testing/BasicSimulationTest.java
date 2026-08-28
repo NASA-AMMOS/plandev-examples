@@ -1,17 +1,17 @@
 package examples.testing;
 
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.EditablePlan;
-import gov.nasa.ammos.aerie.procedural.scheduling.utils.DefaultEditablePlanDriver;
-import gov.nasa.ammos.aerie.procedural.timeline.collections.profiles.Real;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.DirectiveStart;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.SimulationResults;
-import gov.nasa.ammos.aerie.procedural.utils.TypeUtilsEditablePlanAdapter;
-import gov.nasa.ammos.aerie.procedural.utils.TypeUtilsPlanAdapter;
-import gov.nasa.jpl.aerie.merlin.driver.MissionModel;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
-import gov.nasa.jpl.aerie.orchestration.simulation.SimulationUtility;
-import gov.nasa.jpl.aerie.types.Plan;
-import gov.nasa.jpl.aerie.types.Timestamp;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.EditablePlan;
+import gov.nasa.ammos.plandev.procedural.scheduling.utils.DefaultEditablePlanDriver;
+import gov.nasa.ammos.plandev.procedural.timeline.collections.profiles.Real;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.DirectiveStart;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.SimulationResults;
+import gov.nasa.ammos.plandev.procedural.utils.TypeUtilsEditablePlanAdapter;
+import gov.nasa.ammos.plandev.procedural.utils.TypeUtilsPlanAdapter;
+import gov.nasa.ammos.plandev.merlin.driver.MissionModel;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.orchestration.simulation.SimulationUtility;
+import gov.nasa.ammos.plandev.types.Plan;
+import gov.nasa.ammos.plandev.types.Timestamp;
 import examples.testing.generated.GeneratedModelType;
 import org.junit.jupiter.api.*;
 
@@ -87,7 +87,7 @@ public class BasicSimulationTest {
     plan.create(
       "DrainBattery",
       new DirectiveStart.Absolute(Duration.hours(1)),
-      Map.of("amount", gov.nasa.jpl.aerie.merlin.protocol.types.SerializedValue.of(25.0))
+      Map.of("amount", gov.nasa.ammos.plandev.merlin.protocol.types.SerializedValue.of(25.0))
     );
 
     SimulationResults results = plan.simulate();
@@ -105,7 +105,7 @@ public class BasicSimulationTest {
     plan.create(
       "CollectData",
       new DirectiveStart.Absolute(Duration.hours(2)),
-      Map.of("volume", gov.nasa.jpl.aerie.merlin.protocol.types.SerializedValue.of(500))
+      Map.of("volume", gov.nasa.ammos.plandev.merlin.protocol.types.SerializedValue.of(500))
     );
 
     SimulationResults results = plan.simulate();

@@ -1,14 +1,14 @@
 package examples.patterns.activities;
 
 import examples.patterns.Mission;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType.EffectModel;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Parameter;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.core.Resources.currentValue;
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.Resources.currentValue;
+import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
 
 /**
  * Demonstrates repeating an operation N times with a delay between iterations.

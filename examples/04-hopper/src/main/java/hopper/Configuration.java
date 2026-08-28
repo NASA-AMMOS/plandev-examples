@@ -1,8 +1,8 @@
 package hopper;
 
-import gov.nasa.jpl.aerie.power.PowerModelSimConfig;
+import gov.nasa.ammos.plandev.power.PowerModelSimConfig;
 
-import static gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Template;
+import static gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Template;
 
 public record Configuration(
     PowerModelSimConfig powerConfig,

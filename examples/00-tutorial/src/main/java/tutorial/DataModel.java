@@ -1,26 +1,26 @@
 package tutorial;
 
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.DoubleValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.EnumValueMapper;
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.core.Reactions;
-import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.clocks.Clock;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.clocks.ClockEffects;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteEffects;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.DoubleValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.core.Reactions;
+import gov.nasa.ammos.plandev.contrib.streamline.core.Resource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.Clock;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.ClockEffects;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Polynomial;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.resource;
-import static gov.nasa.jpl.aerie.contrib.streamline.core.Resources.currentValue;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete.discrete;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.monads.DiscreteResourceMonad.map;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.asPolynomial;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.scale;
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.resource;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.Resources.currentValue;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete.discrete;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.monads.DiscreteResourceMonad.map;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.asPolynomial;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.scale;
+import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
 
 public class DataModel {
 

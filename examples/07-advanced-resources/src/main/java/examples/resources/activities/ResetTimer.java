@@ -1,9 +1,9 @@
 package examples.resources.activities;
 
 import examples.resources.Mission;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.clocks.ClockEffects;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.ClockEffects;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType.EffectModel;
 
 /**
  * Resets the instrument uptime clock to zero.

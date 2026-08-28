@@ -1,25 +1,25 @@
 package examples.resources;
 
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
-import gov.nasa.jpl.aerie.contrib.streamline.core.monads.ResourceMonad;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.clocks.Clock;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.clocks.ClockResources;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.linear.Linear;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.Polynomial;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.BooleanValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.DoubleValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.EnumValueMapper;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.core.Resource;
+import gov.nasa.ammos.plandev.contrib.streamline.core.monads.ResourceMonad;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.Clock;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.ClockResources;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.linear.Linear;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Polynomial;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.BooleanValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.DoubleValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
 import java.time.Instant;
 
-import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.resource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.polynomial.PolynomialResources.*;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.resource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteResources.discreteResource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.*;
 
 /**
  * Mission model demonstrating all 5 Streamline resource types:
@@ -56,7 +56,7 @@ public class Mission {
     public final Resource<Polynomial> batterySOC;
     public final Resource<Discrete<Boolean>> batteryLow;
 
-    public Mission(final gov.nasa.jpl.aerie.merlin.framework.Registrar registrar,
+    public Mission(final gov.nasa.ammos.plandev.merlin.framework.Registrar registrar,
                    final Instant planStart,
                    final Configuration config) {
 

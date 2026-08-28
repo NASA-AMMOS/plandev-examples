@@ -1,14 +1,14 @@
 package examples.events.goals;
 
-import gov.nasa.ammos.aerie.procedural.scheduling.Goal;
-import gov.nasa.ammos.aerie.procedural.scheduling.annotations.SchedulingProcedure;
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.EditablePlan;
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.NewDirective;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.AnyDirective;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.DirectiveStart;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.EventQuery;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
-import gov.nasa.jpl.aerie.merlin.protocol.types.SerializedValue;
+import gov.nasa.ammos.plandev.procedural.scheduling.Goal;
+import gov.nasa.ammos.plandev.procedural.scheduling.annotations.SchedulingProcedure;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.EditablePlan;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.NewDirective;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.AnyDirective;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.DirectiveStart;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.EventQuery;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.merlin.protocol.types.SerializedValue;
 
 import java.util.Map;
 

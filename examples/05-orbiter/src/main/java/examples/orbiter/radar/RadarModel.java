@@ -1,17 +1,17 @@
 package examples.orbiter.radar;
 
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.DoubleValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.EnumValueMapper;
-import gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource;
-import gov.nasa.jpl.aerie.contrib.streamline.core.Resource;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.DoubleValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
+import gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource;
+import gov.nasa.ammos.plandev.contrib.streamline.core.Resource;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete;
 import examples.orbiter.Configuration;
 
-import static gov.nasa.jpl.aerie.contrib.metadata.UnitRegistrar.withUnit;
-import static gov.nasa.jpl.aerie.contrib.streamline.core.MutableResource.resource;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.Discrete.discrete;
-import static gov.nasa.jpl.aerie.contrib.streamline.modeling.discrete.monads.DiscreteResourceMonad.map;
+import static gov.nasa.ammos.plandev.contrib.metadata.UnitRegistrar.withUnit;
+import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.resource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete.discrete;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.monads.DiscreteResourceMonad.map;
 
 public class RadarModel {
 

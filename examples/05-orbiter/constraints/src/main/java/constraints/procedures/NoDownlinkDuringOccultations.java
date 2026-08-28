@@ -1,12 +1,12 @@
 package constraints.procedures;
 
-import gov.nasa.ammos.aerie.procedural.constraints.Constraint;
-import gov.nasa.ammos.aerie.procedural.constraints.annotations.ConstraintProcedure;
-import gov.nasa.ammos.aerie.procedural.constraints.Violations;
-import gov.nasa.ammos.aerie.procedural.timeline.collections.profiles.Booleans;
-import gov.nasa.ammos.aerie.procedural.timeline.collections.profiles.Real;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.Plan;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.SimulationResults;
+import gov.nasa.ammos.plandev.procedural.constraints.Constraint;
+import gov.nasa.ammos.plandev.procedural.constraints.annotations.ConstraintProcedure;
+import gov.nasa.ammos.plandev.procedural.constraints.Violations;
+import gov.nasa.ammos.plandev.procedural.timeline.collections.profiles.Booleans;
+import gov.nasa.ammos.plandev.procedural.timeline.collections.profiles.Real;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.Plan;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.SimulationResults;
 
 @ConstraintProcedure
 public record NoDownlinkDuringOccultations() implements Constraint {

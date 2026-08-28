@@ -1,15 +1,15 @@
 package constraints.procedures;
 
-import gov.nasa.ammos.aerie.procedural.constraints.Constraint;
-import gov.nasa.ammos.aerie.procedural.constraints.Violations;
-import gov.nasa.ammos.aerie.procedural.constraints.annotations.ConstraintProcedure;
-import gov.nasa.ammos.aerie.procedural.timeline.Interval;
-import gov.nasa.ammos.aerie.procedural.timeline.collections.Windows;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.AnyInstance;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.Instance;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.Plan;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.SimulationResults;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.procedural.constraints.Constraint;
+import gov.nasa.ammos.plandev.procedural.constraints.Violations;
+import gov.nasa.ammos.plandev.procedural.constraints.annotations.ConstraintProcedure;
+import gov.nasa.ammos.plandev.procedural.timeline.Interval;
+import gov.nasa.ammos.plandev.procedural.timeline.collections.Windows;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.AnyInstance;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.Instance;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.Plan;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.SimulationResults;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
 import java.util.List;
 

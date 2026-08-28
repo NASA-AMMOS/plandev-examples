@@ -2,13 +2,13 @@ package examples.power;
 
 
 import examples.power.models.pel.PELModel;
-import gov.nasa.jpl.aerie.merlin.framework.ModelActions;
-import gov.nasa.jpl.aerie.contrib.streamline.modeling.Registrar;
+import gov.nasa.ammos.plandev.merlin.framework.ModelActions;
+import gov.nasa.ammos.plandev.contrib.streamline.modeling.Registrar;
 
-import gov.nasa.jpl.aerie.power.BatteryModel;
-import gov.nasa.jpl.aerie.power.GenericSolarArray;
-import gov.nasa.jpl.aerie.power.PowerSource;
-import gov.nasa.jpl.aerie.power.RtgPowerProduction;
+import gov.nasa.ammos.plandev.power.BatteryModel;
+import gov.nasa.ammos.plandev.power.GenericSolarArray;
+import gov.nasa.ammos.plandev.power.PowerSource;
+import gov.nasa.ammos.plandev.power.RtgPowerProduction;
 
 import java.time.Instant;
 
@@ -22,7 +22,7 @@ public class Mission {
 
     public final Registrar errorRegistrar;
 
-    public Mission(final gov.nasa.jpl.aerie.merlin.framework.Registrar registrar, final Instant planStart, final Configuration config) {
+    public Mission(final gov.nasa.ammos.plandev.merlin.framework.Registrar registrar, final Instant planStart, final Configuration config) {
         this.calculator = new DistAndAngleCalculator();
         ModelActions.spawn(calculator::run);
 

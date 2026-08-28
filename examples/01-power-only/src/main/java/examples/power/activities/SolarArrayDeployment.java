@@ -1,13 +1,13 @@
 package examples.power.activities;
 
-import static gov.nasa.jpl.aerie.merlin.framework.ModelActions.delay;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.ActivityType.EffectModel;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.Export.Parameter;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType.EffectModel;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Parameter;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 import examples.power.Mission;
-import gov.nasa.jpl.aerie.power.ArrayDeploymentStates;
-import gov.nasa.jpl.aerie.power.GenericSolarArray;
+import gov.nasa.ammos.plandev.power.ArrayDeploymentStates;
+import gov.nasa.ammos.plandev.power.GenericSolarArray;
 
 @ActivityType("SolarArrayDeployment")
 public class SolarArrayDeployment {

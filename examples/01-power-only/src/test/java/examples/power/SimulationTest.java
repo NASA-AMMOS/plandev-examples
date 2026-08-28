@@ -2,10 +2,10 @@ package examples.power;
 
 import examples.power.Configuration;
 import examples.power.generated.GeneratedModelType;
-import gov.nasa.jpl.aerie.merlin.driver.*;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
-import gov.nasa.jpl.aerie.types.ActivityDirective;
-import gov.nasa.jpl.aerie.types.ActivityDirectiveId;
+import gov.nasa.ammos.plandev.merlin.driver.*;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.types.ActivityDirective;
+import gov.nasa.ammos.plandev.types.ActivityDirectiveId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

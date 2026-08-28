@@ -1,31 +1,31 @@
 package scheduling.procedures;
 
-import gov.nasa.ammos.aerie.procedural.scheduling.ActivityAutoDelete;
-import gov.nasa.ammos.aerie.procedural.scheduling.Goal;
-import gov.nasa.ammos.aerie.procedural.scheduling.annotations.SchedulingProcedure;
-import gov.nasa.ammos.aerie.procedural.scheduling.annotations.WithDefaults;
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.DeletedAnchorStrategy;
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.EditablePlan;
-import gov.nasa.ammos.aerie.procedural.scheduling.plan.NewDirective;
-import gov.nasa.ammos.aerie.procedural.timeline.Interval;
-import gov.nasa.ammos.aerie.procedural.timeline.collections.profiles.Booleans;
-import gov.nasa.ammos.aerie.procedural.timeline.collections.profiles.Real;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.Plan;
-import gov.nasa.ammos.aerie.procedural.timeline.plan.SimulationResults;
-import gov.nasa.jpl.aerie.types.ActivityDirectiveId;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.AnyDirective;
-import gov.nasa.ammos.aerie.procedural.timeline.payloads.activities.DirectiveStart;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.DurationValueMapper;
-import gov.nasa.jpl.aerie.contrib.serialization.mappers.EnumValueMapper;
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
-import gov.nasa.jpl.aerie.merlin.protocol.types.SerializedValue;
+import gov.nasa.ammos.plandev.procedural.scheduling.ActivityAutoDelete;
+import gov.nasa.ammos.plandev.procedural.scheduling.Goal;
+import gov.nasa.ammos.plandev.procedural.scheduling.annotations.SchedulingProcedure;
+import gov.nasa.ammos.plandev.procedural.scheduling.annotations.WithDefaults;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.DeletedAnchorStrategy;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.EditablePlan;
+import gov.nasa.ammos.plandev.procedural.scheduling.plan.NewDirective;
+import gov.nasa.ammos.plandev.procedural.timeline.Interval;
+import gov.nasa.ammos.plandev.procedural.timeline.collections.profiles.Booleans;
+import gov.nasa.ammos.plandev.procedural.timeline.collections.profiles.Real;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.Plan;
+import gov.nasa.ammos.plandev.procedural.timeline.plan.SimulationResults;
+import gov.nasa.ammos.plandev.types.ActivityDirectiveId;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.AnyDirective;
+import gov.nasa.ammos.plandev.procedural.timeline.payloads.activities.DirectiveStart;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.DurationValueMapper;
+import gov.nasa.ammos.plandev.contrib.serialization.mappers.EnumValueMapper;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.merlin.protocol.types.SerializedValue;
 import examples.orbiter.radar.RadarDataCollectionMode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-import static gov.nasa.jpl.aerie.merlin.protocol.types.Duration.*;
+import static gov.nasa.ammos.plandev.merlin.protocol.types.Duration.*;
 
 /**
  * Schedules a priority-based set of activities within a user-defined time period.

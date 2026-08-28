@@ -7,8 +7,8 @@
 
 package examples.testing;
 
-import gov.nasa.jpl.aerie.contrib.serialization.rulesets.BasicValueMappers;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithConfiguration;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithMappers;
+import gov.nasa.ammos.plandev.contrib.serialization.rulesets.BasicValueMappers;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel.WithActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel.WithConfiguration;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel.WithMappers;

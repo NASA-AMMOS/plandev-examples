@@ -1,11 +1,11 @@
 package scheduling;
 
-import gov.nasa.jpl.aerie.merlin.protocol.types.Duration;
+import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
 import java.time.Instant;
 import java.util.Arrays;
 
-import static gov.nasa.jpl.aerie.merlin.protocol.types.Duration.*;
+import static gov.nasa.ammos.plandev.merlin.protocol.types.Duration.*;
 
 public class SchedulingUtils {
 

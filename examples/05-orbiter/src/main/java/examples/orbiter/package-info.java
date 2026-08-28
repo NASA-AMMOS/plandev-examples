@@ -41,7 +41,7 @@
 @WithActivityType(ChangeRadarDataMode.class)
 @WithActivityType(TakeRadarObservation.class)
 
-@WithMetadata(name = "unit", annotation = gov.nasa.jpl.aerie.contrib.metadata.Unit.class)
+@WithMetadata(name = "unit", annotation = gov.nasa.ammos.plandev.contrib.metadata.Unit.class)
 @WithSubsystem("geometry")
 @WithSubsystem("power")
 @WithSubsystem("data")
@@ -49,15 +49,15 @@
 @WithSubsystem("radar")
 package examples.orbiter;
 
-import gov.nasa.jpl.aerie.contrib.serialization.rulesets.BasicValueMappers;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithActivityType;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithMetadata;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithSubsystem;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithConfiguration;
-import gov.nasa.jpl.aerie.merlin.framework.annotations.MissionModel.WithMappers;
-import gov.nasa.jpl.aerie.data.activities.*;
-import gov.nasa.jpl.aerie.data.mappers.CommonValueMappers;
+import gov.nasa.ammos.plandev.contrib.serialization.rulesets.BasicValueMappers;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel.WithActivityType;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel.WithMetadata;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel.WithSubsystem;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel.WithConfiguration;
+import gov.nasa.ammos.plandev.merlin.framework.annotations.MissionModel.WithMappers;
+import gov.nasa.ammos.plandev.data.activities.*;
+import gov.nasa.ammos.plandev.data.mappers.CommonValueMappers;
 import examples.orbiter.geometry.activities.atomic.*;
 import examples.orbiter.geometry.activities.spawner.AddApoapsis;
 import examples.orbiter.geometry.activities.spawner.AddOccultations;
