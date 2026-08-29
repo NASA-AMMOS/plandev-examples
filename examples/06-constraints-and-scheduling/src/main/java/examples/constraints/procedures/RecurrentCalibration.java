@@ -1,4 +1,4 @@
-package examples.constraints.goals;
+package examples.constraints.procedures;
 
 import gov.nasa.ammos.plandev.procedural.scheduling.Goal;
 import gov.nasa.ammos.plandev.procedural.scheduling.annotations.SchedulingProcedure;

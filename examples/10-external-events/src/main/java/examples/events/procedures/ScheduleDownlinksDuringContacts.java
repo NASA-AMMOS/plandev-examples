@@ -1,4 +1,4 @@
-package examples.events.goals;
+package examples.events.procedures;
 
 import gov.nasa.ammos.plandev.procedural.scheduling.Goal;
 import gov.nasa.ammos.plandev.procedural.scheduling.annotations.SchedulingProcedure;
