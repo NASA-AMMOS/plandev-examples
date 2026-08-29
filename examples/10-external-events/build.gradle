@@ -1,3 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+plugins {
+  id 'io.github.goooler.shadow' version '8.1.7'
+}
+
 dependencies {
   // Procedural scheduling
   annotationProcessor "gov.nasa.ammos.plandev.procedural:processor:${plandevVersion}"
@@ -11,6 +17,6 @@ dependencies {
   implementation "gov.nasa.ammos.plandev:type-utils:${plandevVersion}"
 }
 
-jar {
-  archiveFileName.set("external-events-procedures.jar")
+tasks.named('jar') {
+  enabled = false
 }

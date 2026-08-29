@@ -66,12 +66,12 @@ The activities carry PlanDev metadata annotations:
   ```
   (Resource units — bucket volumes/rates — are attached at registration and need no such
   declaration.)
-- **Subsystem** — each activity is tagged `@Subsystem("data")`. This is inert unless the
-  consuming model declares the subsystem, in which case the activities group under it:
+- **Subsystem** — each activity is tagged `@Subsystem("data")`. A consuming
+  mission model **must declare that subsystem** in `package-info.java`:
+
   ```java
   @WithSubsystem("data")
   ```
-  (Declaring it is optional; omitting it does not break the build.)
 
 See `examples/04-hopper` and `examples/05-orbiter` for both in use.
 

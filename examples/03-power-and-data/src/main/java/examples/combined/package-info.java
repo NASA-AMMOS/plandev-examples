@@ -3,6 +3,7 @@
 @MissionModel.WithMappers(BasicValueMappers.class)
 @MissionModel.WithConfiguration(Configuration.class)
 @MissionModel.WithMetadata(name = "unit", annotation = gov.nasa.ammos.plandev.contrib.metadata.Unit.class)
+@MissionModel.WithSubsystem("data")
 
 @MissionModel.WithActivityType(TakePicture.class)
 @MissionModel.WithActivityType(Downlink.class)
