@@ -40,7 +40,7 @@ Enable the plugin in the PlanDev UI environment:
 PUBLIC_TIME_PLUGIN_ENABLED=true
 ```
 
-Then rebuild or restart the UI deployment.
+Then rebuild the PlanDev UI and restart or redeploy it.
 
 The deployed files must be available at these paths:
 
