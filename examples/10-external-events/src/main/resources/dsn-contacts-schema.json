@@ -1,0 +1,20 @@
+{
+  "event_types": {
+    "DSNContact": {
+      "type": "object",
+      "properties": {
+        "station": { "type": "string" }
+      },
+      "required": ["station"]
+    }
+  },
+  "source_types": {
+    "DSNSchedule": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" }
+      },
+      "required": []
+    }
+  }
+}
