@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "PlanDev UI LMST Plugin Example",
   "scripts": {
-    "build": "rollup -c"
+    "build": "rm -rf build && rollup -c && cp -R static/. build/"
   },
   "dependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",
