@@ -38,5 +38,5 @@ A cookbook of common activity patterns in PlanDev. Each activity demonstrates a 
 ## Build
 
 ```bash
-./gradlew :examples:08-activity-patterns:build
+./gradlew :examples:09-activity-patterns:build
 ```

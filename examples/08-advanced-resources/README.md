@@ -43,5 +43,5 @@ resources, which are a way of building resources rather than a dynamics type). T
 ## Build
 
 ```bash
-./gradlew :examples:07-advanced-resources:build
+./gradlew :examples:08-advanced-resources:build
 ```

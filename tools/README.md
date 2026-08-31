@@ -54,7 +54,7 @@ generated code as a starting point — the maintained PELs in `examples/01-power
 
 ## `generate_external_events.py` — scale-test external events
 
-Generates large, varied [PlanDev external-event](../examples/10-external-events/) datasets for
+Generates large, varied [PlanDev external-event](../examples/07-external-events/) datasets for
 hopper/orbiter scale testing. Stdlib only. Emits two files in PlanDev's canonical ingest format:
 
 - `<prefix>_schema.json` — event-type + source-type definitions (upload to PlanDev **first**)
@@ -77,7 +77,7 @@ python3 tools/generate_external_events.py --count 20000 --start 2028-100 --end 2
 python3 tools/generate_external_events.py --contact-type DSS_Pass --out-dir /tmp/ev
 ```
 
-The default `DSNContact` comms type lines up with example 10's `ScheduleDownlinksDuringContacts`
+The default `DSNContact` comms type lines up with example 07's `ScheduleDownlinksDuringContacts`
 goal (which queries that type). Output JSON is generated on demand and **not committed** —
 thousands of events is a multi-MB source file; size `--count` to your ingest budget (PlanDev
 ingests external events at roughly hundreds/sec).

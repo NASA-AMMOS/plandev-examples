@@ -26,11 +26,11 @@ Tests use PlanDev's stateless simulation utilities to run a simulation in-proces
 ## Running tests
 
 ```bash
-./gradlew :examples:09-testing-patterns:test
+./gradlew :examples:10-testing-patterns:test
 ```
 
 ## Build
 
 ```bash
-./gradlew :examples:09-testing-patterns:build
+./gradlew :examples:10-testing-patterns:build
 ```

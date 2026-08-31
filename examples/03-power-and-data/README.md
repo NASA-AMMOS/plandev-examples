@@ -39,4 +39,4 @@ The `Mission` class composes library models by instantiating them and wiring the
 Activities can then interact with multiple subsystems — `TakePicture` draws power via the PEL while 
 simultaneously writing data to the storage model. This is the pattern used by more complex examples like the orbiter.
 
-This model also serves as the base mission model for examples [06-constraints-and-scheduling](../06-constraints-and-scheduling/) and [10-external-events](../10-external-events/), which add procedural constraints and scheduling goals on top of this model without duplicating its code.
+This model also serves as the base mission model for examples [06-constraints-and-scheduling](../06-constraints-and-scheduling/) and [07-external-events](../07-external-events/), which add procedural constraints and scheduling goals on top of this model without duplicating its code.
