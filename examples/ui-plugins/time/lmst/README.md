@@ -23,6 +23,11 @@ The generated `build/` directory contains:
 - the JavaScript modules used by TimeCraftJS
 - the required SPICE kernels under `build/kernels/`
 
+`build/` is committed here so the plugin can be installed without building it first. It is
+kept out of the repo-root `.gitignore`'s `build/` rule by the `!build/` line in this
+directory's `.gitignore`. Re-run `npm run build` and commit the result whenever you change
+`time-plugin.ts`.
+
 ## Install in PlanDev UI
 
 PlanDev loads the time plugin from `/resources/time-plugin.js`. Copy the complete build output into the UI’s static resources directory:
