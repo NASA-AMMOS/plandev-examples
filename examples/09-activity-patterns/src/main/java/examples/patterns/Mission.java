@@ -16,8 +16,7 @@ import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.res
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete.discrete;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.ClockResources.clock;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.polynomialResource;
-import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.clampedIntegrate;
-import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.constant;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.integrate;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.assumeLinear;
 
 public class Mission {
@@ -39,8 +38,7 @@ public class Mission {
         this.powerDraw = resource(discrete(0.0));
         this.operationCount = resource(discrete(0));
         this.dataRate = polynomialResource(0);
-        this.dataVolume = clampedIntegrate(
-                this.dataRate, constant(0.0), constant(100.0), config.initialDataVolumeMb()).integral();
+        this.dataVolume = integrate(this.dataRate, config.initialDataVolumeMb());
         this.simulationClock = clock();
 
         final var errorRegistrar = new Registrar(registrar, Registrar.ErrorBehavior.Log);

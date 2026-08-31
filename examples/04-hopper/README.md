@@ -59,7 +59,7 @@ turns the bin's receive rate on, accumulates data for the duration, then turns i
 
 ```bash
 # Mission model JAR (uploadable to PlanDev)
-./gradlew :examples:04-hopper:build        # produces hopper.jar
+./gradlew :examples:04-hopper:compileJava        # produces hopper.jar
 
 # Constraint procedure JAR
 ./gradlew :examples:04-hopper:constraints:build
