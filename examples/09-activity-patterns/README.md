@@ -1,4 +1,4 @@
-# 08 - Activity Patterns
+# 09 - Activity Patterns
 
 A cookbook of common activity patterns in PlanDev. Each activity demonstrates a specific idiom that modelers frequently need.
 

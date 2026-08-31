@@ -1,4 +1,4 @@
-# 07 - Advanced Resources
+# 08 - Advanced Resources
 
 Demonstrates the [streamline](../../libraries/) resource types beyond the basic discrete
 resources covered in the tutorial.
