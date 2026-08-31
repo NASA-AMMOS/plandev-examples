@@ -165,7 +165,7 @@
           },
           {
             "id": 22,
-            "name": "Onboard Bins",
+            "name": "Onboard Bin Groups",
             "yAxes": [
               {
                 "id": 21,
@@ -184,7 +184,7 @@
                 "id": 18,
                 "name": "",
                 "filter": {
-                  "resource": "scBin0.volume"
+                  "resource": "onboard.binGroup_00_04.volume"
                 },
                 "yAxisId": 21,
                 "chartType": "line",
@@ -196,7 +196,7 @@
                 "id": 19,
                 "name": "",
                 "filter": {
-                  "resource": "scBin1.volume"
+                  "resource": "onboard.binGroup_05_09.volume"
                 },
                 "yAxisId": 21,
                 "chartType": "line",
@@ -205,10 +205,10 @@
                 "pointRadius": 2
               },
               {
-                "id": 31,
+                "id": 20,
                 "name": "",
                 "filter": {
-                  "resource": "scBin2.volume"
+                  "resource": "onboard.binGroup_10_14.volume"
                 },
                 "yAxisId": 21,
                 "chartType": "line",
@@ -217,26 +217,14 @@
                 "pointRadius": 2
               },
               {
-                "id": 32,
+                "id": 21,
                 "name": "",
                 "filter": {
-                  "resource": "scBin3.volume"
+                  "resource": "onboard.binGroup_15_19.volume"
                 },
                 "yAxisId": 21,
                 "chartType": "line",
                 "lineColor": "#FF47A9",
-                "lineWidth": 1,
-                "pointRadius": 2
-              },
-              {
-                "id": 33,
-                "name": "",
-                "filter": {
-                  "resource": "scBin4.volume"
-                },
-                "yAxisId": 21,
-                "chartType": "line",
-                "lineColor": "#75b53b",
                 "lineWidth": 1,
                 "pointRadius": 2
               }
@@ -259,7 +247,7 @@
           },
           {
             "id": 23,
-            "name": "Ground Bins",
+            "name": "Onboard vs Downlinked Volume",
             "yAxes": [
               {
                 "id": 22,
@@ -278,7 +266,7 @@
                 "id": 20,
                 "name": "",
                 "filter": {
-                  "resource": "gndBin0.volume"
+                  "resource": "onboard.volume"
                 },
                 "yAxisId": 22,
                 "chartType": "line",
@@ -290,47 +278,11 @@
                 "id": 21,
                 "name": "",
                 "filter": {
-                  "resource": "gndBin1.volume"
+                  "resource": "ground.volume"
                 },
                 "yAxisId": 22,
                 "chartType": "line",
                 "lineColor": "#e31a1c",
-                "lineWidth": 1,
-                "pointRadius": 2
-              },
-              {
-                "id": 39,
-                "name": "",
-                "filter": {
-                  "resource": "gndBin2.volume"
-                },
-                "yAxisId": 22,
-                "chartType": "line",
-                "lineColor": "#424242",
-                "lineWidth": 1,
-                "pointRadius": 2
-              },
-              {
-                "id": 40,
-                "name": "",
-                "filter": {
-                  "resource": "gndBin3.volume"
-                },
-                "yAxisId": 22,
-                "chartType": "line",
-                "lineColor": "#FF47A9",
-                "lineWidth": 1,
-                "pointRadius": 2
-              },
-              {
-                "id": 41,
-                "name": "",
-                "filter": {
-                  "resource": "gndBin4.volume"
-                },
-                "yAxisId": 22,
-                "chartType": "line",
-                "lineColor": "#75b53b",
                 "lineWidth": 1,
                 "pointRadius": 2
               }

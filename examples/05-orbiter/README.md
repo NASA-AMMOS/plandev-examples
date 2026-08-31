@@ -109,7 +109,7 @@ Sample plans, views, and external events are in `demo/`:
 | Directory | Contents |
 |---|---|
 | `demo/plans/` | SimplePlan (12 activities), MarsSat Plan (full orbital), Constraint Violation Plan, Example_MarsSat_Plan |
-| `demo/views/` | Timeline views: 5 Bin, MarsSat Overview, MarsSat Power, Overview |
+| `demo/views/` | Timeline views: Bin Groups, MarsSat Overview, MarsSat Power |
 | `demo/external-events/` | DSS-24 comm pass source and schema for external event scheduling |
 | `demo/external-datasets/` | `sample_dataset.json` (3 profiles × 60k segments) for SimplePlan; regenerate with `generate_sample_dataset.py` |
 
