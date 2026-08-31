@@ -16,17 +16,30 @@ Demonstrates how to write automated tests for PlanDev mission models using state
 
 ## Key testing pattern
 
-Tests use PlanDev's stateless simulation utilities to run a simulation in-process without needing a running PlanDev server:
+Tests instantiate the generated mission model and run Merlin's simulation driver directly in the test process. 
+No running PlanDev services, database, or uploaded mission-model JAR are required:
 
-1. Build a `MissionModel` instance from your generated plugin
-2. Create activity directives with parameters and start times
-3. Run simulation over a time range
-4. Query resource profiles from `SimulationResults` and assert values
+1. Instantiate the mission model from its generated `GeneratedModelType`.
+2. Create an in-memory plan and add activity directives.
+3. Run the plan through `SimulationUtility`.
+4. Query the resulting resource profiles and assert their values.
 
 ## Running tests
 
 ```bash
 ./gradlew :examples:10-testing-patterns:test
+```
+
+Gradle prints a test summary in the terminal. A detailed HTML report is generated at:
+
+```text
+examples/10-testing-patterns/build/reports/tests/test/index.html
+```
+
+Individual XML results are written to:
+
+```text
+examples/10-testing-patterns/build/test-results/test/
 ```
 
 ## Build
