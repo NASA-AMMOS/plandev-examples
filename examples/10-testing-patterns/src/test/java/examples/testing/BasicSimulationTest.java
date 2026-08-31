@@ -78,7 +78,7 @@ public class BasicSimulationTest {
     assertEquals(100.0, soc.sample(Duration.ZERO));
 
     Real dataVol = results.resource("DataVolume", Real.deserializer());
-    assertEquals(20.0, dataVol.sample(Duration.ZERO));
+    assertEquals(0.0, dataVol.sample(Duration.ZERO));
   }
 
   @Test

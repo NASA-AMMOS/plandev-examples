@@ -15,15 +15,17 @@ import java.time.Instant;
 import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.resource;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.Discrete.discrete;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.clocks.ClockResources.clock;
-import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.assumeLinear;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.polynomialResource;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.clampedIntegrate;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.constant;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.assumeLinear;
 
 public class Mission {
 
     public final MutableResource<Discrete<InstrumentMode>> instrumentMode;
     public final MutableResource<Discrete<Double>> powerDraw;
     public final MutableResource<Discrete<Integer>> operationCount;
-    public final MutableResource<Polynomial> dataVolume;
+    public final Resource<Polynomial> dataVolume;
     public final MutableResource<Polynomial> dataRate;
     public final Resource<Clock> simulationClock;
     public final Configuration configuration;
@@ -36,14 +38,16 @@ public class Mission {
         this.instrumentMode = resource(discrete(InstrumentMode.IDLE));
         this.powerDraw = resource(discrete(0.0));
         this.operationCount = resource(discrete(0));
-        this.dataVolume = polynomialResource(config.initialDataVolumeMb());
         this.dataRate = polynomialResource(0);
+        this.dataVolume = clampedIntegrate(
+                this.dataRate, constant(0.0), constant(100.0), config.initialDataVolumeMb()).integral();
         this.simulationClock = clock();
 
         final var errorRegistrar = new Registrar(registrar, Registrar.ErrorBehavior.Log);
         errorRegistrar.discrete("instrumentMode", instrumentMode, new EnumValueMapper<>(InstrumentMode.class));
         errorRegistrar.discrete("powerDraw", powerDraw, new DoubleValueMapper());
         errorRegistrar.discrete("operationCount", operationCount, new IntegerValueMapper());
+        errorRegistrar.real("dataRate", assumeLinear(dataRate));
         errorRegistrar.real("dataVolume", assumeLinear(dataVolume));
     }
 }

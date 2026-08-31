@@ -11,7 +11,7 @@ import gov.nasa.ammos.plandev.merlin.protocol.types.Duration;
 
 import static gov.nasa.ammos.plandev.contrib.streamline.core.Resources.currentValue;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.discrete.DiscreteEffects.set;
-import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialEffects.restoring;
+import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialEffects.providing;
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.greaterThanOrEquals;
 import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.waitUntil;
 
@@ -47,8 +47,8 @@ public class DurationLimitedActivity {
 
     set(model.instrumentMode, InstrumentMode.ACTIVE);
     set(model.powerDraw, 45.0);
-    restoring(model.dataVolume, collectionRateMbPerHour / 3600, () ->
-        waitUntil(DiscreteResources.when(shouldStop)));
+    providing(model.dataRate, collectionRateMbPerHour / 3600.0, () ->
+            waitUntil(DiscreteResources.when(shouldStop)));
     set(model.instrumentMode, InstrumentMode.IDLE);
     set(model.powerDraw, 0.0);
     set(model.operationCount, currentValue(model.operationCount) + 1);
