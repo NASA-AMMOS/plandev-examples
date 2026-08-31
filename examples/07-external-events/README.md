@@ -23,7 +23,7 @@ Demonstrates how to schedule activities in response to external events — a key
 
 1. Build and upload the `03-power-and-data` mission model.
 2. Create a plan that includes January 1–2, 2025, the period covered by the example contacts.
-3. Go to the External Sources page and upload `dsn_contact_schema.json` as an external event schema. This defines the `DSNContact` event type and `DSNSchedule` source type.
+3. Go to the [External Sources page and upload](https://nasa-ammos.github.io/plandev-docs/tutorials/external-events/uploading-an-external-source/) `dsn_contact_schema.json` as an external event schema. This defines the `DSNContact` event type and `DSNSchedule` source type.
 4. Upload `dsn_contact_source.json` as an external event source. Its events belong to the `DSNSchedule Default` derivation group.
 5. Open the plan’s External Sources panel, select Manage Derivation Groups, and associate `DSNSchedule Default` with the plan.
 6. Confirm that the three `DSNContact` events now appear on the plan timeline.
@@ -32,19 +32,10 @@ Demonstrates how to schedule activities in response to external events — a key
 9. Run `ScheduleDownlinksDuringContacts` to add a one-hour `Downlink` at the beginning of each contact window.
 10. Simulate the plan. Each `Downlink` turns on telecom power and spawns a `PlaybackData` activity to transfer stored data.
 
-## Key API
+## Events API
 
-```java
-// Query external events by event type
-var contactQuery = new EventQuery(null, "DSNContact", null);
-for (var contact : plan.events(contactQuery).collect()) {
-    plan.create(new NewDirective(
-        new AnyDirective(Map.of("durationHours", SerializedValue.of(1))),
-        "Downlink", "Downlink",
-        new DirectiveStart.Absolute(contact.getInterval().start)));
-}
-plan.commit();
-```
+Events can be used to schedule activities using the [Procedural Scheduling API](https://nasa-ammos.github.io/plandev-docs/scheduling-and-constraints/procedural/introduction/).
+Examples for doing this can be found in the ["Creating a Scheduling Goal with External Events" tutorial](https://nasa-ammos.github.io/plandev-docs/tutorials/external-events/creating-a-scheduling-goal-with-external-events/).
 
 ## Build
 
