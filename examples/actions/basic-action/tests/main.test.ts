@@ -1,22 +1,24 @@
 import { main } from "../src/index";
 
-import assert from 'node:assert';
+import assert from "node:assert";
 import { test, mock } from "node:test";
-import type {ActionsAPI} from "@nasa-jpl/plandev-actions";
+import type { ActionsAPI } from "@nasa-jpl/plandev-actions";
 
 // The basic-action example makes a `fetch` call to an external URL when it runs.
 // This test avoids relying on making an actual call to an external URL by "mocking"
 // the `fetch` API and replacing it with our own test function.
 
 // create a mock Response-like object
-function createMockResponse(data) {
+function createMockResponse(data, { ok = true, status = 200 } = {}) {
   return {
-    ok: true,
-    status: 200,
+    ok,
+    status,
+    statusText: ok ? "OK" : "Internal Server Error",
     json: async () => data,
-    clone: function() {
-      return createMockResponse(data);
-    }
+    text: async () => JSON.stringify(data),
+    clone: function () {
+      return createMockResponse(data, { ok, status });
+    },
   };
 }
 
@@ -41,21 +43,32 @@ const mockActionsAPI = createMock<ActionsAPI>({
 });
 
 test("plandev basic example action", async (t) => {
-  t.mock.method(globalThis, 'fetch', mockFetch);
+  t.mock.method(globalThis, "fetch", mockFetch);
 
   await t.test("runs main", async () => {
     await main(
       {
         urlPath: "repos/NASA-AMMOS/plandev",
-        myBool: false,
         sleepMs: 0,
       },
       {
         externalUrl: "https://api.github.com",
-        retries: 0,
       },
       mockActionsAPI,
     );
     assert.equal(mockFetch.mock.calls.length, 1, "fetch should have been called once");
+  });
+});
+
+test("plandev basic example action - HTTP error handling", async (t) => {
+  // fetch resolves normally on a 500; only response.ok distinguishes it.
+  const failingFetch = mock.fn(async () => createMockResponse({ error: "boom" }, { ok: false, status: 500 }));
+  t.mock.method(globalThis, "fetch", failingFetch);
+
+  await t.test("throws instead of reporting SUCCESS", async () => {
+    await assert.rejects(
+      () => main({ urlPath: "some/path", sleepMs: 0 }, { externalUrl: "https://api.github.com" }, mockActionsAPI),
+      /HTTP 500/,
+    );
   });
 });
