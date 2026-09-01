@@ -128,7 +128,51 @@ Sample plans, views, and external events are in `demo/`:
 ./gradlew :examples:05-orbiter:constraints:buildAllConstraintProcedureJars
 ```
 
-The fat JAR at `build/libs/orbiter-example.jar` can be uploaded to PlanDev (after mounting SPICE kernels). Scheduling and constraint procedure JARs are built individually in their respective `build/libs/` directories.
+**Artifacts:**
+
+- `build/libs/orbiter-example.jar` — the mission model. Upload to PlanDev **after mounting the
+  SPICE kernels** (see [Deploying to PlanDev](#deploying-to-plandev-docker) above); without them
+  the model fails at load time.
+- `scheduling/build/libs/<GoalName>.jar` — nine scheduling goals, one JAR each.
+- `constraints/build/libs/<ConstraintName>.jar` — six constraints, one JAR each.
+
+Note that the procedure JARs need the two-step `compileJava` → `buildAll…ProcedureJars`
+invocation shown above; `:build` alone does not produce them.
+
+## Try it
+
+The quickest end-to-end path, starting from **`demo/plans/SimplePlan.json`** — it is the
+smallest plan here (12 activities) and the one the sample external dataset is sized for:
+
+1. Mount the SPICE kernels and upload `orbiter-example.jar` as a mission model.
+2. Import `demo/plans/SimplePlan.json` as a plan.
+3. Load `demo/views/MarsSat_Overview_View.json` as a UI view.
+4. **Simulate.** This alone exercises the SPICE-backed geometry: the orbital-event resources
+   (apoapsis/periapsis, occultations, eclipses) come from kernel data loaded inside the model,
+   so a successful simulation confirms the kernel mount is correct.
+5. Upload and run the `AddApoapses`, `AddPeriapses`, `AddOccultations` and
+   `AddSpacecraftEclipses` scheduling goals — each spawns marker activities at the geometric
+   events it finds. Re-simulate to see them on the timeline.
+6. Run `ScheduleDownlinks`, then `SchedulePriorityActivitiesAfterDownlink`, and simulate again.
+   Switch to `MarsSat_Power_View.json` to watch battery SOC against the added load, and
+   `Bin Groups View.json` to watch the data bins drain.
+7. Upload the constraint JARs and run them. For guaranteed violations, use
+   `demo/plans/Constraint Violation Plan.json` instead — it is built to trip them.
+
+For the fuller picture, `demo/plans/MarsSat Plan.json` is the complete orbital scenario; it
+takes noticeably longer to simulate.
+
+## Tests
+
+```bash
+./gradlew :examples:05-orbiter:test
+```
+
+This example currently has **no tests of its own** — the command above passes trivially. SPICE
+geometry is covered at the library level by
+[`libraries/geometry`](../../libraries/geometry/)'s test suite, which exercises the calculators
+directly. Kernel loading *inside a mission model*, and the orbiter's event-spawner activities,
+are not currently covered by any automated test; step 4 above is the manual check.
 
 ## Configuration
 

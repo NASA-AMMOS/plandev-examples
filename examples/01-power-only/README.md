@@ -35,11 +35,31 @@ This example simulates a spacecraft with:
 ./gradlew :examples:01-power-only:build
 ```
 
-The JAR is output to `build/libs/power-example.jar` and can be uploaded directly to PlanDev.
+**Artifact:** `build/libs/power-example.jar` — upload directly to PlanDev.
+
+## Try it
+
+1. Upload `power-example.jar` as a mission model and create a plan.
+2. Add a `SolarArrayDeployment` at the start of the plan.
+3. Add a `TurnOnCamera` (say 2 hours) followed by a `Drive`.
+4. Simulate, then watch `cbebattery.batterySOC` fall while the loads are on and recover once
+   they turn off. `spacecraft.cbeLoad` shows the summed PEL draw driving it.
+5. Load `PowerModelBasicView.json` as a UI view to get these plotted together.
+
+## Tests
+
+```bash
+./gradlew :examples:01-power-only:test
+```
+
+Three suites — [`SimulationTest`](src/test/java/examples/power/SimulationTest.java),
+[`TurnOnCameraTest`](src/test/java/examples/power/TurnOnCameraTest.java), and
+[`TurnOnTelecomTest`](src/test/java/examples/power/TurnOnTelecomTest.java) — all run
+in-process without a PlanDev deployment.
 
 ## Included Files
 
-- `pel.json` - PEL definition used by the `pel_java_generator.py` script to generate the PEL model Java code
+- `pel.json` - PEL definition, the input to the [`pel_java_generator.py`](../../tools/pel_java_generator.py) script that generates the PEL model Java code. See [tools/README.md](../../tools/README.md) for how to run it — you must pass an output directory and package, since it does not default to this example's layout.
 - `PowerModelBasicView.json` - An PlanDev UI view definition for visualizing power model resources
 
 ## Source

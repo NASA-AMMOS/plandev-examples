@@ -5,7 +5,7 @@ resources covered in the tutorial.
 
 The streamline framework is an alternative library for defining resources in your mission model, available from
 `plandev.contrib.streamline`. For more details on the motivations behind the framework, see [this PR](https://github.com/NASA-AMMOS/plandev/pull/1253)
-and the (streamline user's guide)[https://github.com/NASA-AMMOS/plandev/blob/develop/contrib/src/main/java/gov/nasa/ammos/plandev/contrib/streamline/streamline-guide.md].
+and the [streamline user's guide](https://github.com/NASA-AMMOS/plandev/blob/develop/contrib/src/main/java/gov/nasa/ammos/plandev/contrib/streamline/streamline-guide.md).
 
 The streamline library defines **five dynamics types** — `discrete`, `polynomial`,
 `linear`, `clocks`, and `black_box`. This example exercises four of them (plus *derived*
@@ -40,8 +40,40 @@ resources, which are a way of building resources rather than a dynamics type). T
 - `add()`, `multiply()`, `lessThan()` for derived resource chains
 - `assumeLinear()` / `approximateAsLinear()` / `VariableClockResources.asLinear()` to register non-discrete resources with the `real` registrar
 
+## Configuration
+
+| Parameter | Default | Description |
+|---|---|---|
+| `batteryCapacityWh` | 100.0 | Battery capacity in watt-hours |
+| `initialSocPercent` | 80.0 | Initial state of charge (0-100) |
+
+Instrument power is an activity parameter (`StartInstrument.powerW`) rather than a
+configuration value, so different activations can draw different amounts.
+
 ## Build
 
 ```bash
 ./gradlew :examples:08-advanced-resources:build
 ```
+
+**Artifact:** `build/libs/advanced-resources-example.jar` — upload directly to PlanDev.
+
+## Try it
+
+1. Upload `advanced-resources-example.jar` as a mission model and create a plan.
+2. Add a `StartInstrument` with `durationHours = 2`.
+3. Simulate, then look at each dynamics type on one timeline:
+   - `instrumentState` steps ON then OFF (**discrete**)
+   - `instrumentPowerDraw` ramps upward across the two hours rather than sitting flat —
+     that is the `warmupRateWPerSec` term of the **polynomial**
+   - `instrumentUptime` counts up while ON and flatlines after (**clock**)
+   - `batterySOC` and `batteryLow` fall out of the others (**derived**)
+4. Add a `StopInstrument` 30 minutes in — the instrument turns off early, and `instrumentUptime`
+   freezes at 30 minutes instead of continuing.
+5. Add a `ResetTimer` afterwards to send `instrumentUptime` back to zero without touching the
+   instrument state.
+
+Note `durationHours` always has a value, so a `StartInstrument` will always shut itself off at
+the end of its duration; use `StopInstrument` for an earlier shutoff.
+
+No tests in this example — see [10-testing-patterns](../10-testing-patterns/).

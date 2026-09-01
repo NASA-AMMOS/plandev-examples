@@ -58,15 +58,33 @@ turns the bin's receive rate on, accumulates data for the duration, then turns i
 ## Build
 
 ```bash
-# Mission model JAR (uploadable to PlanDev)
-./gradlew :examples:04-hopper:build        # produces hopper.jar
+# Mission model JAR
+./gradlew :examples:04-hopper:build
 
-# Constraint procedure JAR
+# Constraint procedure JAR -- compile first, then build the per-procedure JAR
 ./gradlew :examples:04-hopper:constraints:compileJava
 ./gradlew :examples:04-hopper:constraints:buildAllConstraintProcedureJars
 ```
 
-The model composes `libraries/power` and `libraries/data` — it imports their classes directly
-(`gov.nasa.ammos.plandev.power.*`, `gov.nasa.ammos.plandev.data.*`) and adds the hopper-specific
-`SimplePEL` and activities on top. This is the pattern to copy for your own model; see
-[USING-IN-YOUR-OWN-REPO.md](../../USING-IN-YOUR-OWN-REPO.md).
+**Artifacts:**
+
+- `build/libs/hopper.jar` — the mission model; upload directly to PlanDev.
+- `constraints/build/libs/MinBatterySOC.jar` — the constraint procedure.
+
+> `constraints:build` alone produces a thin `constraints.jar` without bundled dependencies —
+> not the artifact you upload. Use `buildAllConstraintProcedureJars` as shown above.
+
+## Try it
+
+1. Upload `hopper.jar` as a mission model and import `hopperplan1.json` as a plan.
+2. Add a `TakePicture` (camera on, data into a bin), then a `Downlink` after it.
+3. Simulate. Watch `mainbattery.batterySOC` dip during the picture and again during the hop,
+   and `onboard.volume` climb then drain as `Downlink` spawns `PlaybackData` and then
+   `DeleteData`.
+4. Add a `PerformHop` between them — it is the 1000 W load, so its effect on SOC dominates.
+5. Upload `MinBatterySOC.jar` as a constraint and run it to see where the plan violates the
+   battery floor.
+6. Load `views/lunar_elevation_view.json` and upload the external dataset to see the Sun/Earth
+   elevation profile alongside the plan.
+
+No tests in this example — see [10-testing-patterns](../10-testing-patterns/).

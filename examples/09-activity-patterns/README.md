@@ -9,7 +9,7 @@ A cookbook of common activity patterns in PlanDev. Each activity demonstrates a 
 | `StateMachineActivity` | Mode transitions (IDLE → WARMUP → ACTIVE → COOLDOWN → IDLE) | `DiscreteEffects.set()`, `delay()` |
 | `ConditionalActivity` | Read resource state, branch on value | `Resources.currentValue()` |
 | `LoopedActivity` | Repeat N times with delay | `delay()` in a loop, `DiscreteEffects.set()` |
-| `ParallelActivities` | Concurrent execution branches | `ModelActions.spawn()` |
+| `ParallelActivities` | Concurrent execution branches, without write contention | `ModelActions.spawn()` |
 | `DelayPatterns` | Duration API usage | `Duration.of()`, `Duration.HOURS`, `plus()` |
 | `ResourceGatedActivity` | Wait for a required resource state | `waitUntil()`, `DiscreteResources.when()` |
 | `DurationLimitedActivity` | Stop at a target or a maximum duration | `Resources.currentValue()`, `PolynomialEffects.restoring()` |
@@ -34,9 +34,14 @@ A cookbook of common activity patterns in PlanDev. Each activity demonstrates a 
 2. Run `DurationLimitedActivity` with its defaults. At 300 MB/hour it reaches the 500 MB target in 100 minutes, before its 120-minute limit. Raise the target above 600 MB to see the duration limit win instead.
 3. Change `configuredPowerDrawWatts` or `configuredOperationDurationMinutes` in the simulation configuration, then run `ConfigurationDrivenActivity` to see those settings control its resource profile and duration.
 4. Run `DiscreteVsLinearActivity` and inspect `instrumentMode` and `dataVolume`. The mode changes at the activity boundaries while data volume increases continuously between them.
+5. Run `ParallelActivities` and inspect `powerDraw` alongside `peakPowerDraw`. Two branches at the same simulated instant have **no guaranteed ordering**, so the main branch owns `powerDraw` while the monitoring branch only reads it and writes `peakPowerDraw`. Re-run it — the result is identical, because no two branches write the same resource.
 
 ## Build
 
 ```bash
 ./gradlew :examples:09-activity-patterns:build
 ```
+
+**Artifact:** `build/libs/activity-patterns-example.jar` — upload directly to PlanDev.
+
+No tests in this example — see [10-testing-patterns](../10-testing-patterns/).

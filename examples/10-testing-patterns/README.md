@@ -47,3 +47,6 @@ examples/10-testing-patterns/build/test-results/test/
 ```bash
 ./gradlew :examples:10-testing-patterns:build
 ```
+
+**Artifact:** `build/libs/testing-patterns-example.jar` — upload directly to PlanDev, though
+the point of this example is the tests rather than the model.

@@ -31,7 +31,22 @@ Demonstrates how to compose multiple subsystem libraries into a single mission m
 ./gradlew :examples:03-power-and-data:build
 ```
 
-The JAR at `build/libs/power-and-data-example.jar` can be uploaded directly to PlanDev.
+**Artifact:** `build/libs/power-and-data-example.jar` — upload directly to PlanDev.
+
+## Try it
+
+1. Upload `power-and-data-example.jar` as a mission model and create a plan.
+2. Add three or four `TakePicture` activities in a row.
+3. Simulate. `mainbattery.batterySOC` drops as the camera draws power, and `onboard.volume`
+   climbs as the pictures land in the storage bin — one activity moving both subsystems is the
+   whole point of this example.
+4. Add a `Downlink` after them and re-simulate: telecom power goes up, and `onboard.volume`
+   comes back down as the spawned `PlaybackData` drains the bin.
+
+`Downlink`'s `durationHours` is fractional, so `1.5` gives a 90-minute pass — example 07 uses
+that to size downlinks to real contact windows.
+
+No tests in this example — see [10-testing-patterns](../10-testing-patterns/).
 
 ## Key takeaway
 
