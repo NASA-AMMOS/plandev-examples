@@ -3,7 +3,9 @@
     "DSNContact": {
       "type": "object",
       "properties": {
-        "station": { "type": "string" }
+        "station": { "type": "string" },
+        "band": { "type": "string" },
+        "bitrate_kbps": { "type": "number" }
       },
       "required": ["station"]
     }

@@ -19,7 +19,9 @@
       "start_time": "2025-001T02:00:00Z",
       "duration": "01:30:00",
       "attributes": {
-        "station": "DSS-14"
+        "station": "DSS-14",
+        "band": "X",
+        "bitrate_kbps": 2048.0
       }
     },
     {
@@ -28,7 +30,9 @@
       "start_time": "2025-001T14:00:00Z",
       "duration": "02:00:00",
       "attributes": {
-        "station": "DSS-43"
+        "station": "DSS-43",
+        "band": "Ka",
+        "bitrate_kbps": 8192.0
       }
     },
     {
@@ -37,7 +41,9 @@
       "start_time": "2025-002T06:00:00Z",
       "duration": "01:45:00",
       "attributes": {
-        "station": "DSS-63"
+        "station": "DSS-63",
+        "band": "X",
+        "bitrate_kbps": 512.0
       }
     }
   ]

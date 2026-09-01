@@ -24,6 +24,8 @@ public class Mission {
     public final MutableResource<Discrete<InstrumentMode>> instrumentMode;
     public final MutableResource<Discrete<Double>> powerDraw;
     public final MutableResource<Discrete<Integer>> operationCount;
+    /** Highest powerDraw the monitoring branch has observed. Written only by that branch. */
+    public final MutableResource<Discrete<Double>> peakPowerDraw;
     public final Resource<Polynomial> dataVolume;
     public final MutableResource<Polynomial> dataRate;
     public final Resource<Clock> simulationClock;
@@ -37,6 +39,7 @@ public class Mission {
         this.instrumentMode = resource(discrete(InstrumentMode.IDLE));
         this.powerDraw = resource(discrete(0.0));
         this.operationCount = resource(discrete(0));
+        this.peakPowerDraw = resource(discrete(0.0));
         this.dataRate = polynomialResource(0);
         this.dataVolume = integrate(this.dataRate, config.initialDataVolumeMb());
         this.simulationClock = clock();
@@ -45,6 +48,7 @@ public class Mission {
         errorRegistrar.discrete("instrumentMode", instrumentMode, new EnumValueMapper<>(InstrumentMode.class));
         errorRegistrar.discrete("powerDraw", powerDraw, new DoubleValueMapper());
         errorRegistrar.discrete("operationCount", operationCount, new IntegerValueMapper());
+        errorRegistrar.discrete("peakPowerDraw", peakPowerDraw, new DoubleValueMapper());
         errorRegistrar.real("dataRate", assumeLinear(dataRate));
         errorRegistrar.real("dataVolume", assumeLinear(dataVolume));
     }

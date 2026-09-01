@@ -15,18 +15,37 @@ import java.util.Map;
 /**
  * Procedural scheduling goal that reacts to external DSN contact events.
  *
- * For each DSN contact event in the plan, this goal schedules a Downlink
- * activity at the contact start time. It avoids duplicates by checking
- * whether a Downlink already exists within one hour of each contact.
+ * <p>For each DSN contact event in the plan, this goal schedules a Downlink
+ * activity that spans the contact window, skipping contacts that already have a
+ * Downlink nearby.
+ *
+ * <p>The two things worth copying from this goal:
+ * <ul>
+ *   <li><b>Size the activity to the event.</b> The downlink duration comes from
+ *       {@code contact.getInterval()}, not a constant — a 1h45m pass gets a
+ *       1h45m downlink. Hardcoding a duration would waste most real contacts.</li>
+ *   <li><b>Read the event payload.</b> {@code contact.attributes} carries the
+ *       schema's fields (station, band, bitrate); this goal uses the bitrate to
+ *       skip passes too weak to be worth scheduling, and puts the station in the
+ *       directive name.</li>
+ * </ul>
  *
  * Usage:
- * 1. Upload DSN contact events as an external event source in PlanDev
+ * 1. Upload the event schema and source in {@code src/main/resources/} to PlanDev
  *    (event type: "DSNContact")
  * 2. Run this scheduling goal -- it will create Downlink activities
  *    aligned to the contact windows
  */
 @SchedulingProcedure
-public record ScheduleDownlinksDuringContacts() implements Goal {
+public record ScheduleDownlinksDuringContacts(double minimumBitrateKbps) implements Goal {
+
+  public static class Defaults {
+    /** Contacts slower than this are skipped as not worth a downlink. */
+    public double minimumBitrateKbps = 0.0;
+  }
+
+  /** Two downlinks closer together than this are treated as the same opportunity. */
+  private static final Duration DEDUPE_WINDOW = Duration.HOUR;
 
   @Override
   public void run(EditablePlan plan) {
@@ -36,31 +55,53 @@ public record ScheduleDownlinksDuringContacts() implements Goal {
     var existingDownlinks = plan.directives("Downlink").collect();
 
     for (var contact : contacts) {
-      var contactStart = contact.getInterval().start;
+      var window = contact.getInterval();
+      var contactStart = window.start;
+
+      // Payload: skip contacts whose bitrate is below the configured floor.
+      if (bitrateKbps(contact.attributes) < minimumBitrateKbps) {
+        continue;
+      }
 
       // Check if a Downlink already exists near this contact
       boolean alreadyExists = false;
       for (var dl : existingDownlinks) {
-        var diff = dl.getStartTime().minus(contactStart);
-        // Duration has no abs(), so check both directions
-        if (diff.shorterThan(Duration.HOUR) && Duration.negate(diff).shorterThan(Duration.HOUR)) {
+        if (dl.getStartTime().minus(contactStart).abs().shorterThan(DEDUPE_WINDOW)) {
           alreadyExists = true;
           break;
         }
       }
-
-      if (!alreadyExists) {
-        plan.create(new NewDirective(
-            new AnyDirective(Map.of(
-                "durationHours", SerializedValue.of(1)
-            )),
-            "Downlink (DSN contact: " + contact.key + ")",
-            "Downlink",
-            new DirectiveStart.Absolute(contactStart)
-        ));
+      if (alreadyExists) {
+        continue;
       }
+
+      // Size the downlink to the contact window rather than assuming a fixed length.
+      double durationHours = window.duration().ratioOver(Duration.HOUR);
+
+      plan.create(new NewDirective(
+          new AnyDirective(Map.of(
+              "durationHours", SerializedValue.of(durationHours)
+          )),
+          "Downlink (" + stationOf(contact.attributes) + ": " + contact.key + ")",
+          "Downlink",
+          new DirectiveStart.Absolute(contactStart)
+      ));
     }
 
     plan.commit();
+  }
+
+  /** Reads the schema's optional {@code bitrate_kbps} attribute, defaulting to permissive. */
+  private static double bitrateKbps(Map<String, SerializedValue> attributes) {
+    var value = attributes.get("bitrate_kbps");
+    if (value == null) return Double.MAX_VALUE;
+    return value.asReal().orElse(Double.MAX_VALUE);
+  }
+
+  /** Reads the schema's required {@code station} attribute. */
+  private static String stationOf(Map<String, SerializedValue> attributes) {
+    var value = attributes.get("station");
+    if (value == null) return "unknown station";
+    return value.asString().orElse("unknown station");
   }
 }

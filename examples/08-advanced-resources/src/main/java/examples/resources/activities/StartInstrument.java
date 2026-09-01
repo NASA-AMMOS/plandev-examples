@@ -20,12 +20,15 @@ import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
  * - Polynomial effect: set data collection rate
  * - VariableClock effect: restart the uptime stopwatch (runs while on), pause it on shutoff
  *
- * The instrument stays on for the specified duration, then shuts off.
- * Use StopInstrument to turn it off earlier, or omit duration for indefinite operation.
+ * <p>The instrument stays on for {@code durationHours} and then shuts itself off.
+ * {@link StopInstrument} turns it off earlier. Note that {@code durationHours} always
+ * has a value — there is no "run indefinitely" option; to model an open-ended activation,
+ * pass a long duration and rely on {@code StopInstrument}.
  */
 @ActivityType("StartInstrument")
 public class StartInstrument {
 
+    /** Steady-state draw in watts, before the warmup term. */
     @Parameter
     public double powerW = 25.0;
 

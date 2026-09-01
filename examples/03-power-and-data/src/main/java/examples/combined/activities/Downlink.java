@@ -16,16 +16,22 @@ import static examples.combined.generated.ActivityActions.spawn;
 /**
  * Turns on the telecom subsystem and plays back onboard data for the
  * specified duration.
+ *
+ * <p>{@code durationHours} is fractional so a downlink can be sized to a real
+ * contact window — DSN passes are rarely a whole number of hours. See
+ * {@code examples/07-external-events}, whose scheduling goal derives this value
+ * from each contact's interval.
  */
 @ActivityType("Downlink")
 public class Downlink {
 
   @Parameter
-  public long durationHours = 1;
+  public double durationHours = 1.0;
 
   @EffectModel
   public void run(Mission model) {
-    var duration = Duration.of(durationHours, Duration.HOURS);
+    // Converted via seconds so fractional hours survive (1.5 -> 01:30:00)
+    var duration = Duration.of(Math.round(durationHours * 3600), Duration.SECONDS);
 
     DiscreteEffects.set(model.pel.telecomState, TelecomState.ON);
     spawn(model, new PlaybackData(duration));

@@ -54,7 +54,7 @@ public record CoscheduleCameraDownlink(Duration delayAfterPicture) implements Go
       if (!alreadyExists) {
         plan.create(new NewDirective(
             new AnyDirective(Map.of(
-                "durationHours", SerializedValue.of(1)
+                "durationHours", SerializedValue.of(1.0)
             )),
             "Downlink (after picture)",
             "Downlink",
