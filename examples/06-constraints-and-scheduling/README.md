@@ -41,5 +41,6 @@ with no mission model, and is meant to be used alongside the [03-power-and-data]
 ./gradlew :examples:03-power-and-data:build
 
 # Build the procedure JAR
-./gradlew :examples:06-constraints-and-scheduling:build
+./gradlew :examples:06-constraints-and-scheduling:compileJava
+./gradlew :examples:06-constraints-and-scheduling:buildAllProcedureJars
 ```

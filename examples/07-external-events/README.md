@@ -44,5 +44,6 @@ Examples for doing this can be found in the ["Creating a Scheduling Goal with Ex
 ./gradlew :examples:03-power-and-data:build
 
 # Build the procedure JAR
-./gradlew :examples:07-external-events:build
+./gradlew :examples:07-external-events:compileJava
+./gradlew :examples:07-external-events:buildAllProcedureJars
 ```
