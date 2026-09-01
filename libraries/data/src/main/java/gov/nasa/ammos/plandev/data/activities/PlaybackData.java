@@ -18,6 +18,21 @@ import static gov.nasa.ammos.plandev.contrib.streamline.core.MutableResource.set
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialEffects.restore;
 import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.waitUntil;
 
+/**
+ * Downlinks stored data to the ground, draining onboard bins in priority order.
+ *
+ * <p>Give it a {@code volume} goal, a {@code duration} goal, or both; with neither it downlinks
+ * until something else stops it. The requested volume <strong>may not be achieved</strong> if
+ * the data simply is not there.
+ *
+ * <p><strong>Blocking:</strong> waits until the goal is met before completing.
+ *
+ * <p><strong>Only one PlaybackData may run at a time</strong> — a second overlapping one throws.
+ * Bins are drained strictly by priority: the highest-priority non-empty bin consumes the entire
+ * available rate, rather than sharing it.
+ *
+ * @see <a href="https://github.com/NASA-AMMOS/plandev-examples/blob/main/libraries/data/docs/ModelBehaviorDescription.md">Data model behavior description</a>
+ */
 @ActivityType("PlaybackData")
 @Subsystem("data")
 public class PlaybackData {

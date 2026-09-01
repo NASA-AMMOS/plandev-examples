@@ -1,5 +1,9 @@
 # Power Library
 
+> **How it behaves:** [docs/ModelBehaviorDescription.md](docs/ModelBehaviorDescription.md) —
+> the solar-array and RTG equations, battery integration and clamping, and why there are two
+> battery-current resources.
+
 Reusable spacecraft power subsystem models for PlanDev mission models.
 
 ## What It Models

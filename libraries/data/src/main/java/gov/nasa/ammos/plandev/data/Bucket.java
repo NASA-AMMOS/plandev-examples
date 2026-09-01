@@ -20,7 +20,7 @@ import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.Poly
 import static gov.nasa.ammos.plandev.contrib.streamline.modeling.polynomial.PolynomialResources.*;
 
 /**
- * A container or category representing volume and constant & linear changes in the volume of something (e.g., data).
+ * A container or category representing volume and constant &amp; linear changes in the volume of something (e.g., data).
  * A Bucket has an upper bound on volume.  A Bucket may also have child buckets, whose volumes sum to the parent's
  * volume.  Thus, children can be indirectly limited in volume.  Children are prioritized by their order in a List.
  * This ordering affects rates of change when the parent has reached its limit.  A Bucket cannot have a negative volume.

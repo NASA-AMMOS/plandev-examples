@@ -21,7 +21,7 @@ import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.spawn;
 /**
  * The Data class is the main interface for using the data model.  A mission model can construct a Data object
  * containing data volume bins and the parent storage with the storage limit.  See the
- * [Model Behavior Description]({@docRoot}/docs/ModelBehaviorDesc.md) for a description of how {@link Bucket}
+ * <a href="https://github.com/NASA-AMMOS/plandev-examples/blob/main/libraries/data/docs/ModelBehaviorDescription.md">Model Behavior Description</a> for a description of how {@link Bucket}
  * (bin) resources are updated.  That functionality is implemented by this class.  This class also automatically
  * registers resources for the bins.
  */

@@ -1,5 +1,9 @@
 # Data Library
 
+> **How it behaves:** [docs/ModelBehaviorDescription.md](docs/ModelBehaviorDescription.md) —
+> rate clamping, what happens when storage fills, downlink priority allocation, and the
+> blocking vs. non-blocking effect methods.
+
 Reusable data management subsystem model for PlanDev mission models. Migrated from [aerie-simple-model-data](https://github.com/NASA-AMMOS/aerie-simple-model-data) (model module).
 
 ## What it models
