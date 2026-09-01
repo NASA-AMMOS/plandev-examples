@@ -39,18 +39,39 @@ into `spacecraft.cbeLoad` / `spacecraft.mevLoad`.
 ### Run
 
 ```bash
-# with pel.json in the current directory
-python3 tools/pel_java_generator.py
+python3 tools/pel_java_generator.py \
+  --input examples/01-power-only/pel.json \
+  --output-dir examples/01-power-only/src/main/java/examples/power/models/pel \
+  --package examples.power.models.pel
 ```
 
-### Caveat — adjust the output path/package before use
+| Flag | Required | Default | Meaning |
+|---|---|---|---|
+| `--input` / `-i` | no | `pel.json` | Path to the PEL JSON spec |
+| `--output-dir` / `-o` | **yes** | — | Directory for the generated `.java` files; created if missing |
+| `--package` / `-p` | **yes** | — | Java package for the generated classes |
 
-The script currently hardcodes a **pre-consolidation** output path and package
-(`missionmodel/src/main/java/demosystem/models/pel`, package `demosystem.models.pel`). Before
-using it in this repo, edit the `path` variable and the `package` string near the top of the
-script to match the target example's convention (e.g. `examples.orbiter.power.pel`). Treat the
-generated code as a starting point — the maintained PELs in `examples/01-power-only/` and
-`examples/05-orbiter/src/.../power/pel/` show the current expected shape.
+The two maintained PELs in this repo both round-trip through the script:
+
+```bash
+# Regenerates examples/01-power-only/.../pel/ byte-for-byte
+python3 tools/pel_java_generator.py -i examples/01-power-only/pel.json \
+  -o /tmp/pel-check -p examples.power.models.pel
+diff -r /tmp/pel-check examples/01-power-only/src/main/java/examples/power/models/pel/
+```
+
+### Caveat — the orbiter's PEL has hand-edits
+
+[`examples/05-orbiter/pel.json`](../examples/05-orbiter/pel.json) regenerates 13 of its 15 Java
+files exactly, but **two carry post-generation hand-edits that regenerating would discard**:
+
+- `PELModel.java` wraps the two total-load registrations in `withUnit("W", …)`, and imports
+  `UnitRegistrar.withUnit`. The generator does not emit units.
+- `Radar_State.java` uses integer literals (`ON_LOW(1000, 1000)`) where the generator emits
+  doubles (`1000.0`). Cosmetic only.
+
+So treat generated code as a **starting point**: regenerate into a scratch directory, diff, and
+port your changes across rather than overwriting in place.
 
 ## `generate_external_events.py` — scale-test external events
 
