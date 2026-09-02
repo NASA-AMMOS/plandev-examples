@@ -43,11 +43,6 @@ tasks.create("generateProcedureJarTasks") {
   final proceduresDir = findFirstMatchingBuildDir("generated/procedures")
   final constraintsDir = findFirstMatchingBuildDir("generated/constraints")
 
-  if (proceduresDir == null && constraintsDir == null) {
-    println "No procedures or constraints folders found"
-    return
-  }
-
   def allFiles = []
 
   if (proceduresDir != null) {
@@ -66,11 +61,22 @@ tasks.create("generateProcedureJarTasks") {
     }
   }
 
-  final files = allFiles
-  if (files.size() == 0) {
-    println "No procedures or constraints available within folders"
+  // Nothing to package yet. This closure is evaluated at *configuration* time on every Gradle
+  // invocation -- including a clean `./gradlew build`, long before the annotation processor has
+  // emitted anything -- so it must not throw here. Defer the failure to execution time so that
+  // asking for the JARs and getting none is a hard error instead of a silent no-op.
+  if (allFiles.isEmpty()) {
+    doLast {
+      throw new GradleException(
+        "No generated procedures or constraints found under build/generated/sources.\n" +
+        "They are discovered at configuration time, so this needs two invocations:\n" +
+        "  ./gradlew ${project.path}:compileJava\n" +
+        "  ./gradlew ${project.path}:buildAllProcedureJars")
+    }
     return
   }
+
+  final files = allFiles
 
   files.toList().each { file ->
     final nameWithoutExtension = file.name.replace(".java", "")

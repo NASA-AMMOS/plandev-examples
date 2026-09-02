@@ -3,8 +3,9 @@ name: Build
 on:
   push:
     branches: [main]
+  # Every PR, whatever it targets -- long-lived dev/* integration branches get checked too.
+  # `push` stays limited to main so a PR branch isn't built twice per commit.
   pull_request:
-    branches: [main]
 
 jobs:
   build:
@@ -27,6 +28,25 @@ jobs:
 
       - name: Build & test all subprojects
         run: ./gradlew build
+        env:
+          GITHUB_USER: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # `./gradlew build` compiles the procedure sources but never packages them, so the
+      # ShadowJar path is otherwise untested -- and it is the flow the example READMEs hand to
+      # users. The buildAll* tasks discover procedures at *configuration* time, so they have to
+      # run in a separate Gradle invocation from the compile above; they fail loudly (rather
+      # than no-op) if that ordering ever breaks.
+      #
+      # The task names are unqualified on purpose: Gradle runs each one in every subproject that
+      # declares it, so a new example picks up coverage by following one of these three naming
+      # conventions rather than by being added here.
+      - name: Build procedure JARs
+        run: >-
+          ./gradlew
+          buildAllProcedureJars
+          buildAllConstraintProcedureJars
+          buildAllSchedulingProcedureJars
         env:
           GITHUB_USER: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,6 +91,10 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          # static/kernels/m2020.tls is LFS-tracked and gets copied into the build output;
+          # without LFS the plugin ships a pointer file instead of the real kernel.
+          lfs: true
 
       - name: Set up Node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
