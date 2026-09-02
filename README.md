@@ -51,17 +51,18 @@ at the tutorial.
 
 | Step | Directory                                 | What You Build | Building Blocks Used |
 |------|-------------------------------------------|---------------|----------------------|
-| 0 | `examples/00-tutorial/`                   | Simple SSR data recorder | None (standalone) |
-| 1 | `examples/01-power-only/`                 | Power + battery model | `power` |
-| 2 | `examples/02-data-only/`                  | Data storage + downlink | `data` |
-| 3 | `examples/03-power-and-data/`             | Combine two subsystems | `power` + `data` |
-| 4 | `examples/04-hopper/`                     | Lunar hopper — composition at small scale | `power` + `data` |
-| 5 | `examples/05-orbiter/`                    | Full Mars orbiter — the deep end | `power` + `data` + `geometry` |
-| 6 | `examples/06-constraints-and-scheduling/` | Constraints + scheduling goals | Procedures for the 03 model |
-| 7 | `examples/07-advanced-resources/`         | Streamline resource types | None (standalone) |
-| 8 | `examples/08-activity-patterns/`          | Common activity idioms | None (standalone) |
-| 9 | `examples/09-testing-patterns/`           | Model testing strategies | None (self-contained model) |
-| 10 | `examples/10-external-events/`            | Scheduling against external events | Procedures for the 03 model |
+| 0    | `examples/00-tutorial/`                   | Simple SSR data recorder | None (standalone) |
+| 1    | `examples/01-power-only/`                 | Power + battery model | `power` |
+| 2    | `examples/02-data-only/`                  | Data storage + downlink | `data` |
+| 3    | `examples/03-power-and-data/`             | Combine two subsystems | `power` + `data` |
+| 4    | `examples/04-hopper/`                     | Lunar hopper — composition at small scale | `power` + `data` |
+| 5    | `examples/05-orbiter/`                    | Full Mars orbiter — the deep end | `power` + `data` + `geometry` |
+| 6    | `examples/06-constraints-and-scheduling/` | Constraints + scheduling goals | Procedures for the 03 model |
+| 7    | `examples/07-external-events/`            | Scheduling against external events | Procedures for the 03 model |
+| 8    | `examples/08-advanced-resources/`         | Streamline resource types | None (standalone) |
+| 9    | `examples/09-activity-patterns/`          | Common activity idioms | None (standalone) |
+| 10   | `examples/10-testing-patterns/`           | Model testing strategies | None (self-contained model) |
+
 
 **04-hopper** is the gentle first taste of composing the building blocks; **05-orbiter** is
 the realistic, full-complexity model that shows what those blocks look like at scale plus

@@ -10,6 +10,18 @@ import gov.nasa.ammos.plandev.data.DataMissionModel;
 import static gov.nasa.ammos.plandev.contrib.streamline.core.Resources.*;
 import static java.lang.Math.max;
 
+/**
+ * Deletes up to {@code volume} bits from an onboard bin.
+ *
+ * <p><strong>By default only data that has already been downlinked is eligible</strong>
+ * ({@code limitToSentData = true}), so if nothing has been played back yet this activity
+ * deletes nothing. Set it to {@code false} to delete regardless of downlink state.
+ *
+ * <p>The amount actually deleted is clamped to what is present and eligible, so asking for
+ * more than the bin holds is safe rather than an error.
+ *
+ * @see <a href="https://github.com/NASA-AMMOS/plandev-examples/blob/main/libraries/data/docs/ModelBehaviorDescription.md">Data model behavior description</a>
+ */
 @ActivityType("DeleteData")
 @Subsystem("data")
 public class DeleteData {

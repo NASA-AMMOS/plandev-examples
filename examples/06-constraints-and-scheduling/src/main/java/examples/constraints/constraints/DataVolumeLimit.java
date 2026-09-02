@@ -23,8 +23,8 @@ public record DataVolumeLimit(double maxVolumePercent) implements Constraint {
 
   @Override
   public Violations run(Plan plan, SimulationResults simResults) {
-    var volume = simResults.resource("/data/onboard/volume", Real.deserializer());
-    var limit = simResults.resource("/data/onboard/limit", Real.deserializer());
+    var volume = simResults.resource("onboard.volume", Real.deserializer());
+    var limit  = simResults.resource("onboard.maxVolume", Real.deserializer());
 
     // Flag when volume exceeds the configured percentage of limit
     var overLimit = volume.minus(limit.times(maxVolumePercent / 100.0))

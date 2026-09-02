@@ -24,7 +24,7 @@ public record BatteryDepthOfDischarge(double minSOC) implements Constraint {
   @Override
   public Violations run(Plan plan, SimulationResults simResults) {
     var lowBatteryWindows = simResults
-        .resource("main.batterySOC", Real.deserializer())
+        .resource("mainbattery.batterySOC", Real.deserializer())
         .lessThan(minSOC)
         .highlightTrue();
     return Violations.inside(lowBatteryWindows);

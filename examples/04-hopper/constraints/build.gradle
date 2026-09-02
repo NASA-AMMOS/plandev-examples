@@ -47,17 +47,26 @@ tasks.create("generateConstraintProcedureJarTasks") {
 
   final proceduresDir = findFirstMatchingBuildDir("generated/procedures")
 
-  if (proceduresDir == null) {
-    println "No procedures folder found"
+  final procedureFiles = proceduresDir == null ? [] : (file(proceduresDir).listFiles() ?: []).toList()
+
+  // Nothing to package yet. This closure is evaluated at *configuration* time on every Gradle
+  // invocation -- including a clean `./gradlew build`, long before the annotation processor has
+  // emitted anything -- so it must not throw here. Defer the failure to execution time so that
+  // asking for the JARs and getting none is a hard error instead of a silent no-op.
+  if (procedureFiles.isEmpty()) {
+    doLast {
+      throw new GradleException(
+        "No generated constraint procedures found under build/generated/sources.\n" +
+        "Procedures are discovered at configuration time, so this needs two invocations:\n" +
+        "  ./gradlew ${project.path}:compileJava\n" +
+        "  ./gradlew ${project.path}:buildAllConstraintProcedureJars")
+    }
     return
   }
+
   println "Generating jar tasks for the following procedures directory: ${proceduresDir}"
 
-  final files = file(proceduresDir).listFiles()
-  if (files.length == 0) {
-    println "No procedures available within folder ${proceduresDir}"
-    return
-  }
+  final files = procedureFiles
 
   files.toList().each { file ->
     final nameWithoutExtension = file.name.replace(".java", "")

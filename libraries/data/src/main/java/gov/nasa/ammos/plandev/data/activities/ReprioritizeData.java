@@ -11,6 +11,17 @@ import gov.nasa.ammos.plandev.data.DataMissionModel;
 
 import static gov.nasa.ammos.plandev.contrib.streamline.core.Resources.*;
 
+/**
+ * Moves data from one onboard bin to another, changing the priority it will downlink at.
+ *
+ * <p>The amount moved is clamped both by what {@code bin} holds and by the headroom left in
+ * {@code newBin}, so an oversized request moves what it can instead of failing.
+ *
+ * <p>The removal and the receipt are spawned as parallel tasks, so this activity itself
+ * completes immediately while the transfer settles over the following second.
+ *
+ * @see <a href="https://github.com/NASA-AMMOS/plandev-examples/blob/main/libraries/data/docs/ModelBehaviorDescription.md">Data model behavior description</a>
+ */
 @ActivityType("ReprioritizeData")
 @Subsystem("data")
 public class ReprioritizeData {

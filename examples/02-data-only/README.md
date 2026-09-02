@@ -27,9 +27,8 @@ Demo-specific:
 | `initialMaxVolume` | 1e10 (10 Gb) | Onboard storage limit in bits |
 | `initialDatarate` | 1e4 (10 Kbps) | Playback data rate in bits per second |
 
-## Resources
+## Included files
 
-Includes sample JSON files:
 - `DataModelBasicView.json` - PlanDev UI view definition showing data volumes, rates, and downlink tracking
 - `sample-plan.json` - Example plan with activities demonstrating all data operations
 
@@ -39,4 +38,21 @@ Includes sample JSON files:
 ./gradlew :examples:02-data-only:build
 ```
 
-The output JAR at `build/libs/02-data-only.jar` can be uploaded directly to PlanDev.
+**Artifact:** `build/libs/02-data-only.jar` — upload directly to PlanDev.
+
+## Try it
+
+The bundled `sample-plan.json` exercises every data operation, so the quickest path is to use
+it rather than build a plan by hand:
+
+1. Upload `02-data-only.jar` as a mission model.
+2. Import `sample-plan.json` as a plan against that model.
+3. Load `DataModelBasicView.json` as a UI view.
+4. Simulate, and follow `onboard.volume` as `GenerateData` fills the bins, `PlaybackData`
+   drains them, and `DeleteData` clears what has already been downlinked.
+5. Add a `SetMaxVolume` partway through and re-simulate to see the storage ceiling move.
+
+Note the registered resource names follow `<bucket>.<property>` — `onboard.volume`,
+`onboard.maxVolume`, `scBin0.volume`. Those are the strings constraints and goals reference.
+
+No tests in this example — see [10-testing-patterns](../10-testing-patterns/).
