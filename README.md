@@ -30,7 +30,7 @@ cd plandev-examples
 cp .env.template .env
 # Edit .env and set:
 #   GITHUB_USER=your-github-username
-#   GITHUB_TOKEN=ghp_your-token
+#   GITHUB_TOKEN=your-token
 
 ./gradlew build
 ```
@@ -143,11 +143,6 @@ git clone git@github.com:NASA-AMMOS/plandev-examples.git
 cd plandev-examples
 ```
 
-If the LFS files were not downloaded correctly, run:
-
-```bash
-git lfs pull
-```
 
 ### 6. Create a GitHub Packages token
 
@@ -177,7 +172,7 @@ Open `.env` and set:
 
 ```text
 GITHUB_USER=your-github-username
-GITHUB_TOKEN=ghp_your-token
+GITHUB_TOKEN=your-token
 ```
 
 The `.env` file contains local credentials and should not be committed.
@@ -187,8 +182,6 @@ The `.env` file contains local credentials and should not be committed.
 Check the major tools:
 
 ```bash
-git --version
-git lfs version
 java -version
 ./gradlew --version
 ```
