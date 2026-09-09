@@ -75,16 +75,25 @@ See [examples/05-orbiter/src/main/java/examples/orbiter/Mission.java](../../exam
 
 `libraries/geometry/src/test/java/` covers the **direct SPICE layer**:
 
-- [SpiceDirectTimeDependentStateCalculatorTest](src/test/java/gov/nasa/ammos/plandev/geometry/SpiceDirectTimeDependentStateCalculatorTest.java) — 14 sub-tests, MATLAB reference values for state / range / speed / altitude / Sun-Earth-spacecraft angles / sub-point / illumination / beta / half-angle / RA-Dec / LST.
+- [SpiceDirectTimeDependentStateCalculatorTest](src/test/java/gov/nasa/ammos/plandev/geometry/SpiceDirectTimeDependentStateCalculatorTest.java) — 15 sub-tests, MATLAB reference values for state / range / speed / altitude / Sun-Earth-spacecraft angles / sub-point / illumination / beta / half-angle / RA-Dec / LST.
 - [SpiceDirectEventGeneratorTest](src/test/java/gov/nasa/ammos/plandev/geometry/SpiceDirectEventGeneratorTest.java) — occultations, periapses, apoapses, conjunctions against MATLAB reference.
 
-**TODO — resource layer + spawner activities are not yet covered here.** The upstream `aerie-multimission-models-bb` had three more tests that depend on a `Mission` class with `default_geometry_config.json` and a full `@MissionModel` package-info:
+### What is not covered
 
-1. `SpiceResourcePopulaterTest` — config parsing + data-gap window splitting.
-2. `GenericGeometryCalculatorTest` — PlanDev resource values match direct SPICE calls within ±0.01°.
-3. `GeometrySpawnersTest` — spawner activities (`AddSpacecraftEclipses`, `AddOccultations`, `AddPeriapsis`, `AddApoapsis`) produce the right event counts over a sim window.
+- **The PlanDev resource layer.** `SpiceResourcePopulater` (config parsing, data-gap window
+  splitting) and `GenericGeometryCalculator` (whether registered resource values match direct
+  SPICE calls) have no tests.
+- **The spawner activities.** `AddSpacecraftEclipses`, `AddOccultations`, `AddPeriapsis` and
+  `AddApoapsis` — which live in [examples/05-orbiter](../../examples/05-orbiter/) — have no
+  tests, so nothing verifies the event counts they produce over a simulation window.
+- **Kernel loading inside a mission model.** The tests above call the calculators directly.
+  Loading kernels through a `@MissionModel` is exercised only by manually simulating the
+  orbiter example.
 
-To port these, build a minimal test mission model inside `libraries/geometry/src/test/java/.../testmodel/`: a `TestMission`, `TestConfiguration`, `package-info.java` with `@MissionModel` + the ~10 activity registrations, plus `default_geometry_config.json` copied from [examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json](../../examples/05-orbiter/src/main/resources/examples/orbiter/default_geometry_config.json) into `src/test/resources/`. Enable `testAnnotationProcessor "gov.nasa.ammos.plandev:merlin-framework-processor:${plandevVersion}"` in `build.gradle`. ~150–200 lines of scaffold; same shape as the upstream tests.
+Covering the first two requires a minimal test mission model (a `@MissionModel` package-info,
+a test `Mission` and `Configuration`, and a geometry config resource) plus
+`testAnnotationProcessor` wired into `build.gradle`; the upstream `aerie-multimission-models-bb`
+had tests of this shape that were not carried over.
 
 ## Building
 

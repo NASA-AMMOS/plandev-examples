@@ -35,17 +35,17 @@ public class PowerModelTest {
 
   private final MutableResource<Discrete<Double>> idleDemand = discreteResource(0.0);
   private final BatteryModel idleBattery =
-      new BatteryModel("idle", BatterySimConfig.defaultConfiguration(), idleDemand, constant(0.0));
+      new BatteryModel("idlebattery", BatterySimConfig.defaultConfiguration(), idleDemand, constant(0.0));
 
   // 140 W demand at 0 W production = -5 A net at 28 V bus.
   private final MutableResource<Discrete<Double>> drainDemand = discreteResource(140.0);
   private final BatteryModel drainingBattery =
-      new BatteryModel("drain", BatterySimConfig.defaultConfiguration(), drainDemand, constant(0.0));
+      new BatteryModel("drainbattery", BatterySimConfig.defaultConfiguration(), drainDemand, constant(0.0));
 
   // 2800 W demand = 100 A net drain — drains the 100 Ah battery in ~1 h.
   private final MutableResource<Discrete<Double>> overDrainDemand = discreteResource(2800.0);
   private final BatteryModel overDrainBattery =
-      new BatteryModel("over", BatterySimConfig.defaultConfiguration(), overDrainDemand, constant(0.0));
+      new BatteryModel("overbattery", BatterySimConfig.defaultConfiguration(), overDrainDemand, constant(0.0));
 
   // Solar arrays.
   private final MutableResource<Discrete<Double>> undeployedDistance = discreteResource(1.0);

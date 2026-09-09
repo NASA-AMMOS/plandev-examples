@@ -11,11 +11,9 @@ import gov.nasa.ammos.plandev.merlin.framework.annotations.Subsystem;
 import gov.nasa.ammos.plandev.merlin.framework.annotations.ActivityType.EffectModel;
 import gov.nasa.ammos.plandev.merlin.framework.annotations.Export.Parameter;
 
-import java.util.Optional;
-
 import static gov.nasa.ammos.plandev.merlin.framework.ModelActions.delay;
 import static hopper.generated.ActivityActions.spawn;
-import static hopper.generated.ActivityActions.spawn;
+
 /**
  * Turns on the telecom subsystem for a specified duration, 
  * spawn a PlaybackData activity to model data downlink, 

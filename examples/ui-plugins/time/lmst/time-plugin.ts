@@ -159,7 +159,6 @@ export function lmstTicks(start: Date, stop: Date, tickCount: number): Date[] {
   const lsmtEndSols = lsmtEndSeconds / 60 / 60 / 24;
   // TODO handle duration = 0 case
   const lmstDurationSeconds = lsmtEndSeconds - lsmtStartSeconds;
-  let stepSize;
   const stepSizeSols = lmstDurationSeconds / 60 / 60 / 24 / tickCount;
   const dayInSeconds = 86400;
 
@@ -199,12 +198,15 @@ export function lmstTicks(start: Date, stop: Date, tickCount: number): Date[] {
     1000,
     2500,
     5000,
-    1000,
+    10000,
   ];
 
   const bisectTicks = bisector((d) => d).left;
-  const i = bisectTicks(lmstSteps, stepSizeSols, 0);
-  stepSize = lmstSteps[i];
+  const i = Math.min(
+      bisectTicks(lmstSteps, stepSizeSols, 0),
+      lmstSteps.length - 1,
+  );
+  const stepSize = lmstSteps[i];
 
   // round the domain to nearest step size values
   const minValRounded = Math.round(lsmtStartSols / stepSize) * stepSize;

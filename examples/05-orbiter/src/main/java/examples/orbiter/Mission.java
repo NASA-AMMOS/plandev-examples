@@ -132,8 +132,8 @@ public final class Mission implements DataMissionModel {
     this.pel = new PELModel();
     this.array = new GenericSolarArray(config.powerConfig().powerSourceConfig(),
       SpacecraftSunRange_AU, offSunAngle, this.geometryResources.FractionOfSunNotInEclipse);
-    this.cbebattery = new BatteryModel("cbe", config.powerConfig().batteryConfig(), pel.cbeTotalLoad, array.getPowerProduction());
-    this.mevbattery = new BatteryModel("mev", config.powerConfig().batteryConfig(), pel.mevTotalLoad, array.getPowerProduction());
+    this.cbebattery = new BatteryModel("cbebattery", config.powerConfig().batteryConfig(), pel.cbeTotalLoad, array.getPowerProduction());
+    this.mevbattery = new BatteryModel("mevbattery", config.powerConfig().batteryConfig(), pel.mevTotalLoad, array.getPowerProduction());
 
     pel.registerStates(this.errorRegistrar);
     array.registerStates(this.errorRegistrar);

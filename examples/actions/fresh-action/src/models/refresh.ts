@@ -1,10 +1,10 @@
 export enum CommandArgType {
-  NUMBER = 'NUMBER'
+  NUMBER = "NUMBER",
 }
 
 export enum FlightRuleState {
-  PASSED = 'PASSED',
-  VIOLATED = 'VIOLATED'
+  PASSED = "PASSED",
+  VIOLATED = "VIOLATED",
 }
 
 export type FlightRule = {
@@ -15,7 +15,7 @@ export type FlightRule = {
   state: FlightRuleState;
   num_violations: number;
   results: FlightRuleResult[];
-}
+};
 
 export type FlightRuleResult = {
   state: FlightRuleState;
@@ -28,7 +28,7 @@ export type FlightRuleResult = {
   }[];
   flight_rule_id: string;
   message: string;
-}
+};
 
 export type RefreshResponse = {
   metadata: {
@@ -42,6 +42,6 @@ export type RefreshResponse = {
     rules_violated: number;
     rules_flagged: number;
     violation_locations: string[];
-  }
+  };
   fr_checks: Record<string, FlightRule[]>;
-}
+};

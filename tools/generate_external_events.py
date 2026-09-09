@@ -12,7 +12,7 @@ real geometry/SPICE — it just produces thousands of plausibly-shaped events sp
 mission window, with several event types that each carry a different attribute schema.
 
 The comms event type defaults to "DSNContact" so the data works directly with
-examples/10-external-events' ScheduleDownlinksDuringContacts goal (which queries that
+examples/07-external-events' ScheduleDownlinksDuringContacts goal (which queries that
 type). Pass --contact-type DSS_Pass to match the hopper comms_pass_schema instead.
 
 Usage:

@@ -1,0 +1,22 @@
+{
+  "event_types": {
+    "DSNContact": {
+      "type": "object",
+      "properties": {
+        "station": { "type": "string" },
+        "band": { "type": "string" },
+        "bitrate_kbps": { "type": "number" }
+      },
+      "required": ["station"]
+    }
+  },
+  "source_types": {
+    "DSNSchedule": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" }
+      },
+      "required": []
+    }
+  }
+}

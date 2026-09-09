@@ -11,5 +11,5 @@ export default {
     dir: "./build",
     format: "esm",
   },
-  plugins: [nodeResolve(), typescript({tsconfig: "../../../tsconfig.json"})],
+  plugins: [nodeResolve(), typescript({tsconfig: "../../tsconfig.json"})],
 };

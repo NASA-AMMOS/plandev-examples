@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "rimraf dist && tsc && rollup -c rollup.config.js && grep -v \"export { main }\" dist/index.js >> dist/action.js && rm dist/index.js",
-    "format": "prettier --plugin-search-dir=. --write .",
-    "lint": "prettier --plugin-search-dir=. --check . && eslint .",
+    "format": "prettier --write .",
+    "lint": "prettier --check .",
     "stringify": "npm run build && node stringify.js",
     "test": "echo 'no tests yet for fresh-action' && exit 0"
   },

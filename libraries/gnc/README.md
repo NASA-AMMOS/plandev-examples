@@ -46,7 +46,21 @@ gnc.registerStates(registrar);
 // Wire targets/observers to your geometry calculator's outputs.
 ```
 
-Rotation and vector math relies on Apache `commons-math3` (already a transitive dependency via PlanDev's contrib library).
+Rotation and vector math relies on Apache `commons-math3`, which this library declares
+explicitly as an `api` dependency at a pinned version (see
+[build.gradle](build.gradle)) — it does **not** arrive transitively, so a project that copies
+this code out of the repo must declare it too:
+
+```gradle
+api 'org.apache.commons:commons-math3:3.6.1'
+```
+
+## Scope: primitives, not a mission model
+
+This is a set of **building blocks** — attitude, targets, observers, and rotation math — not a
+ready-made GNC mission model. There are no activity types here: upstream's `PointingActivity`
+was deliberately not carried over, because it was mission-specific, incomplete, and coupled to
+Blackbird's configuration. Expect to write your own activities on top of these classes.
 
 ## Building
 

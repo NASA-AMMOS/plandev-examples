@@ -31,8 +31,8 @@ public class Mission {
         // Initialize Power Source
         this.powerSource = new GenericSolarArray(config.powerConfig().powerSourceConfig(), calculator.distance, calculator.angle, calculator.eclipseFactor);
         // this.powerSource = new RtgPowerProduction(config.powerConfig().powerSourceConfig(), planStart);
-        this.cbebattery = new BatteryModel("cbe", config.powerConfig().batteryConfig(), pel.cbeTotalLoad, powerSource.getPowerProduction());
-        this.mevbattery = new BatteryModel("mev", config.powerConfig().batteryConfig(), pel.mevTotalLoad, powerSource.getPowerProduction());
+        this.cbebattery = new BatteryModel("cbebattery", config.powerConfig().batteryConfig(), pel.cbeTotalLoad, powerSource.getPowerProduction());
+        this.mevbattery = new BatteryModel("mevbattery", config.powerConfig().batteryConfig(), pel.mevTotalLoad, powerSource.getPowerProduction());
 
         this.errorRegistrar = new Registrar(registrar, Registrar.ErrorBehavior.Log);
 

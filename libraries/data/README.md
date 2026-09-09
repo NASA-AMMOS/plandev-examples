@@ -1,5 +1,9 @@
 # Data Library
 
+> **How it behaves:** [docs/ModelBehaviorDescription.md](docs/ModelBehaviorDescription.md) —
+> rate clamping, what happens when storage fills, downlink priority allocation, and the
+> blocking vs. non-blocking effect methods.
+
 Reusable data management subsystem model for PlanDev mission models. Migrated from [aerie-simple-model-data](https://github.com/NASA-AMMOS/aerie-simple-model-data) (model module).
 
 ## What it models
@@ -66,12 +70,12 @@ The activities carry PlanDev metadata annotations:
   ```
   (Resource units — bucket volumes/rates — are attached at registration and need no such
   declaration.)
-- **Subsystem** — each activity is tagged `@Subsystem("data")`. This is inert unless the
-  consuming model declares the subsystem, in which case the activities group under it:
+- **Subsystem** — each activity is tagged `@Subsystem("data")`. A consuming
+  mission model **must declare that subsystem** in `package-info.java`:
+
   ```java
   @WithSubsystem("data")
   ```
-  (Declaring it is optional; omitting it does not break the build.)
 
 See `examples/04-hopper` and `examples/05-orbiter` for both in use.
 

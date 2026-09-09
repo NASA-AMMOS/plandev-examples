@@ -11,6 +11,23 @@ import gov.nasa.ammos.plandev.data.DataMissionModel;
 
 import java.util.Optional;
 
+/**
+ * Generates data into an onboard bin over a span of time.
+ *
+ * <p><strong>Specify at least two of {@code rate}, {@code volume} and {@code duration};</strong>
+ * the third is derived from them. Supplying all three is allowed, but if they disagree the
+ * model quietly reduces one of them to the most conservative consistent value rather than
+ * failing — see {@link #derivedValues()}.
+ *
+ * <p><strong>Blocking:</strong> this activity occupies {@code duration} of simulation time, so
+ * it both produces the data and provides the activity's length.
+ *
+ * <p>Data arriving when the bin (or total onboard storage) is full is <em>dropped, not
+ * overwritten</em>. Compare {@code desiredReceivedVolume} against {@code receivedVolume} to see
+ * how much was lost.
+ *
+ * @see <a href="https://github.com/NASA-AMMOS/plandev-examples/blob/main/libraries/data/docs/ModelBehaviorDescription.md">Data model behavior description</a>
+ */
 @ActivityType("GenerateData")
 @Subsystem("data")
 public class GenerateData {

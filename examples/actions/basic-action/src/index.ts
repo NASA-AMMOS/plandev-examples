@@ -9,13 +9,11 @@ import type {
 // Define schemas for your action's settings and parameters
 export const parameterDefinitions = {
   urlPath: { type: "string" },
-  myBool: { type: "boolean" },
   sleepMs: { type: "int" },
 } satisfies ActionParameterDefinitions;
 
 export const settingDefinitions = {
   externalUrl: { type: "string" },
-  retries: { type: "int" },
 } satisfies ActionSettingDefinitions;
 
 // generate the correct typescript types from the schemas
@@ -42,6 +40,13 @@ export async function main(parameters: MyActionParameters, settings: MyActionSet
   });
   console.log(`request took ${performance.now() - startTime}ms`);
 
+  // `fetch` only rejects on network failure -- an HTTP 500 resolves normally, so
+  // a bad status has to be turned into an error explicitly. Throwing here is what
+  // marks the action run as failed; without it a 500 is reported as SUCCESS.
+  if (!result.ok) {
+    throw new Error(`Request to ${url} failed with HTTP ${result.status} ${result.statusText}`);
+  }
+
   // try parsing result as either json or text
   let resultData: string;
   try {
@@ -52,7 +57,7 @@ export async function main(parameters: MyActionParameters, settings: MyActionSet
 
   // read/write files using the actions helpers
   const files = await actionsAPI.listFiles("");
-  console.log(`sequence files: ${JSON.stringify(files)}`);
+  console.log(`action files: ${JSON.stringify(files)}`);
 
   const readFileName = "my_file";
   // note: only wrap in try/catch to handle *non-fatal errors*! Fatal errors should be thrown to properly report action run as failure
