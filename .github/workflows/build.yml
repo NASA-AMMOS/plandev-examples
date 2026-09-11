@@ -111,3 +111,37 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  run-transfer:
+    name: Run transfer (format + writer)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The writer is stdlib-only by design -- a producer is the party most likely to live outside
+      # PlanDev, so the module they copy has to run where they are. Nothing is installed for this
+      # step, and that is the point of running it separately from the one below.
+      - name: Writer tests
+        working-directory: tools/run_transfer
+        run: python3 test_writer.py -v
+
+      - name: Install jsonschema
+        run: pip install jsonschema pytest
+
+      # `--check` first: every invalid fixture is GENERATED from the valid one by a single declared
+      # mutation, so a hand-edited fixture would otherwise pass its own test while no longer being
+      # the file the manifest says it is.
+      - name: Fixtures are in sync with their generator
+        working-directory: tools/run_transfer
+        run: python3 make_fixtures.py --check
+
+      - name: Schema tests
+        working-directory: tools/run_transfer
+        run: python3 -m pytest test_run_transfer.py -v

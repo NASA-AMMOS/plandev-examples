@@ -1,0 +1,134 @@
+[
+  {
+    "fixture": "schema/missing-required-field.run.json",
+    "layer": "schema",
+    "what": "an activity with no localId",
+    "message": "plan.activities[0] is missing required property 'localId'"
+  },
+  {
+    "fixture": "schema/wrong-kind.run.json",
+    "layer": "schema",
+    "what": "kind is not plandev-run",
+    "message": "kind must be 'plandev-run'; refused outright rather than sniffed"
+  },
+  {
+    "fixture": "schema/unknown-version.run.json",
+    "layer": "schema",
+    "what": "a major version this reader does not know",
+    "message": "version '3' is not supported; this reader accepts version 1"
+  },
+  {
+    "fixture": "schema/malformed-value-schema.run.json",
+    "layer": "schema",
+    "what": "a series ValueSchema with no items",
+    "message": "model.resourceTypes[0].schema is missing required property 'items'"
+  },
+  {
+    "fixture": "schema/wrong-primitive-type.run.json",
+    "layer": "schema",
+    "what": "results.duration as a string",
+    "message": "results.duration must be an integer (microseconds)"
+  },
+  {
+    "fixture": "schema/calendar-date-start-time.run.json",
+    "layer": "schema",
+    "what": "results.startTime as a calendar date instead of day-of-year",
+    "message": "results.startTime must be uuuu-DDDTHH:MM:SS -- day of year, not a calendar date"
+  },
+  {
+    "fixture": "schema/null-span-duration.run.json",
+    "layer": "schema",
+    "what": "an unfinished span written as duration: null rather than omitting the field",
+    "message": "results.spans[4].duration must be an integer; omit the field for an unfinished span"
+  },
+  {
+    "fixture": "schema/unsupported-capability-without-reason.run.json",
+    "layer": "schema",
+    "what": "a capability declared unsupported with no sentence to show",
+    "message": "model.capabilities.simulation is missing required property 'reason'"
+  },
+  {
+    "fixture": "importer/unknown-directive-local-id.run.json",
+    "layer": "importer",
+    "what": "a span claiming a directive localId no activity declares",
+    "message": "span 1 references directiveLocalId 'a99', which no activity in this file declares"
+  },
+  {
+    "fixture": "importer/unknown-anchor-local-id.run.json",
+    "layer": "importer",
+    "what": "an activity anchored to a localId no activity declares",
+    "message": "activity 'a2' is anchored to 'a99', which no activity in this file declares"
+  },
+  {
+    "fixture": "importer/duplicate-local-id.run.json",
+    "layer": "importer",
+    "what": "two activities sharing one localId",
+    "message": "localId 'a1' is declared by more than one activity; it must be unique within the file"
+  },
+  {
+    "fixture": "gate/unregistered-resource.run.json",
+    "layer": "gate",
+    "what": "a profile for a resource the model never declared",
+    "message": "resource '/thermal/tempC' is not a registered resource type of this model"
+  },
+  {
+    "fixture": "gate/resource-schema-drift.run.json",
+    "layer": "gate",
+    "what": "a resource declared int whose profile is real",
+    "message": "resource '/battery/soc' has schema RealSchema[] but is registered as IntSchema[]"
+  },
+  {
+    "fixture": "gate/unregistered-activity-type.run.json",
+    "layer": "gate",
+    "what": "a span whose type the model never declared",
+    "message": "span 2 has type 'Rewind', which is not a registered activity type"
+  },
+  {
+    "fixture": "gate/argument-type-mismatch.run.json",
+    "layer": "gate",
+    "what": "a string where the declared parameter is an int",
+    "message": "span 1 (Observe) argument 'priority' is \"high\" where the schema says int"
+  },
+  {
+    "fixture": "gate/duplicate-span-id.run.json",
+    "layer": "gate",
+    "what": "two spans sharing one spanId",
+    "message": "duplicate spanId 1"
+  },
+  {
+    "fixture": "gate/unresolvable-parent.run.json",
+    "layer": "gate",
+    "what": "a parentId that is not a span in this result",
+    "message": "span 2 has parentId 99, which is not a span in this result"
+  },
+  {
+    "fixture": "gate/parent-cycle.run.json",
+    "layer": "gate",
+    "what": "1 -> 4 -> 3 -> 1",
+    "message": "span 1 is part of a parent cycle"
+  },
+  {
+    "fixture": "gate/non-finite-real-dynamics.run.json",
+    "layer": "gate",
+    "what": "a rate that parses to 1e400 as a double",
+    "message": "resource '/battery/soc' has a non-finite rate (1e400)"
+  },
+  {
+    "fixture": "gate/negative-duration.run.json",
+    "layer": "gate",
+    "what": "a span of negative duration",
+    "message": "span 3 has negative duration (-900000000us)"
+  },
+  {
+    "fixture": "gate/span-outside-window.run.json",
+    "layer": "gate",
+    "what": "a span that starts inside the simulation and ends after it",
+    "message": "span 3 runs to 4400000000us, past the simulation duration of 3600000000us; report it as unfinished (omit `duration`) instead of claiming an end the simulation never reached"
+  },
+  {
+    "fixture": "gate/activity-type-name-not-ts-identifier.run.json",
+    "layer": "gate",
+    "what": "a declared activity type whose name cannot be a bare TypeScript identifier",
+    "message": "activity type '2Slew' is not a legal TypeScript identifier, so the generated constraint and scheduling typings for this model will not compile"
+  }
+]

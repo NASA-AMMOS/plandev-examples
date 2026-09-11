@@ -73,6 +73,49 @@ files exactly, but **two carry post-generation hand-edits that regenerating woul
 So treat generated code as a **starting point**: regenerate into a scratch directory, diff, and
 port your changes across rather than overwriting in place.
 
+## `run_transfer/` — import a simulation PlanDev did not perform
+
+A **run transfer** is one JSON file holding a simulation somebody else already ran: the model's type
+declaration, the plan's directives, and the results. PlanDev imports it as a first-class run — it
+renders on the timeline and constraints check against it — with nothing behind the model to compile
+or to call. That makes it the way to get a run out of a simulator PlanDev cannot itself drive, and
+the way to hand a finished run to someone who has none of the tooling that produced it.
+
+[`run_transfer/README.md`](run_transfer/README.md) is the normative format reference;
+[`run_transfer/writer.py`](run_transfer/writer.py) is the reference producer, stdlib only and
+self-contained, so it can be copied next to whatever code is doing the simulating.
+
+```python
+import writer as run_transfer
+
+document = run_transfer.RunTransfer(
+    declaration=declaration, mission="Demo", plan_name="Recorded run",
+    plan_start=start, plan_duration_us=3600 * 1_000_000,
+    directives=[run_transfer.RunDirective("a1", "Observe", arguments={"target": "Europa"})],
+    response={"realProfiles": ..., "discreteProfiles": ..., "spans": [...]},
+).to_json()
+
+for problem in run_transfer.run_problems(document):   # PlanDev's own rules, before the upload
+    print(problem)
+run_transfer.write_run(document, "my.run.json")
+```
+
+Upload the file on the plans page exactly like a plan export. Two things the format will bite a
+producer with if they are not known in advance, both of which `writer.py` handles:
+
+- **The two timestamps in one file use different calendars.** `plan.start_time` is an ISO calendar
+  date with a literal `+00:00`; `results.startTime` is day-of-year. That asymmetry is inherited from
+  the two formats a run file embeds.
+- **A non-finite number must be written `1e400`.** `NaN` and `Infinity` are not JSON — Python emits
+  them and nothing else accepts them — and a value re-serialized by JavaScript along the way becomes
+  `null`, which is the wire spelling of a profile *gap*: a wrong run, stored, with no complaint.
+
+```bash
+python3 tools/run_transfer/test_writer.py              # stdlib only
+python3 -m pytest tools/run_transfer/test_run_transfer.py   # the JSON schema; needs jsonschema
+python3 tools/run_transfer/make_fixtures.py --check    # the invalid fixtures are generated
+```
+
 ## `generate_external_events.py` — scale-test external events
 
 Generates large, varied [PlanDev external-event](../examples/07-external-events/) datasets for

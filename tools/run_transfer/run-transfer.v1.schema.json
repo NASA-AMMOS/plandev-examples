@@ -1,0 +1,353 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nasa-ammos.github.io/plandev-examples/run-transfer.v1.schema.json",
+  "title": "PlanDev run transfer, version 1",
+  "description": "A recorded simulation: model type declaration, plan directives, and results. Draft-07 deliberately, to match the ajv ^6 pinned in aerie-gateway. Normative prose: README.md, beside this schema",
+
+  "type": "object",
+  "required": ["kind", "version", "plan"],
+  "properties": {
+    "kind": {
+      "const": "plandev-run",
+      "description": "Refused outright if anything else. A file with no `kind` at all is a legacy plan.json and is not a run transfer."
+    },
+    "version": {
+      "const": "1",
+      "description": "Major only. A reader refuses a version it does not know rather than best-effort parsing it."
+    },
+    "model": { "$ref": "#/definitions/model" },
+    "plan": { "$ref": "#/definitions/plan" },
+    "results": { "$ref": "#/definitions/results" }
+  },
+
+  "definitions": {
+    "serializedValue": {
+      "description": "A SerializedValue: raw untagged JSON. Any JSON value, null included."
+    },
+
+    "valueSchema": {
+      "description": "A ValueSchema, as ValueSchemaJsonParser reads it. Recursive and tagged on `type`.",
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["real", "int", "boolean", "string", "duration", "path", "series", "struct", "variant"]
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/serializedValue" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "series" } }, "required": ["type"] },
+          "then": {
+            "required": ["items"],
+            "properties": { "items": { "$ref": "#/definitions/valueSchema" } }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "struct" } }, "required": ["type"] },
+          "then": {
+            "required": ["items"],
+            "properties": {
+              "items": {
+                "type": "object",
+                "additionalProperties": { "$ref": "#/definitions/valueSchema" }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "variant" } }, "required": ["type"] },
+          "then": {
+            "required": ["variants"],
+            "properties": {
+              "variants": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["key", "label"],
+                  "properties": {
+                    "key": { "type": "string" },
+                    "label": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "tsIdentifier": {
+      "description": "An activity type or parameter name. It must survive as a bare TypeScript identifier in the generated typings, but that rule is NOT encoded here: ExternalResultsGate is its sole authority, and it owns the message that explains the consequence. See README.md, 'Two layers'.",
+      "type": "string",
+      "minLength": 1
+    },
+
+    "resourceName": {
+      "description": "Always emitted quoted downstream, so spaces and dots are legal; arrayed resources flatten to dotted names. Length and control characters are the gate's call, not the schema's.",
+      "type": "string",
+      "minLength": 1
+    },
+
+    "pgInterval": {
+      "description": "A Postgres interval literal, as PlanTransfer v2 already uses: [-][N day[s] ]HH:MM:SS[.ffffff].",
+      "type": "string",
+      "pattern": "^-?(\\d+ days? )?\\d{2,}:[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?$"
+    },
+
+    "modelParameter": {
+      "type": "object",
+      "required": ["name", "schema"],
+      "properties": {
+        "name": { "$ref": "#/definitions/tsIdentifier" },
+        "schema": { "$ref": "#/definitions/valueSchema" }
+      }
+    },
+
+    "activityType": {
+      "type": "object",
+      "required": ["name", "parameters", "requiredParameters", "computedAttributesSchema"],
+      "properties": {
+        "name": { "$ref": "#/definitions/tsIdentifier" },
+        "parameters": {
+          "description": "ORDER IS LOAD-BEARING: merlin persists each parameter's index as its `order` and the UI lays the argument form out in it.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/modelParameter" }
+        },
+        "requiredParameters": { "type": "array", "items": { "type": "string" } },
+        "computedAttributesSchema": {
+          "description": "Not optional. A model that computes nothing declares a closed empty struct.",
+          "$ref": "#/definitions/valueSchema"
+        },
+        "subsystem": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+
+    "resourceType": {
+      "type": "object",
+      "required": ["name", "schema"],
+      "properties": {
+        "name": { "$ref": "#/definitions/resourceName" },
+        "schema": { "$ref": "#/definitions/valueSchema" }
+      }
+    },
+
+    "capability": {
+      "type": "object",
+      "required": ["supported"],
+      "properties": {
+        "supported": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "if": { "properties": { "supported": { "const": false } }, "required": ["supported"] },
+      "then": {
+        "required": ["reason"],
+        "description": "An unsupported capability MUST carry its own sentence: that string is what the UI shows, and it is the only way the UI stays free of branches naming a producer."
+      }
+    },
+
+    "model": {
+      "description": "Omit to attach the run to an existing model by id, exactly as importPlan works today.",
+      "type": "object",
+      "required": ["mission", "name", "version", "activityTypes", "resourceTypes", "parameters"],
+      "properties": {
+        "mission": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "activityTypes": { "type": "array", "items": { "$ref": "#/definitions/activityType" } },
+        "resourceTypes": { "type": "array", "items": { "$ref": "#/definitions/resourceType" } },
+        "parameters": {
+          "description": "Simulation configuration. ORDER IS LOAD-BEARING, as for activity parameters.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/modelParameter" }
+        },
+        "capabilities": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/capability" }
+        }
+      }
+    },
+
+    "activity": {
+      "type": "object",
+      "required": ["localId", "type", "start_offset", "arguments"],
+      "properties": {
+        "localId": {
+          "description": "Unique within this file. Spans reference directives by it, and so do anchors: Postgres assigns real ids only on insert.",
+          "type": "string",
+          "minLength": 1
+        },
+        "type": { "type": "string", "minLength": 1 },
+        "start_offset": { "$ref": "#/definitions/pgInterval" },
+        "arguments": { "type": "object" },
+        "anchor_id": {
+          "description": "Null for an offset from the plan start; otherwise the `localId` of another activity in this file.",
+          "type": ["string", "null"]
+        },
+        "anchored_to_start": { "type": "boolean" },
+        "name": { "type": "string" },
+        "metadata": { "type": "object" },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tag"],
+            "properties": {
+              "tag": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "color": { "type": ["string", "null"] }
+                }
+              }
+            }
+          }
+        },
+        "id": { "description": "Permitted so a plain plan export round-trips, and ignored: `localId` is the keyspace." }
+      }
+    },
+
+    "plan": {
+      "description": "A PlanTransfer v2 document, with two additions: every activity carries a `localId`, and `anchor_id` refers to one.",
+      "type": "object",
+      "required": ["version", "name", "start_time", "duration", "simulation_arguments", "activities"],
+      "properties": {
+        "version": {
+          "const": "2",
+          "description": "The PlanTransfer version, which is independent of the run transfer's own `version`."
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "start_time": {
+          "description": "ISO calendar date-time with a literal +00:00 suffix. A `Z` breaks the UI, which strips exactly that suffix. NOTE the asymmetry with results.startTime, which is day-of-year.",
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,6})?\\+00:00$"
+        },
+        "duration": { "$ref": "#/definitions/pgInterval" },
+        "simulation_arguments": { "type": "object" },
+        "activities": { "type": "array", "items": { "$ref": "#/definitions/activity" } },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tag"],
+            "properties": {
+              "tag": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "color": { "type": ["string", "null"] }
+                }
+              }
+            }
+          }
+        },
+        "id": {},
+        "model_id": {}
+      }
+    },
+
+    "realSegment": {
+      "type": "object",
+      "required": ["duration"],
+      "properties": {
+        "duration": {
+          "description": "Integer microseconds. Not constrained non-negative here on purpose: a negative duration is the gate's finding to make, not the schema's.",
+          "type": "integer"
+        },
+        "dynamics": {
+          "description": "Omit for a gap -- a legitimate 'this resource has no value here'. `rate` is per SECOND.",
+          "type": "object",
+          "required": ["initial", "rate"],
+          "properties": {
+            "initial": { "type": "number" },
+            "rate": { "type": "number" }
+          }
+        }
+      }
+    },
+
+    "discreteSegment": {
+      "type": "object",
+      "required": ["duration"],
+      "properties": {
+        "duration": { "type": "integer" },
+        "dynamics": { "$ref": "#/definitions/serializedValue" }
+      }
+    },
+
+    "profile": {
+      "type": "object",
+      "required": ["type", "schema", "segments"],
+      "properties": {
+        "type": { "enum": ["real", "discrete"] },
+        "schema": { "$ref": "#/definitions/valueSchema" },
+        "segments": {
+          "description": "Consecutive from offset 0; each segment's duration is its extent, not a timestamp.",
+          "type": "array"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "real" } }, "required": ["type"] },
+          "then": { "properties": { "segments": { "items": { "$ref": "#/definitions/realSegment" } } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "discrete" } }, "required": ["type"] },
+          "then": { "properties": { "segments": { "items": { "$ref": "#/definitions/discreteSegment" } } } }
+        }
+      ]
+    },
+
+    "span": {
+      "type": "object",
+      "required": ["spanId", "type", "startOffset", "arguments"],
+      "properties": {
+        "spanId": { "type": "integer" },
+        "parentId": {
+          "description": "A decomposition or dispatched child. Such a span carries no directiveLocalId. Omit for a root span; never send null.",
+          "type": "integer"
+        },
+        "type": { "type": "string", "minLength": 1 },
+        "startOffset": { "type": "integer", "description": "Integer microseconds from the simulation start." },
+        "duration": {
+          "description": "Omit -- never null -- for a span still running when the simulation ended. That is stored as an unfinished activity.",
+          "type": "integer"
+        },
+        "directiveLocalId": {
+          "description": "The `localId` of the directive this span belongs to. Omit for a span the model created itself.",
+          "type": "string",
+          "minLength": 1
+        },
+        "arguments": { "type": "object", "additionalProperties": { "$ref": "#/definitions/serializedValue" } },
+        "computedAttributes": { "$ref": "#/definitions/serializedValue" }
+      }
+    },
+
+    "results": {
+      "description": "Byte-identical to what ingestExternalSimulationResults parses today, so v0 needs no new parsing code. Resource-major, and slated to be replaced by time-major NDJSON in version 2 -- see README.md.",
+      "type": "object",
+      "required": ["startTime", "duration", "profiles", "spans"],
+      "properties": {
+        "startTime": {
+          "description": "DAY-OF-YEAR: uuuu-DDDTHH:MM:SS[.ffffff], which is what gov.nasa...types.Timestamp parses. A calendar date here is a parse failure.",
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{3}T\\d{2}:[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?$"
+        },
+        "duration": { "type": "integer", "minimum": 0, "description": "Integer microseconds." },
+        "profiles": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/definitions/resourceName" },
+          "additionalProperties": { "$ref": "#/definitions/profile" }
+        },
+        "spans": { "type": "array", "items": { "$ref": "#/definitions/span" } }
+      }
+    }
+  }
+}

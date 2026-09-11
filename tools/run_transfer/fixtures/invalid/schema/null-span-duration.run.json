@@ -1,0 +1,314 @@
+{
+  "kind": "plandev-run",
+  "version": "1",
+  "model": {
+    "mission": "RunTransferDemo",
+    "name": "recorded",
+    "version": "1.0.0",
+    "description": "A hand-authored recorded run. No framework in it: two activity types plus a helper, one real and one discrete resource, a two-level decomposition, one unfinished span, one anchored directive.",
+    "activityTypes": [
+      {
+        "name": "Observe",
+        "parameters": [
+          {
+            "name": "target",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "priority",
+            "schema": {
+              "type": "int"
+            }
+          }
+        ],
+        "requiredParameters": [
+          "target"
+        ],
+        "computedAttributesSchema": {
+          "type": "struct",
+          "items": {
+            "framesCaptured": {
+              "type": "int"
+            }
+          }
+        },
+        "subsystem": "payload",
+        "description": "Point at a target and collect frames."
+      },
+      {
+        "name": "Slew",
+        "parameters": [
+          {
+            "name": "angleDeg",
+            "schema": {
+              "type": "real"
+            }
+          }
+        ],
+        "requiredParameters": [
+          "angleDeg"
+        ],
+        "computedAttributesSchema": {
+          "type": "struct",
+          "items": {}
+        }
+      },
+      {
+        "name": "Downlink",
+        "parameters": [
+          {
+            "name": "rateKbps",
+            "schema": {
+              "type": "real"
+            }
+          },
+          {
+            "name": "band",
+            "schema": {
+              "type": "variant",
+              "variants": [
+                {
+                  "key": "X",
+                  "label": "X band"
+                },
+                {
+                  "key": "KA",
+                  "label": "Ka band"
+                }
+              ]
+            }
+          }
+        ],
+        "requiredParameters": [
+          "rateKbps"
+        ],
+        "computedAttributesSchema": {
+          "type": "struct",
+          "items": {
+            "bitsSent": {
+              "type": "int"
+            }
+          }
+        }
+      }
+    ],
+    "resourceTypes": [
+      {
+        "name": "/battery/soc",
+        "schema": {
+          "type": "real"
+        }
+      },
+      {
+        "name": "/comm/mode",
+        "schema": {
+          "type": "variant",
+          "variants": [
+            {
+              "key": "IDLE",
+              "label": "Idle"
+            },
+            {
+              "key": "TRANSMIT",
+              "label": "Transmit"
+            }
+          ]
+        }
+      }
+    ],
+    "parameters": [
+      {
+        "name": "initialSoc",
+        "schema": {
+          "type": "real"
+        }
+      },
+      {
+        "name": "groundStation",
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "capabilities": {
+      "simulation": {
+        "supported": false,
+        "reason": "This model was declared by a run transfer, so PlanDev has no simulator to run it. Import another recorded run to see different results."
+      }
+    }
+  },
+  "plan": {
+    "version": "2",
+    "name": "Recorded run (synthetic)",
+    "start_time": "2026-01-01T00:00:00+00:00",
+    "duration": "01:00:00",
+    "simulation_arguments": {
+      "initialSoc": 0.85,
+      "groundStation": "DSS-14"
+    },
+    "activities": [
+      {
+        "localId": "a1",
+        "type": "Observe",
+        "start_offset": "00:00:00",
+        "arguments": {
+          "target": "Europa",
+          "priority": 1
+        },
+        "anchor_id": null,
+        "anchored_to_start": true,
+        "name": "Observe Europa",
+        "metadata": {},
+        "tags": []
+      },
+      {
+        "localId": "a2",
+        "type": "Downlink",
+        "start_offset": "00:05:00",
+        "arguments": {
+          "rateKbps": 512.0,
+          "band": "X"
+        },
+        "anchor_id": "a1",
+        "anchored_to_start": false,
+        "name": "Downlink after observing",
+        "metadata": {},
+        "tags": []
+      }
+    ],
+    "tags": []
+  },
+  "results": {
+    "startTime": "2026-001T00:00:00",
+    "duration": 3600000000,
+    "profiles": {
+      "/battery/soc": {
+        "type": "real",
+        "schema": {
+          "type": "real"
+        },
+        "segments": [
+          {
+            "duration": 1800000000,
+            "dynamics": {
+              "initial": 0.85,
+              "rate": -2e-05
+            }
+          },
+          {
+            "duration": 900000000,
+            "dynamics": {
+              "initial": 0.814,
+              "rate": -5e-05
+            }
+          },
+          {
+            "duration": 900000000,
+            "dynamics": {
+              "initial": 0.769,
+              "rate": 3e-05
+            }
+          }
+        ]
+      },
+      "/comm/mode": {
+        "type": "discrete",
+        "schema": {
+          "type": "variant",
+          "variants": [
+            {
+              "key": "IDLE",
+              "label": "Idle"
+            },
+            {
+              "key": "TRANSMIT",
+              "label": "Transmit"
+            }
+          ]
+        },
+        "segments": [
+          {
+            "duration": 600000000,
+            "dynamics": "IDLE"
+          },
+          {
+            "duration": 900000000,
+            "dynamics": "TRANSMIT"
+          },
+          {
+            "duration": 300000000
+          },
+          {
+            "duration": 1800000000,
+            "dynamics": "IDLE"
+          }
+        ]
+      }
+    },
+    "spans": [
+      {
+        "spanId": 1,
+        "type": "Observe",
+        "startOffset": 0,
+        "duration": 1800000000,
+        "directiveLocalId": "a1",
+        "arguments": {
+          "target": "Europa",
+          "priority": 1
+        },
+        "computedAttributes": {
+          "framesCaptured": 12
+        }
+      },
+      {
+        "spanId": 2,
+        "parentId": 1,
+        "type": "Slew",
+        "startOffset": 0,
+        "duration": 300000000,
+        "arguments": {
+          "angleDeg": 42.5
+        },
+        "computedAttributes": {}
+      },
+      {
+        "spanId": 3,
+        "parentId": 1,
+        "type": "Downlink",
+        "startOffset": 600000000,
+        "duration": 900000000,
+        "arguments": {
+          "rateKbps": 256.0,
+          "band": "KA"
+        },
+        "computedAttributes": {
+          "bitsSent": 230400
+        }
+      },
+      {
+        "spanId": 4,
+        "parentId": 3,
+        "type": "Slew",
+        "startOffset": 600000000,
+        "duration": 60000000,
+        "arguments": {
+          "angleDeg": -3.25
+        },
+        "computedAttributes": {}
+      },
+      {
+        "spanId": 5,
+        "type": "Downlink",
+        "startOffset": 2100000000,
+        "directiveLocalId": "a2",
+        "arguments": {
+          "rateKbps": 512.0,
+          "band": "X"
+        },
+        "duration": null
+      }
+    ]
+  }
+}
