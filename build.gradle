@@ -1,8 +1,7 @@
 plugins {
   id("co.uzzu.dotenv.gradle") version "4.0.0"
 }
-// todo: update this to 4.4.0 after release
-ext.plandevVersion = '4.3.0-SNAPSHOT-2110331'
+ext.plandevVersion = '4.4.0'
 
 allprojects {
   repositories {
